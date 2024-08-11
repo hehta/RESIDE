@@ -1,0 +1,19 @@
+Package: RESIDE
+Title: Rapid Easy Synthesis to Inform Data Extraction
+Version: 0.1.0
+Authors@R: 
+    person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4424-9890"))
+Description: The package allows data to be simulation from marginal distibutions obtained from
+    Trusted Research Environments (TRES)
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.0
+Suggests: 
+    lifecycle
+Depends: 
+    R (>= 2.10)
+    bestNormalize
+    RDP
+LazyData: true
