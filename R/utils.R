@@ -1,16 +1,3 @@
-check_df <- function(
-  df
-) {
-  tryCatch({
-    if (!is.data.frame(as.data.frame(df))) {
-      return(FALSE)
-    }
-    return(TRUE)
-  }, error = {
-    return(FALSE)
-  })
-}
-
 get_missing_variables <- function(
   df,
   variables

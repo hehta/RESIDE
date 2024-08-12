@@ -1,3 +1,32 @@
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param df PARAM_DESCRIPTION
+#' @param variables PARAM_DESCRIPTION, Default: c()
+#' @param ignore_na PARAM_DESCRIPTION, Default: TRUE
+#' @param print PARAM_DESCRIPTION, Default: TRUE
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'    marginal_distributions <- get_marginal_distributions(
+#'      IST,
+#'      variables <- c(
+#'        "SEX",
+#'        "AGE",
+#'        "ID14",
+#'        "RSBP",
+#'        "RATRIAL"
+#'      )
+#'    )
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[dplyr]{mutate_all}}
+#' @rdname get_marginal_distributions
+#' @export
+#' @importFrom magrittr `%>%`
+#' @importFrom dplyr mutate_if
 get_marginal_distributions <- function(
   df,
   variables = c(),
@@ -5,9 +34,7 @@ get_marginal_distributions <- function(
   print = TRUE
 ) {
   # Check if variables is set
-  if (!check_df(df)) {
-    stop("df must be coersable into a data.frame")
-  }
+  df <- as.data.frame(df)
   if (length(variables > 1)) {
     if (!is.character(variables)) {
       stop("Variables must be a vector of characters")
@@ -32,7 +59,7 @@ get_marginal_distributions <- function(
   `%>%` <- magrittr::`%>%`
 
   # Ensure characters are factors
-  df %>% dplyr::mutate_if(is.character, factor)
+  df <- df %>% dplyr::mutate_if(is.character, factor)
 
   # Declare variables
   .categorical_variables <- c()
@@ -93,5 +120,31 @@ get_marginal_distributions <- function(
     # add (factor) summary to categortical summary
     .categorical_summary[[.column]] <- summary(df[[.column]])
   }
+
+  # Forward declare continuous summary as empty list
+  .continuous_summary <- list()
+  # Loop through continuous variables
+  for (.column in .continuous_variables) {
+    .continuous_summary[[.column]] <- get_continuous_summary(
+      df,
+      .column
+    )
+  }
+
+  .return <- list(
+    categorical_variables = .categorical_summary,
+    binary_variables = .binary_summary,
+    continuous_variables = .continuous_summary
+  )
+
+  class(.return) <- "RESIDE"
+
+  if (print) {
+    print(.return)
+  }
+
+  return(
+    .return
+  )
 
 }

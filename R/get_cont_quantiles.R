@@ -1,45 +1,3 @@
-#' @title Get Continuous Quantiles
-#' @description Internal function to get transform continuous quantiles
-#' Normalised quantiles (Ordered Quantile Normalisation)
-#' and original quantiles
-#' @param df a \code{data.frame} with continous variable to be transformed
-#' @param varnames Variables (columns) to be transfromed,
-#' Default: c("egfr", "hba1c")
-#' @param probs a \code(seq) of Probabilities for Quantiles,
-#' Default: seq(0, 1, 0.001)
-#' @param thin_rdp Whether or not to thin the quantiles, Default: TRUE
-#' @param maxpts PARAM_DESCRIPTION, Default: 10
-#' @param eps episilon, Default: 0.05
-#' @param increment How much to increment epsilon when thinning,
-#' Default: 0.01
-#' @param maxeps Maximum epsilon when thinning, Default: 1
-#' @param ... Additional parameters currently none are supported
-#' @return A \code{data.frame} containing the original and transformed quantiles
-#' @details DETAILS
-#' @examples
-#' \dontrun{
-#' if(interactive()){
-#'    get_cont_quantiles(ist, varnames = "AGE")
-#'  }
-#' }
-#' @seealso
-#'  \code{\link[bestNormalize]{orderNorm}}
-#'  \code{\link[RDP]{RamerDouglasPeucker}}
-#'  \code{\link[magrittr]{character(0)}}
-#'  \code{\link[dplyr]{select}},
-#'  \code{\link[dplyr]{reexports}},
-#'  \code{\link[dplyr]{distinct}},
-#'  \code{\link[dplyr]{bind_rows}}
-#'  \code{\link[tidyr]{gather}},
-#'  \code{\link[tidyr]{unnest}}
-#'  \code{\link[purrr]{map}}
-#' @rdname get_continous_quantiles
-#' @importFrom bestNormalize orderNorm
-#' @importFrom RDP RamerDouglasPeucker
-#' @importFrom magrittr `%>%`
-#' @importFrom dplyr select ends_with distinct as_tibble bind_rows
-#' @importFrom tidyr gather unnest
-#' @importFrom purrr map
 get_cont_quantiles <- function(
   df,
   varnames = c("egfr", "hba1c"),
@@ -56,16 +14,21 @@ get_cont_quantiles <- function(
   }
 
   for (varname in varnames) {
+    if (!varname %in% names(df)) {
+      stop("Varname needs for be in data frame")
+    }
 
     ## perform transformation and add to dataframe
-    res <- bestNormalize::orderNorm(x = df[[varname]])
+    res <- suppressWarnings(
+      bestNormalize::orderNorm(x = df[[varname]])
+    )
     df[[paste0(varname, "_t")]] <- res$x.t
 
     ## get quantiles
     quants <- quants_full <- q <- data.frame(
       probs = probs,
-      orig_q  =  quantile(res$x,   probs = probs, na.rm = TRUE),
-      tform_q  = quantile(res$x.t, probs = probs, na.rm = TRUE)
+      orig_q  =  stats::quantile(res$x,   probs = probs, na.rm = TRUE),
+      tform_q  = stats::quantile(res$x.t, probs = probs, na.rm = TRUE)
     )
 
     ## Apply RDP function to reduce the number of points
@@ -98,7 +61,7 @@ get_cont_quantiles <- function(
 
     ## recover original vector from quantiles and transformed vector
     df[[paste0(varname, "_r")]] <-
-      approx(
+      stats::approx(
         quants[, "tform_q"],
         quants[, "orig_q"],
         df[[paste0(varname, "_t")]],

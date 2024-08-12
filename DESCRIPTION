@@ -4,18 +4,24 @@ Version: 0.1.0
 Authors@R: 
     person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4424-9890"))
-Description: The package allows data to be simulation from marginal distibutions obtained from
-    Trusted Research Environments (TRES)
-License: GPL (>= 3)
+Description: An R package which allows data to be simulation from marginal distibutions obtained from
+    Trusted Research Environments (TRES).
+License: GPL (>= 3) + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.2
 Suggests: 
     lifecycle,
     testthat (>= 3.0.0)
 Depends: 
     R (>= 2.10)
-    bestNormalize
-    RDP
+Imports:
+    dplyr,
+    magrittr,
+    purrr,
+    tidyr,
+    bestNormalize,
+    RDP,
+    methods
 LazyData: true
 Config/testthat/edition: 3
