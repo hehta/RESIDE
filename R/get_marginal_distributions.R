@@ -1,10 +1,11 @@
-#' @title FUNCTION_TITLE
-#' @description FUNCTION_DESCRIPTION
+#' @title Generate Marginal Distributions for a given data frame
+#' @description Generate Marginal Distibutions from a given
+#' data frame with options to specify which variables to use.
 #' @param df PARAM_DESCRIPTION
 #' @param variables PARAM_DESCRIPTION, Default: c()
 #' @param ignore_na PARAM_DESCRIPTION, Default: TRUE
 #' @param print PARAM_DESCRIPTION, Default: TRUE
-#' @return OUTPUT_DESCRIPTION
+#' @return A lisd of and S3 RESIDE Class
 #' @details DETAILS
 #' @examples
 #' \dontrun{
@@ -131,18 +132,22 @@ get_marginal_distributions <- function(
     )
   }
 
+  # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
     continuous_variables = .continuous_summary
   )
 
+  # Add a class to the return to allow for S3 overrides
   class(.return) <- "RESIDE"
 
+  # If print is TRUE print the marginal distributions
   if (print) {
     print(.return)
   }
 
+  # Return the S3 Class
   return(
     .return
   )

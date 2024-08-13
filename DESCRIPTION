@@ -5,14 +5,14 @@ Authors@R:
     person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4424-9890"))
 Description: An R package which allows data to be simulation from marginal distibutions obtained from
-    Trusted Research Environments (TRES).
+    Trusted Research Environments (TREs).
 License: GPL (>= 3) + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
-    lifecycle,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    lifecycle
 Depends: 
     R (>= 2.10)
 Imports:

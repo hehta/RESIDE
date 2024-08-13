@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_marginal_distributions.R
 \name{get_marginal_distributions}
 \alias{get_marginal_distributions}
-\title{FUNCTION_TITLE}
+\title{Generate Marginal Distributions for a given data frame}
 \usage{
 get_marginal_distributions(df, variables = c(), ignore_na = TRUE, print = TRUE)
 }
@@ -16,10 +16,11 @@ get_marginal_distributions(df, variables = c(), ignore_na = TRUE, print = TRUE)
 \item{print}{PARAM_DESCRIPTION, Default: TRUE}
 }
 \value{
-OUTPUT_DESCRIPTION
+A lisd of and S3 RESIDE Class
 }
 \description{
-FUNCTION_DESCRIPTION
+Generate Marginal Distibutions from a given
+data frame with options to specify which variables to use.
 }
 \details{
 DETAILS
