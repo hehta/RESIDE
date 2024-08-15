@@ -2,8 +2,12 @@ Package: RESIDE
 Title: Rapid Easy Synthesis to Inform Data Extraction
 Version: 0.1.0
 Authors@R: 
-    person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-4424-9890"))
+    c(person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4424-9890")),
+    person("David", "McAllister", , "david.mcallister@glasgow.ac.uk", role = "aut",
+           comment = c(ORCID = "0000-0003-3550-1764")),
+    person("Claudia", "Geue", , "cladia.geue@glasgow.ac.uk", role = "ctb",
+           comment = c(ORCID = "0000-0003-2243-0733")))
 Description: An R package which allows data to be simulation from marginal distibutions obtained from
     Trusted Research Environments (TREs).
 License: GPL (>= 3) + file LICENSE
