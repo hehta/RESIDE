@@ -33,3 +33,27 @@ quantiles_to_df <- function(
   .quantiles <- do.call(rbind, .quantiles)
   return(.quantiles)
 }
+
+continuous_to_df <- function(
+  x
+) {
+  `%>%` <- magrittr::`%>%`
+  .summaries <- lapply(x, \(.x) .x[["summary"]])
+  .summaries <- do.call(rbind, .summaries) %>%
+    tibble::rownames_to_column(var = "variable")
+  return(.summaries)
+}
+
+categorical_to_df <- function(
+  x
+) {
+  .cat_df <- data.frame()
+  for (c_var in names(x)) {
+    .tmp_df <- as.data.frame(x[[c_var]]) %>%
+      tibble::rownames_to_column(var = "category")
+    names(.tmp_df) <- c("category", "n")
+    .tmp_df$variable <- c_var
+    .cat_df <- rbind(.cat_df, .tmp_df)
+  }
+  return(.cat_df)
+}
