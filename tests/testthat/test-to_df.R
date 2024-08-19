@@ -20,6 +20,7 @@ testthat::test_that("binary_to_df works", {
       c("variable", "mean") %in% names(binary_df)
     )
   )
+  testthat::expect_gt(nrow(binary_df), 1)
 })
 
 testthat::test_that("quantiles_to_df works", {
@@ -32,4 +33,31 @@ testthat::test_that("quantiles_to_df works", {
       c("varname", "orig_q", "tform_q", "epsilon") %in% names(quantiles_df)
     )
   )
+  testthat::expect_gt(nrow(quantiles_df), 1)
+})
+
+testthat::test_that("continuous_to_df works", {
+  continuous_df <- continuous_to_df(
+    test_reside$continuous_variables
+  )
+  testthat::expect_s3_class(continuous_df, "data.frame")
+  testthat::expect_true(
+    all(
+      c("variable", "m", "s") %in% names(continuous_df)
+    )
+  )
+  testthat::expect_gt(nrow(continuous_df), 1)
+})
+
+testthat::test_that("categorical_to_df works", {
+  categorical_df <- categorical_to_df(
+    test_reside$categorical_variables
+  )
+  testthat::expect_s3_class(categorical_df, "data.frame")
+  testthat::expect_true(
+    all(
+      c("category", "n", "variable") %in% names(categorical_df)
+    )
+  )
+  testthat::expect_gt(nrow(categorical_df), 1)
 })

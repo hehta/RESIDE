@@ -57,3 +57,19 @@ categorical_to_df <- function(
   }
   return(.cat_df)
 }
+
+generate_file_path <- function(
+  file_name,
+  folder_path,
+  variable_type
+) {
+  .file_path <- file.path(normalizePath(folder_path), file_name)
+  cat(
+    "Exporting",
+    variable_type,
+    "To: ",
+    .file_path,
+    "\n"
+  )
+  return(.file_path)
+}
