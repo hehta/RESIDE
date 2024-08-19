@@ -16,7 +16,7 @@ binary_to_df <- function(
   x
 ) {
   `%>%` <- magrittr::`%>%`
-  binary_df <- as.data.frame(x$binary_variables)
+  binary_df <- as.data.frame(x)
   binary_df <- binary_df %>%
     tidyr::pivot_longer(
       cols = tidyr::everything(),
