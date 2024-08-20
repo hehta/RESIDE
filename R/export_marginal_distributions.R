@@ -2,7 +2,8 @@
 #' @description Export the marginal distributions to CSV files
 #' @param x an Object of type RESIDE from get_marginal_distributions()
 #' @param folder_path path to folder where to save files, Default: '.'
-#' @param create_folder if the folder does not exist should it be created, Default: FALSE
+#' @param create_folder if the folder does not exist should it be created,
+#' Default: FALSE
 #' @return No Explicit Return
 #' @details Exports each of the marginal distributions to CSV files
 #' within a given folder, along with the continuous quantiles.

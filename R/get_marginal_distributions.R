@@ -26,7 +26,7 @@
 #'  \code{\link[dplyr]{mutate_all}}
 #' @rdname get_marginal_distributions
 #' @export
-#' @importFrom magrittr `%>%`
+#' @importFrom magrittr %>%
 #' @importFrom dplyr mutate_if
 get_marginal_distributions <- function(
   df,
