@@ -67,7 +67,7 @@ generate_file_path <- function(
   cat(
     "Exporting",
     variable_type,
-    "To: ",
+    "to:",
     .file_path,
     "\n"
   )
