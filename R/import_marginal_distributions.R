@@ -11,24 +11,24 @@ import_marginal_distributions <- function(
       "Directory must exist, hint: set create_folder to TRUE"
     )
   }
-
-  if (binary_variables_file == "") {
-    .default_binary_variables_file <-
-      file.path(
-        normalizePath(folder_path),
-        "binary_variables.csv"
-      )
-    if (file.exists(.default_binary_variables_file)) {
-      binary_variables_file <- .default_binary_variables_file
-    } else {
-      message(
-        paste0(
-          "No Default Binary Variables File Present in",
-          normalizePath(folder_path)
-        )
-      )
-    }
-  } else if (! file.exists(normalizePath(folder_path))) {
-    stop("Binary File Must Exist")
-  }
+  .binary_variables_file <- get_variables_path(
+    folder_path,
+    binary_variables_file,
+    "binary"
+  )
+  .categorical_variables_file <- get_variables_path(
+    folder_path,
+    categorical_variables_file,
+    "categorical"
+  )
+  .continuous_variables_file <- get_variables_path(
+    folder_path,
+    continuous_variables_file,
+    "continuous"
+  )
+  .continuous_quantiles_file <- get_variables_path(
+    folder_path,
+    continuous_quantiles_file,
+    "quantiles"
+  )
 }

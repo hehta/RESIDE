@@ -73,3 +73,81 @@ generate_file_path <- function(
   )
   return(.file_path)
 }
+
+get_full_file_path <- function(
+  folder_path,
+  file_path
+) {
+  return(
+    file.path(
+      normalizePath(folder_path),
+      file_path
+    )
+  )
+}
+
+get_variables_path <- function(
+  folder_path,
+  file_path,
+  variable_type
+) {
+  .file_path <- dplyr::case_when(
+    variable_type == "binary" && file_path == "" ~
+      "binary_variables.csv",
+    variable_type == "categorical" && file_path == "" ~
+      "categorical_variables.csv",
+    variable_type == "continuous" && file_path == "" ~
+      "continuous_variables.csv",
+    variable_type == "quantiles" && file_path == "" ~
+      "continuous_quantiles.csv",
+    file_path != "" ~ file_path,
+    TRUE ~ ""
+  )
+  .full_file_path <- get_full_file_path(
+    folder_path,
+    .file_path
+  )
+  if (file_path == "" && !file.exists(.full_file_path)) {
+    message(
+      paste0(
+        "No file for ",
+        variable_type,
+        " found"
+      )
+    )
+    return("")
+  } else if (!file.exists(.full_file_path)) {
+    stop(
+      paste0(
+        variable_type,
+        "Must Exist"
+      )
+    )
+  } else {
+    return(.full_file_path)
+  }
+}
+
+load_variables_file <- function(
+  file_path,
+  variable_type
+) {
+  if (file_path == "") {
+    return()
+  }
+  tryCatch({
+    return(
+      utils::read.csv(
+        file_path
+      )
+    )
+  }, error = function(e) {
+    stop(paste(
+      "Error reading",
+      variable_type,
+      "variables from",
+      file_path,
+      "does the file exist?"
+    ))
+  })
+}
