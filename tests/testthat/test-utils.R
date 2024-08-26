@@ -21,3 +21,12 @@ test_that("generate_file_path works", {
     file.path(normalizePath(folder_path), file_name)
   )
 })
+
+test_that("get_full_file_path works", {
+  file_path <- get_full_file_path(
+    ".",
+    "test.csv"
+  )
+  expect_type(file_path, "character")
+  expect_true(grepl("test.csv$", file_path))
+})

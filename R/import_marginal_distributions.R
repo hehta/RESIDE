@@ -12,6 +12,7 @@ import_marginal_distributions <- function(
     )
   }
 
+  # Load the binary variables
   .binary_variables <- load_variables_file(
     get_variables_path(
       folder_path,
@@ -21,6 +22,7 @@ import_marginal_distributions <- function(
     "binary"
   )
 
+  # Load the categorical variables
   .categorical_variables <- load_variables_file(
     get_variables_path(
       folder_path,
@@ -30,6 +32,7 @@ import_marginal_distributions <- function(
     "categorical"
   )
 
+  # Load the continuous variables
   .continuous_variables <- load_variables_file(
     get_variables_path(
       folder_path,
@@ -39,6 +42,7 @@ import_marginal_distributions <- function(
     "continuous"
   )
 
+  # Load the quantiles for the continuous variables
   .quantile_variables <- load_variables_file(
     get_variables_path(
       folder_path,
@@ -48,6 +52,8 @@ import_marginal_distributions <- function(
     "quantiles"
   )
 
+  # Validate the variables and throw an error if they
+  # are invalid.
   if (! is_variables_valid(
     .binary_variables,
     .categorical_variables,
