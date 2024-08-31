@@ -6,7 +6,7 @@
 \alias{RESIDE-package}
 \title{RESIDE: Rapid Easy Synthesis to Inform Data Extraction}
 \description{
-An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TRES).
+An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).
 }
 \details{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -15,5 +15,15 @@ The RESIDE Package
 }
 \author{
 \strong{Maintainer}: Ryan Field \email{ryan.field@glasgow.ac.uk} (\href{https://orcid.org/0000-0002-4424-9890}{ORCID})
+
+Authors:
+\itemize{
+  \item David McAllister \email{david.mcallister@glasgow.ac.uk} (\href{https://orcid.org/0000-0003-3550-1764}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Claudia Geue \email{cladia.geue@glasgow.ac.uk} (\href{https://orcid.org/0000-0003-2243-0733}{ORCID}) [contributor]
+}
 
 }

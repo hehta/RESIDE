@@ -1,3 +1,5 @@
 *.Rproj
 .Rproj.user/
 check/
+.RData
+.Rhistory
