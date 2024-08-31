@@ -109,9 +109,7 @@ import_marginal_distributions <- function(
       ]$category
     # Add the values to the categorical list
     # Using the variable name as the key
-    .categorical_summary[[variable]] <- list(
-      n
-    )
+    .categorical_summary[[variable]] <- n
   }
 
   # Forware declare binary sumamry list
@@ -143,7 +141,8 @@ import_marginal_distributions <- function(
       "summary" = dplyr::select(
         as.data.frame(.continuous_variables[
           .continuous_variables$variable == variable,
-        ]),
+        ],
+        row.names = 1L), # Set for equality tests
         m, # nolint: object_name
         s # nolint: object_name
       )
