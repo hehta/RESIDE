@@ -144,7 +144,8 @@ import_marginal_distributions <- function(
         ],
         row.names = 1L), # Set for equality tests
         m, # nolint: object_name
-        s # nolint: object_name
+        s, # nolint: object_name
+        missing
       )
     )
   }

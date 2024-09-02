@@ -99,8 +99,11 @@ print.RESIDE <- function(
         "\n",
         "SD: ",
         x[["continuous_variables"]][[.variable]][["summary"]][["s"]],
+        "\n",
+        "Missing: ",
+        x[["continuous_variables"]][[.variable]][["summary"]][["missing"]],
         "\n"
       )
-}
+    }
   }
 }
