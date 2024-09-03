@@ -7,10 +7,12 @@
 #' Default: '' see details.
 #' @param categorical_variables_file filename for the categorical variables file
 #' , Default: '' see details.
-#' @param continuous_variables_file filename for the,
+#' @param continuous_variables_file filename for the continuous variables file,
 #' Default: '' see details.
-#' @param continuous_quantiles_file filename for the,
+#' @param continuous_quantiles_file filename for the continuous quantiles file,
 #' Default: '' see details.
+#' @param summary_file filename for the summary file,
+#' Default: 'summary.csv' see details.
 #' @return Returns an object of a RESIDE class
 #' @details This function will import marginal distributions as generated
 #' within a Trusted Research Environment (TRE) using the function
@@ -36,7 +38,8 @@ import_marginal_distributions <- function(
   binary_variables_file = "",
   categorical_variables_file = "",
   continuous_variables_file = "",
-  continuous_quantiles_file = ""
+  continuous_quantiles_file = "",
+  summary_file = "summary.csv"
 ) {
   # Check the folder exists first
   if (! dir.exists(normalizePath(folder_path))) {
@@ -85,13 +88,23 @@ import_marginal_distributions <- function(
     "quantiles"
   )
 
+  .summary_variables <- load_variables_file(
+    get_variables_path(
+      folder_path,
+      summary_file,
+      "summary"
+    ),
+    "summary"
+  )
+
   # Validate the variables and throw an error if they
   # are invalid.
   if (! is_variables_valid(
     .binary_variables,
     .categorical_variables,
     .continuous_variables,
-    .quantile_variables
+    .quantile_variables,
+    .summary_variables
   )) {
     stop("The input files are not valid for the RESIDE package")
   }
@@ -150,11 +163,19 @@ import_marginal_distributions <- function(
     )
   }
 
+  .summary <- dplyr::select(
+    .summary_variables,
+    n_row, # nolint: object_name
+    n_col, # nolint: object_name
+    variables # nolint: object_name
+  )
+
   # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
-    continuous_variables = .continuous_summary
+    continuous_variables = .continuous_summary,
+    summary = .summary
   )
 
   # Add a class to the return to allow for S3 overrides

@@ -5,5 +5,8 @@ utils::globalVariables(c(
   "tform_q",
   "epsilon",
   "m",
-  "s"
+  "s",
+  "n_row",
+  "n_col",
+  "variables"
 ))

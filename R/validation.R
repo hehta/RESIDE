@@ -2,7 +2,8 @@ is_variables_valid <- function(
   binary_variables,
   categorical_variables,
   continuous_variables,
-  quantile_variables
+  quantile_variables,
+  summary_variables
 ) {
   # Check all of the variables
   if (!all(
@@ -21,6 +22,10 @@ is_variables_valid <- function(
     is_variable_valid(
       quantile_variables,
       "quantile"
+    ),
+    is_variable_valid(
+      summary_variables,
+      "summary"
     )
   )) {
     # Return FALSE if any variables aren't valid
@@ -80,6 +85,8 @@ get_required_variables <- function(
         list(c("variable", "m", "s", "missing")),
       variable_type == "quantile" ~
         list(c("varname", "orig_q", "tform_q", "epsilon")),
+      variable_type == "summary" ~
+        list(c("n_row", "n_col", "variables")),
       .default = list(c("ERROR", "UNKNOWN VARIABLE"))
     )
   )

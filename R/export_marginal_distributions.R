@@ -77,4 +77,13 @@ export_marginal_distributions <- function(
     utils::write.csv(.quantiles_df, .file_path)
   }
 
+  utils::write.csv(
+    x[["summary"]],
+    generate_file_path(
+      "summary.csv",
+      folder_path,
+      "Summary"
+    )
+  )
+
 }

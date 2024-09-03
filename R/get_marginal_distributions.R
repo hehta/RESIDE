@@ -132,11 +132,18 @@ get_marginal_distributions <- function(
     )
   }
 
+  .overall_summary <- data.frame(
+    n_row = nrow(df),
+    n_col = ncol(df),
+    variables = paste(names(df), collapse = ", ")
+  )
+
   # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
-    continuous_variables = .continuous_summary
+    continuous_variables = .continuous_summary,
+    summary = .overall_summary
   )
 
   # Add a class to the return to allow for S3 overrides

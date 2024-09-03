@@ -17,6 +17,10 @@ test_that("get_required_variables_work", {
     list(c("varname", "orig_q", "tform_q", "epsilon"))
   )
   testthat::expect_equal(
+    get_required_variables("summary"),
+    list(c("n_row", "n_col", "variables"))
+  )
+  testthat::expect_equal(
     get_required_variables("unknown"),
     list(c("ERROR", "UNKNOWN VARIABLE"))
   )
@@ -36,6 +40,9 @@ test_that("is_variable_valid works", {
     is_variable_valid(quantile_df, "quantile")
   )
   testthat::expect_true(
+    is_variable_valid(summary_df, "summary")
+  )
+  testthat::expect_true(
     is_variable_valid(empty_df, "quantile")
   )
   testthat::expect_output(
@@ -53,5 +60,9 @@ test_that("is_variable_valid works", {
   testthat::expect_output(
     is_variable_valid(categorical_df, "binary"),
     regexp = "^binary not valid.+$"
+  )
+  testthat::expect_output(
+    is_variable_valid(categorical_df, "summary"),
+    regexp = "^summary not valid.+$"
   )
 })

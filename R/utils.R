@@ -162,7 +162,7 @@ get_variables_path <- function(
     stop(
       paste0(
         variable_type,
-        "Must Exist"
+        " Must Exist"
       )
     )
   }

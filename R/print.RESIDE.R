@@ -96,14 +96,22 @@ print.RESIDE <- function(
       cat(
         "Mean: ",
         x[["continuous_variables"]][[.variable]][["summary"]][["m"]],
-        "\n",
-        "SD: ",
+        "\nSD: ",
         x[["continuous_variables"]][[.variable]][["summary"]][["s"]],
-        "\n",
-        "Missing: ",
+        "\nMissing: ",
         x[["continuous_variables"]][[.variable]][["summary"]][["missing"]],
         "\n"
       )
     }
   }
+  cat(
+    "Summary: \n",
+    "Number of Rows: ",
+    x[["summary"]][["n_row"]],
+    "\nNumber of Columns: ",
+    x[["summary"]][["n_col"]],
+    "\nVariables: ",
+    x[["summary"]][["variables"]]
+  )
+  invisible()
 }
