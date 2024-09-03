@@ -69,7 +69,6 @@ get_cont_quantiles <- function(
       )$y
   }
 
-  `%>%` <- magrittr::`%>%`
   df <- df %>%
     dplyr::select(dplyr::ends_with("_q")) %>%
     dplyr::distinct() %>%

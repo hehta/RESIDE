@@ -19,8 +19,6 @@ get_missing_variables <- function(
 binary_to_df <- function(
   x
 ) {
-  # Scope the magrittr pipe
-  `%>%` <- magrittr::`%>%`
   # Convert the binary variables list to a data frame
   binary_df <- as.data.frame(x)
   # Transform the data frame from wide to long
@@ -50,8 +48,6 @@ quantiles_to_df <- function(
 continuous_to_df <- function(
   x
 ) {
-  # Scope the magrittr pip
-  `%>%` <- magrittr::`%>%`
   # Use lapply to extract the summary (list) of each variable
   # from the variables list
   .summaries <- lapply(x, \(.x) .x[["summary"]])

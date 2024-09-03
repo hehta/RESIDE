@@ -2,7 +2,6 @@ get_continuous_summary <- function(
   df,
   column_name
 ) {
-  `%>%` <- magrittr::`%>%`
   .tmp_df <- df[column_name]
   .quantiles <- get_cont_quantiles(
     .tmp_df,

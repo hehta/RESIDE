@@ -56,9 +56,6 @@ get_marginal_distributions <- function(
     df <- df[variables]
   }
 
-  # Scope Magnittr pipe
-  `%>%` <- magrittr::`%>%`
-
   # Replace missing values for characters with "missing"
   df <- df %>% dplyr::mutate_if(
     is.character,
