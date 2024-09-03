@@ -59,52 +59,20 @@ get_marginal_distributions <- function(
   # Scope Magnittr pipe
   `%>%` <- magrittr::`%>%`
 
+  # Replace missing values for characters with "missing"
+  df <- df %>% dplyr::mutate_if(
+    is.character,
+    function(x) ifelse(x == "", "missing", x)
+  )
+
   # Ensure characters are factors
   df <- df %>% dplyr::mutate_if(is.character, factor)
 
-  # Declare variables
-  .categorical_variables <- c()
-  .continuous_variables <- c()
-  .binary_variables <- c()
-
-  # Identify Variable types
-  # Loop through Columns
-  for (.column in names(df)) {
-    # If factor its a categorical variable
-    if (is.factor(df[[.column]])) {
-      .categorical_variables <- c(
-        .categorical_variables,
-        .column
-      )
-      # if numberic it's either binary or continuous
-    } else if (is.numeric(df[[.column]])) {
-      # If between 0 and 1 it's binary
-      if (
-        min(df[[.column]], na.rm = TRUE) == 0 &&
-          max(df[[.column]], na.rm = TRUE) == 1
-      ) {
-        .binary_variables <- c(
-          .binary_variables,
-          .column
-        )
-        # Otherwise continuous
-      } else {
-        .continuous_variables <- c(
-          .continuous_variables,
-          .column
-        )
-      }
-      # If neither factor or numeric, through and error
-    } else {
-      stop(
-        paste(
-          "Unknown Variable type for column",
-          .column,
-          sep = " "
-        )
-      )
-    }
-  }
+  # Get variable types
+  .variable_types <- get_variable_types(df)
+  .categorical_variables <- .variable_types$categorical_variables
+  .continuous_variables <- .variable_types$continuous_variables
+  .binary_variables <- .variable_types$binary_variables
 
   # Forward declare binary summary as empty list
   .binary_summary <- list()
@@ -159,4 +127,55 @@ get_marginal_distributions <- function(
     .return
   )
 
+}
+
+get_variable_types <- function(df) {
+  # Declare variables
+  .categorical_variables <- c()
+  .continuous_variables <- c()
+  .binary_variables <- c()
+
+  # Identify Variable types
+  # Loop through Columns
+  for (.column in names(df)) {
+    # If factor its a categorical variable
+    if (is.factor(df[[.column]])) {
+      .categorical_variables <- c(
+        .categorical_variables,
+        .column
+      )
+      # if numberic it's either binary or continuous
+    } else if (is.numeric(df[[.column]])) {
+      # If between 0 and 1 it's binary
+      if (
+        min(df[[.column]], na.rm = TRUE) == 0 &&
+          max(df[[.column]], na.rm = TRUE) == 1
+      ) {
+        .binary_variables <- c(
+          .binary_variables,
+          .column
+        )
+        # Otherwise continuous
+      } else {
+        .continuous_variables <- c(
+          .continuous_variables,
+          .column
+        )
+      }
+      # If neither factor or numeric, throw an error
+    } else {
+      stop(
+        paste(
+          "Unknown Variable type for column",
+          .column,
+          sep = " "
+        )
+      )
+    }
+  }
+  return(list(
+    categorical_variables = .categorical_variables,
+    continuous_variables = .continuous_variables,
+    binary_variables = .binary_variables
+  ))
 }
