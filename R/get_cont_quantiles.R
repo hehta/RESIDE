@@ -12,17 +12,20 @@ get_cont_quantiles <- function(
   if (any(paste0(varnames, "_t") %in% names(df))) {
     stop("Transformations already present")
   }
+  # Define data frame for quantiles
+  quantile_df <- df
 
+  # loop through
   for (varname in varnames) {
-    if (!varname %in% names(df)) {
+    if (!varname %in% names(quantile_df)) {
       stop("Varname needs for be in data frame")
     }
 
     ## perform transformation and add to dataframe
     res <- suppressWarnings(
-      bestNormalize::orderNorm(x = df[[varname]])
+      bestNormalize::orderNorm(x = quantile_df[[varname]])
     )
-    df[[paste0(varname, "_t")]] <- res$x.t
+    quantile_df[[paste0(varname, "_t")]] <- res$x.t
 
     ## get quantiles
     quants <- quants_full <- q <- data.frame(
@@ -52,30 +55,51 @@ get_cont_quantiles <- function(
     }
 
     ## store quantiles in tibble (note same for every row)
-    df[[paste0(varname, "_q")]] <- vector(mode = "list", length = nrow(df))
-    df[[paste0(varname, "_q")]] <-
+    quantile_df[[paste0(varname, "_q")]] <-
+      vector(mode = "list", length = nrow(quantile_df))
+    quantile_df[[paste0(varname, "_q")]] <-
       lapply(
-        df[[paste0(varname, "_q")]],
+        quantile_df[[paste0(varname, "_q")]],
         function(x) quants
       )
 
     ## recover original vector from quantiles and transformed vector
-    df[[paste0(varname, "_r")]] <-
+    quantile_df[[paste0(varname, "_r")]] <-
       stats::approx(
         quants[, "tform_q"],
         quants[, "orig_q"],
-        df[[paste0(varname, "_t")]],
+        quantile_df[[paste0(varname, "_t")]],
         na.rm = FALSE
       )$y
   }
 
-  df <- df %>%
+  summary_df <- as.data.frame(
+    quantile_df[, setdiff(
+      names(quantile_df),
+      c(varname,
+        paste0(varname, "_q"),
+        paste0(varname, "_r"))
+    )]
+  )
+
+  summary_df <- summary_df %>%
+    dplyr::summarise_all(
+      .funs = list(
+        m = mean, s = sd
+      ),
+      na.rm = TRUE
+    )
+
+  quantile_df <- quantile_df %>%
     dplyr::select(dplyr::ends_with("_q")) %>%
     dplyr::distinct() %>%
     tidyr::gather("varname", "res")
-  df$res <- purrr::map(df$res, dplyr::as_tibble)
-  df <- dplyr::bind_rows(df) %>%
+  quantile_df$res <- purrr::map(quantile_df$res, dplyr::as_tibble)
+  quantile_df <- dplyr::bind_rows(quantile_df) %>%
     tidyr::unnest(res)
 
-  return(df)
+  return(list(
+    quantiles = quantile_df,
+    summary = summary_df
+  ))
 }

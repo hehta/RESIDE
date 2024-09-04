@@ -27,6 +27,7 @@ Imports:
     bestNormalize,
     RDP,
     methods,
-    tibble
+    tibble,
+    simstudy
 LazyData: true
 Config/testthat/edition: 3

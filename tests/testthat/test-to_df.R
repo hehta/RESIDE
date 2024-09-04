@@ -43,7 +43,7 @@ testthat::test_that("continuous_to_df works", {
   testthat::expect_s3_class(continuous_df, "data.frame")
   testthat::expect_true(
     all(
-      c("variable", "m", "s") %in% names(continuous_df)
+      c("variable", "m", "s", "missing", "max_dp") %in% names(continuous_df)
     )
   )
   testthat::expect_gt(nrow(continuous_df), 1)

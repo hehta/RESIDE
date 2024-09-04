@@ -82,7 +82,7 @@ get_required_variables <- function(
       variable_type == "categorical" ~
         list(c("category", "n", "variable")),
       variable_type == "continuous" ~
-        list(c("variable", "m", "s", "missing")),
+        list(c("variable", "m", "s", "missing", "max_dp")),
       variable_type == "quantile" ~
         list(c("varname", "orig_q", "tform_q", "epsilon")),
       variable_type == "summary" ~

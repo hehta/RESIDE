@@ -3,5 +3,6 @@
 #'
 #' The RESIDE Package
 #' @importFrom magrittr "%>%"
+#' @importFrom stats approx
 #'
 "_PACKAGE"

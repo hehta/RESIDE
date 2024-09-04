@@ -6,7 +6,7 @@ test_that("get_required_variables_work", {
   )
   testthat::expect_equal(
     get_required_variables("continuous"),
-    list(c("variable", "m", "s", "missing"))
+    list(c("variable", "m", "s", "missing", "max_dp"))
   )
   testthat::expect_equal(
     get_required_variables("categorical"),

@@ -193,3 +193,13 @@ load_variables_file <- function(
     ))
   })
 }
+
+max_decimal_places <- function(x) {
+  .x <- x[!is.na(x)]
+  dps <- sapply(
+    .x, function(y) {
+      nchar(sub("^-?\\d*\\.?", "", format(y, scientific = FALSE)))
+    }
+  )
+  return(max(dps))
+}

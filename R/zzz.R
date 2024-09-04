@@ -8,5 +8,6 @@ utils::globalVariables(c(
   "s",
   "n_row",
   "n_col",
-  "variables"
+  "variables",
+  "max_dp"
 ))
