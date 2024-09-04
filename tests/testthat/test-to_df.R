@@ -30,7 +30,7 @@ testthat::test_that("quantiles_to_df works", {
   testthat::expect_s3_class(quantiles_df, "data.frame")
   testthat::expect_true(
     all(
-      c("varname", "orig_q", "tform_q", "epsilon") %in% names(quantiles_df)
+      c("variable", "orig_q", "tform_q", "epsilon") %in% names(quantiles_df)
     )
   )
   testthat::expect_gt(nrow(quantiles_df), 1)

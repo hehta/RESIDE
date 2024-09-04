@@ -102,8 +102,7 @@ get_marginal_distributions <- function(
   # Loop through continuous variables
   for (.column in .continuous_variables) {
     .continuous_summary[[.column]] <- get_continuous_summary(
-      df,
-      .column
+      df[.column]
     )
   }
 

@@ -14,7 +14,7 @@ test_that("get_required_variables_work", {
   )
   testthat::expect_equal(
     get_required_variables("quantile"),
-    list(c("varname", "orig_q", "tform_q", "epsilon"))
+    list(c("variable", "orig_q", "tform_q", "epsilon"))
   )
   testthat::expect_equal(
     get_required_variables("summary"),

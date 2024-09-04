@@ -36,8 +36,9 @@ is_variables_valid <- function(
   }
   # Check the quantile names against the continuous variables
   if (!all(
-    continuous_variables$variable %in%
-      gsub("_q$", "", levels(as.factor(quantile_variables$varname)))
+    continuous_variables$variable %in% levels(
+      as.factor(quantile_variables$variable)
+    )
   )) {
     # Produce a helpful message
     cat(
@@ -87,7 +88,7 @@ get_required_variables <- function(
       variable_type == "continuous" ~
         list(c("variable", "mean", "sd", "missing", "max_dp")),
       variable_type == "quantile" ~
-        list(c("varname", "orig_q", "tform_q", "epsilon")),
+        list(c("variable", "orig_q", "tform_q", "epsilon")),
       variable_type == "summary" ~
         list(c("n_row", "n_col", "variables")),
       .default = list(c("ERROR", "UNKNOWN VARIABLE"))

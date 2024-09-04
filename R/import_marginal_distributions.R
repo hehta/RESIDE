@@ -142,14 +142,18 @@ import_marginal_distributions <- function(
   .continuous_summary <- list()
   # Loop through variables (use unique rather than levels to maintain order)
   for (variable in unique(as.factor(.continuous_variables$variable))) {
+    # Get the quantiles as a df for the current variable
+    .quantile_df <- as.data.frame(.quantile_variables[
+      .quantile_variables$variable == variable,
+    ])
+    # Set the rownames for equality tests
+    rownames(.quantile_df) <- seq_len(nrow(.quantile_df))
     # Set the summary and quantiles for the variable
     # Using the variable name as the key
     .continuous_summary[[variable]] <- list(
       "quantiles" = dplyr::select(
-        tibble::as_tibble(.quantile_variables[
-          .quantile_variables$varname == paste0(variable, "_q"),
-        ]),
-        varname, # nolint: object_name
+        .quantile_df,
+        variable, # nolint: object_name
         orig_q, # nolint: object_name
         tform_q, # nolint: object_name
         epsilon # nolint: object_name
