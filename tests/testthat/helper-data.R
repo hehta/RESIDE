@@ -14,4 +14,8 @@ quantile_df <- read.csv(
   testthat::test_path("testdata", "continuous_quantiles.csv")
 )
 
+summary_df <- read.csv(
+  testthat::test_path("testdata", "summary.csv")
+)
+
 empty_df <- data.frame()

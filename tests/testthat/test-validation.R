@@ -2,11 +2,11 @@ test_that("get_required_variables_work", {
   # Expect Equal
   testthat::expect_equal(
     get_required_variables("binary"),
-    list(c("variable", "mean"))
+    list(c("variable", "mean", "missing"))
   )
   testthat::expect_equal(
     get_required_variables("continuous"),
-    list(c("variable", "m", "s"))
+    list(c("variable", "mean", "sd", "missing", "max_dp"))
   )
   testthat::expect_equal(
     get_required_variables("categorical"),
@@ -14,7 +14,11 @@ test_that("get_required_variables_work", {
   )
   testthat::expect_equal(
     get_required_variables("quantile"),
-    list(c("varname", "orig_q", "tform_q", "epsilon"))
+    list(c("variable", "orig_q", "tform_q", "epsilon"))
+  )
+  testthat::expect_equal(
+    get_required_variables("summary"),
+    list(c("n_row", "n_col", "variables"))
   )
   testthat::expect_equal(
     get_required_variables("unknown"),
@@ -36,6 +40,9 @@ test_that("is_variable_valid works", {
     is_variable_valid(quantile_df, "quantile")
   )
   testthat::expect_true(
+    is_variable_valid(summary_df, "summary")
+  )
+  testthat::expect_true(
     is_variable_valid(empty_df, "quantile")
   )
   testthat::expect_output(
@@ -53,5 +60,9 @@ test_that("is_variable_valid works", {
   testthat::expect_output(
     is_variable_valid(categorical_df, "binary"),
     regexp = "^binary not valid.+$"
+  )
+  testthat::expect_output(
+    is_variable_valid(categorical_df, "summary"),
+    regexp = "^summary not valid.+$"
   )
 })

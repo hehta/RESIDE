@@ -9,7 +9,8 @@ import_marginal_distributions(
   binary_variables_file = "",
   categorical_variables_file = "",
   continuous_variables_file = "",
-  continuous_quantiles_file = ""
+  continuous_quantiles_file = "",
+  summary_file = "summary.csv"
 )
 }
 \arguments{
@@ -22,11 +23,14 @@ Default: '' see details.}
 \item{categorical_variables_file}{filename for the categorical variables file
 , Default: '' see details.}
 
-\item{continuous_variables_file}{filename for the,
+\item{continuous_variables_file}{filename for the continuous variables file,
 Default: '' see details.}
 
-\item{continuous_quantiles_file}{filename for the,
+\item{continuous_quantiles_file}{filename for the continuous quantiles file,
 Default: '' see details.}
+
+\item{summary_file}{filename for the summary file,
+Default: 'summary.csv' see details.}
 }
 \value{
 Returns an object of a RESIDE class

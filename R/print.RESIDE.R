@@ -65,9 +65,10 @@ print.RESIDE <- function(
       cat(
         "Variable: ",
         .variable,
-        "\n",
-        "Mean: ",
-        x[["binary_variables"]][[.variable]],
+        "\nMean: ",
+        x[["binary_variables"]][[.variable]]$mean,
+        "\nMissing:",
+        x[["binary_variables"]][[.variable]]$missing,
         "\n"
       )
     }
@@ -95,12 +96,23 @@ print.RESIDE <- function(
       # Cat the Means and SDs
       cat(
         "Mean: ",
-        x[["continuous_variables"]][[.variable]][["summary"]][["m"]],
-        "\n",
-        "SD: ",
-        x[["continuous_variables"]][[.variable]][["summary"]][["s"]],
+        x[["continuous_variables"]][[.variable]][["summary"]][["mean"]],
+        "\nSD: ",
+        x[["continuous_variables"]][[.variable]][["summary"]][["sd"]],
+        "\nMissing: ",
+        x[["continuous_variables"]][[.variable]][["summary"]][["missing"]],
         "\n"
       )
-}
+    }
   }
+  cat(
+    "Summary: \n",
+    "Number of Rows: ",
+    x[["summary"]][["n_row"]],
+    "\nNumber of Columns: ",
+    x[["summary"]][["n_col"]],
+    "\nVariables: ",
+    x[["summary"]][["variables"]]
+  )
+  invisible()
 }

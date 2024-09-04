@@ -7,10 +7,12 @@
 #' Default: '' see details.
 #' @param categorical_variables_file filename for the categorical variables file
 #' , Default: '' see details.
-#' @param continuous_variables_file filename for the,
+#' @param continuous_variables_file filename for the continuous variables file,
 #' Default: '' see details.
-#' @param continuous_quantiles_file filename for the,
+#' @param continuous_quantiles_file filename for the continuous quantiles file,
 #' Default: '' see details.
+#' @param summary_file filename for the summary file,
+#' Default: 'summary.csv' see details.
 #' @return Returns an object of a RESIDE class
 #' @details This function will import marginal distributions as generated
 #' within a Trusted Research Environment (TRE) using the function
@@ -36,7 +38,8 @@ import_marginal_distributions <- function(
   binary_variables_file = "",
   categorical_variables_file = "",
   continuous_variables_file = "",
-  continuous_quantiles_file = ""
+  continuous_quantiles_file = "",
+  summary_file = "summary.csv"
 ) {
   # Check the folder exists first
   if (! dir.exists(normalizePath(folder_path))) {
@@ -85,13 +88,23 @@ import_marginal_distributions <- function(
     "quantiles"
   )
 
+  .summary_variables <- load_variables_file(
+    get_variables_path(
+      folder_path,
+      summary_file,
+      "summary"
+    ),
+    "summary"
+  )
+
   # Validate the variables and throw an error if they
   # are invalid.
   if (! is_variables_valid(
     .binary_variables,
     .categorical_variables,
     .continuous_variables,
-    .quantile_variables
+    .quantile_variables,
+    .summary_variables
   )) {
     stop("The input files are not valid for the RESIDE package")
   }
@@ -118,22 +131,29 @@ import_marginal_distributions <- function(
   for (variable in unique(as.factor(.binary_variables$variable))) {
     # Add the mean of the variable to the list
     # Using the variable name as the key
-    .binary_summary[[variable]] <-
-      .binary_variables[.binary_variables$variable == variable, ]$mean
+    .binary_summary[[variable]] <- list(
+      mean = .binary_variables[.binary_variables$variable == variable, ]$mean,
+      missing =
+        .binary_variables[.binary_variables$variable == variable, ]$missing
+    )
   }
 
   # Forward declare continuous summary
   .continuous_summary <- list()
   # Loop through variables (use unique rather than levels to maintain order)
   for (variable in unique(as.factor(.continuous_variables$variable))) {
+    # Get the quantiles as a df for the current variable
+    .quantile_df <- as.data.frame(.quantile_variables[
+      .quantile_variables$variable == variable,
+    ])
+    # Set the rownames for equality tests
+    rownames(.quantile_df) <- seq_len(nrow(.quantile_df))
     # Set the summary and quantiles for the variable
     # Using the variable name as the key
     .continuous_summary[[variable]] <- list(
       "quantiles" = dplyr::select(
-        tibble::as_tibble(.quantile_variables[
-          .quantile_variables$varname == paste0(variable, "_q"),
-        ]),
-        varname, # nolint: object_name
+        .quantile_df,
+        variable, # nolint: object_name
         orig_q, # nolint: object_name
         tform_q, # nolint: object_name
         epsilon # nolint: object_name
@@ -143,17 +163,27 @@ import_marginal_distributions <- function(
           .continuous_variables$variable == variable,
         ],
         row.names = 1L), # Set for equality tests
-        m, # nolint: object_name
-        s # nolint: object_name
+        mean, # nolint: object_name
+        sd, # nolint: object_name
+        missing, # nolint: object_name
+        max_dp # nolint: object_name
       )
     )
   }
+
+  .summary <- dplyr::select(
+    .summary_variables,
+    n_row, # nolint: object_name
+    n_col, # nolint: object_name
+    variables # nolint: object_name
+  )
 
   # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
-    continuous_variables = .continuous_summary
+    continuous_variables = .continuous_summary,
+    summary = .summary
   )
 
   # Add a class to the return to allow for S3 overrides
