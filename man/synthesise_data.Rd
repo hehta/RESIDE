@@ -29,7 +29,8 @@ DETAILS
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+   marginals <- get_marginal_distributions(IST)
+   df <- synthesise_data(marginals)
  }
 }
 }

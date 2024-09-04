@@ -4,26 +4,38 @@
 \alias{get_marginal_distributions}
 \title{Generate Marginal Distributions for a given data frame}
 \usage{
-get_marginal_distributions(df, variables = c(), ignore_na = TRUE, print = TRUE)
+get_marginal_distributions(
+  df,
+  variables = c(),
+  ignore_na = TRUE,
+  print = FALSE
+)
 }
 \arguments{
-\item{df}{PARAM_DESCRIPTION}
+\item{df}{Data frame to get the marginal distributions from}
 
-\item{variables}{PARAM_DESCRIPTION, Default: c()}
+\item{variables}{(Optional) variable (columns) to select, Default: c()}
 
-\item{ignore_na}{PARAM_DESCRIPTION, Default: TRUE}
+\item{ignore_na}{Currently unuses, Default: TRUE}
 
-\item{print}{PARAM_DESCRIPTION, Default: TRUE}
+\item{print}{Whether to print the marginal distributions
+to the console, Default: FALSE}
 }
 \value{
-A lisd of and S3 RESIDE Class
+A list of marginal distributions of an S3 RESIDE Class
 }
 \description{
 Generate Marginal Distibutions from a given
 data frame with options to specify which variables to use.
 }
 \details{
-DETAILS
+A function to generate marginal distributions from
+a given data frame, depending on the variable type the marginals
+will differ, for binary variables a mean and number of missing is generated
+for continuous variables, they are first transformed and both mean and sd of
+the transformed variables are stored along with the quantile mapping for back
+transformation. For categorical variables, the number of each category is
+stored, missing values are categorise as "missing".
 }
 \examples{
 \dontrun{

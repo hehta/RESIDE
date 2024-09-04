@@ -1,12 +1,19 @@
 #' @title Generate Marginal Distributions for a given data frame
 #' @description Generate Marginal Distibutions from a given
 #' data frame with options to specify which variables to use.
-#' @param df PARAM_DESCRIPTION
-#' @param variables PARAM_DESCRIPTION, Default: c()
-#' @param ignore_na PARAM_DESCRIPTION, Default: TRUE
-#' @param print PARAM_DESCRIPTION, Default: TRUE
-#' @return A lisd of and S3 RESIDE Class
-#' @details DETAILS
+#' @param df Data frame to get the marginal distributions from
+#' @param variables (Optional) variable (columns) to select, Default: c()
+#' @param ignore_na Currently unuses, Default: TRUE
+#' @param print Whether to print the marginal distributions
+#' to the console, Default: FALSE
+#' @return A list of marginal distributions of an S3 RESIDE Class
+#' @details A function to generate marginal distributions from
+#' a given data frame, depending on the variable type the marginals
+#' will differ, for binary variables a mean and number of missing is generated
+#' for continuous variables, they are first transformed and both mean and sd of
+#' the transformed variables are stored along with the quantile mapping for back
+#' transformation. For categorical variables, the number of each category is
+#' stored, missing values are categorise as "missing".
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -32,7 +39,7 @@ get_marginal_distributions <- function(
   df,
   variables = c(),
   ignore_na = TRUE,
-  print = TRUE
+  print = FALSE
 ) {
   # Check if variables is set
   df <- as.data.frame(df)
@@ -76,7 +83,10 @@ get_marginal_distributions <- function(
   # Loop through binary variables
   for (.column in .binary_variables) {
     # add mean of binary varable to binary summary
-    .binary_summary[[.column]] <- mean(df[[.column]])
+    .binary_summary[[.column]] <- list(
+      mean = mean(df[[.column]]),
+      missing = get_n_missing(df, .column)
+    )
   }
 
   # Forward declare categorical summary as empty list

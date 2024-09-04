@@ -131,8 +131,11 @@ import_marginal_distributions <- function(
   for (variable in unique(as.factor(.binary_variables$variable))) {
     # Add the mean of the variable to the list
     # Using the variable name as the key
-    .binary_summary[[variable]] <-
-      .binary_variables[.binary_variables$variable == variable, ]$mean
+    .binary_summary[[variable]] <- list(
+      mean = .binary_variables[.binary_variables$variable == variable, ]$mean,
+      missing =
+        .binary_variables[.binary_variables$variable == variable, ]$missing
+    )
   }
 
   # Forward declare continuous summary
@@ -156,8 +159,8 @@ import_marginal_distributions <- function(
           .continuous_variables$variable == variable,
         ],
         row.names = 1L), # Set for equality tests
-        m, # nolint: object_name
-        s, # nolint: object_name
+        mean, # nolint: object_name
+        sd, # nolint: object_name
         missing, # nolint: object_name
         max_dp # nolint: object_name
       )

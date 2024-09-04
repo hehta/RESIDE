@@ -9,7 +9,8 @@
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'    marginals <- get_marginal_distributions(IST)
+#'    df <- synthesise_data(marginals)
 #'  }
 #' }
 #' @seealso
@@ -28,6 +29,7 @@ synthesise_data <- function(
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")
   }
+  # @todo add covaraince matrix for correlations
   if (!is.null(covariance_matrix)) {
     stop("correllations a not yet supported")
   } else {
@@ -46,22 +48,35 @@ synthesise_data_no_cor <- function(
   # Predifine dataDefinition
   data_def <- NULL
 
-  data_def <- define_categorical(
-    marginals$categorical_variables,
-    marginals$summary$n_row,
-    data_def
-  )
+  # If there are categorical variables
+  if ("categorical_variables" %in% names(marginals)) {
+    # Define categorical variables
+    data_def <- define_categorical(
+      marginals$categorical_variables,
+      marginals$summary$n_row,
+      data_def
+    )
+  }
 
-  data_def <- define_binary(
-    marginals$binary_variables,
-    data_def
-  )
+  # If there are binary variables
+  if ("binary_variables" %in% names(marginals)) {
+    # Define binary variables
+    data_def <- define_binary(
+      marginals$binary_variables,
+      data_def
+    )
+  }
 
-  data_def <- define_continuous(
-    marginals$continuous_variables,
-    data_def
-  )
+  # If there are continuous variables
+  if ("continuous_variables" %in% names(marginals)) {
+    # Define continuous variables
+    data_def <- define_continuous(
+      marginals$continuous_variables,
+      data_def
+    )
+  }
 
+  # Synthesise the data
   sim_df <- simstudy::genData(
     marginals$summary$n_row,
     data_def
@@ -81,6 +96,12 @@ synthesise_data_no_cor <- function(
       marginals$continuous_variables[[variable_name]]$summary$max_dp
     )
   }
+  # Add missing values (MAR)
+  sim_df <- add_missingness(
+    sim_df,
+    marginals
+  )
+  # Return the data frame
   return(sim_df)
 }
 
@@ -89,14 +110,24 @@ define_categorical <- function(
   n_row,
   data_def
 ) {
+  # Explicitly copy the definitions
   .data_def <- data_def
+  # Loop through the variables
   for (.col in names(categorical_summary)){
+    # Forward declare the categories
     .labs <- c()
+    # Forward declare the probabilities
     .probs <- c()
+    # Loop through the categories
     for (.cat in names(categorical_summary[[.col]])) {
+      # Add the category to the categories
       .labs <- c(.labs, .cat)
+      # Add the probability to the probabilities
       .probs <- c(.probs, (categorical_summary[[.col]][[.cat]] / n_row))
     }
+    # Add the definition to the definitions
+    # Specifying a categorical distribution
+    # Giving the categories and probabilities of each
     .data_def <- simstudy::defData(
       .data_def,
       varname = .col,
@@ -105,6 +136,7 @@ define_categorical <- function(
       variance = paste0(.labs, collapse = ";")
     )
   }
+  # Return the definitions
   return(.data_def)
 }
 
@@ -112,13 +144,18 @@ define_binary <- function(
   binary_summary,
   data_def
 ) {
+  # Explicitly copy the definitions
   .data_def <- data_def
+  # Loop through the variables
   for (.col in names(binary_summary)){
+    # Add the variable to the definitions
+    # Specifying a binary distribution
+    # Using mean as the probability
     .data_def <- simstudy::defData(
       .data_def,
       varname = .col,
       dist = "binary",
-      formula = binary_summary[[.col]]
+      formula = binary_summary[[.col]][["mean"]]
     )
   }
   return(.data_def)
@@ -128,14 +165,19 @@ define_continuous <- function(
   continuous_summary,
   data_def
 ) {
+  # Explicitly copy the definitions
   .data_def <- data_def
+  # Loop through the variables
   for (.col in names(continuous_summary)) {
+    # Add the variable to the definition
+    # Specifying a normal distribution
+    # Using mean and standard deviation
     .data_def <- simstudy::defData(
       .data_def,
       varname = .col,
       dist = "normal",
-      formula = continuous_summary[[.col]][["summary"]][["m"]],
-      variance = continuous_summary[[.col]][["summary"]][["s"]]
+      formula = continuous_summary[[.col]][["summary"]][["mean"]],
+      variance = continuous_summary[[.col]][["summary"]][["sd"]]
     )
   }
   return(.data_def)
@@ -145,5 +187,36 @@ add_missingness <- function(
   simulated_data,
   marginals
 ) {
-  # Todo
+  # Remove purposly added 'missing' factors
+  .df <- simulated_data %>%
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::where(is.character), ~gsub("missing", "", .x)
+      )
+    )
+  # Loop through the binary variables
+  for (binary_variable in names(marginals$binary_variables)) {
+    # Get the number of NAs
+    .variable_missingness <-
+      marginals$binary_variables[[binary_variable]][["missing"]]
+    # Only add NAs if there are any to add
+    if (.variable_missingness > 0) {
+      # Select a random set of rows given the number of NAs and replace
+      # the variable of those rows with NAs
+      .df[sample(nrow(.df), .variable_missingness), ][[binary_variable]] <- NA
+    }
+  }
+  # Loop through the continuous variables
+  for (continuous_variable in names(marginals$continuous_variables)) {
+    # Only add NAs if there are any to add
+    .variable_missingness <-
+      marginals$continuous_variables[[continuous_variable]][["summary"]][["missing"]] # nolint line_length
+    if (.variable_missingness > 0) {
+      # Select a random set of rows given the number of NAs and replace
+      # the variable of those rows with NAs
+      .df[sample(nrow(.df), .variable_missingness), ][[continuous_variable]] <- NA # nolint line_length
+    }
+  }
+  # Return the new data frame
+  return(.df)
 }

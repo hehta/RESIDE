@@ -1,3 +1,6 @@
+##################################################################
+##                     Validation Functions                     ##
+##################################################################
 is_variables_valid <- function(
   binary_variables,
   categorical_variables,
@@ -78,11 +81,11 @@ get_required_variables <- function(
   return(
     dplyr::case_when(
       variable_type == "binary" ~
-        list(c("variable", "mean")),
+        list(c("variable", "mean", "missing")),
       variable_type == "categorical" ~
         list(c("category", "n", "variable")),
       variable_type == "continuous" ~
-        list(c("variable", "m", "s", "missing", "max_dp")),
+        list(c("variable", "mean", "sd", "missing", "max_dp")),
       variable_type == "quantile" ~
         list(c("varname", "orig_q", "tform_q", "epsilon")),
       variable_type == "summary" ~

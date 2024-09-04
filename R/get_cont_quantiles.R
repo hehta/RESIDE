@@ -73,6 +73,7 @@ get_cont_quantiles <- function(
       )$y
   }
 
+  # Extract the quantile transformed values to a dataframe
   summary_df <- as.data.frame(
     quantile_df[, setdiff(
       names(quantile_df),
@@ -81,23 +82,27 @@ get_cont_quantiles <- function(
         paste0(varname, "_r"))
     )]
   )
-
+  # Summarise the quantile transformed values
   summary_df <- summary_df %>%
     dplyr::summarise_all(
       .funs = list(
-        m = mean, s = sd
+        mean = mean, sd = sd
       ),
       na.rm = TRUE
     )
 
+  # keep only the quantiles
   quantile_df <- quantile_df %>%
     dplyr::select(dplyr::ends_with("_q")) %>%
     dplyr::distinct() %>%
     tidyr::gather("varname", "res")
+  # convert the results into tibbles
   quantile_df$res <- purrr::map(quantile_df$res, dplyr::as_tibble)
+  # bind and unest the results
   quantile_df <- dplyr::bind_rows(quantile_df) %>%
     tidyr::unnest(res)
-
+  
+  # Return both the quantiles and summaries of the quantiles
   return(list(
     quantiles = quantile_df,
     summary = summary_df

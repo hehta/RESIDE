@@ -17,7 +17,7 @@ testthat::test_that("binary_to_df works", {
   testthat::expect_s3_class(binary_df, "data.frame")
   testthat::expect_true(
     all(
-      c("variable", "mean") %in% names(binary_df)
+      c("variable", "mean", "missing") %in% names(binary_df)
     )
   )
   testthat::expect_gt(nrow(binary_df), 1)
@@ -43,7 +43,7 @@ testthat::test_that("continuous_to_df works", {
   testthat::expect_s3_class(continuous_df, "data.frame")
   testthat::expect_true(
     all(
-      c("variable", "m", "s", "missing", "max_dp") %in% names(continuous_df)
+      c("variable", "mean", "sd", "missing", "max_dp") %in% names(continuous_df)
     )
   )
   testthat::expect_gt(nrow(continuous_df), 1)

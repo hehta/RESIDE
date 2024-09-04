@@ -2,11 +2,11 @@ test_that("get_required_variables_work", {
   # Expect Equal
   testthat::expect_equal(
     get_required_variables("binary"),
-    list(c("variable", "mean"))
+    list(c("variable", "mean", "missing"))
   )
   testthat::expect_equal(
     get_required_variables("continuous"),
-    list(c("variable", "m", "s", "missing", "max_dp"))
+    list(c("variable", "mean", "sd", "missing", "max_dp"))
   )
   testthat::expect_equal(
     get_required_variables("categorical"),

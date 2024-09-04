@@ -1,3 +1,6 @@
+##################################################################
+##                       Helper Functions                       ##
+##################################################################
 get_missing_variables <- function(
   df,
   variables
@@ -14,71 +17,6 @@ get_missing_variables <- function(
   }
   # Return the missing variables vector
   return(.missing_variables)
-}
-
-binary_to_df <- function(
-  x
-) {
-  # Convert the binary variables list to a data frame
-  binary_df <- as.data.frame(x)
-  # Transform the data frame from wide to long
-  # The data frame should contain variables and means
-  binary_df <- binary_df %>%
-    tidyr::pivot_longer(
-      cols = tidyr::everything(),
-      names_to = "variable",
-      values_to = "mean"
-    )
-  # Return the data frame
-  return(binary_df)
-}
-
-quantiles_to_df <- function(
-  x
-) {
-  # Using lapply select the quantiles list from each
-  # variables list
-  .quantiles <- lapply(x, \(.x) .x[["quantiles"]])
-  # Using do.call and rbind add all the quantiles a single data frame
-  .quantiles <- do.call(rbind, .quantiles)
-  # Return the data frame
-  return(.quantiles)
-}
-
-continuous_to_df <- function(
-  x
-) {
-  # Use lapply to extract the summary (list) of each variable
-  # from the variables list
-  .summaries <- lapply(x, \(.x) .x[["summary"]])
-  # Use do.call and rbind to add all the summaries to a single data frame
-  # And convert the row name (variable name) to a column named variable
-  .summaries <- do.call(rbind, .summaries) %>%
-    tibble::rownames_to_column(var = "variable")
-  # Return the summaries data frame
-  return(.summaries)
-}
-
-categorical_to_df <- function(
-  x
-) {
-  # Forward declare and empty data frame
-  .cat_df <- data.frame()
-  # Loop through the variable names in the categorical variables list
-  for (c_var in names(x)) {
-    # Using the name select the variable and convert it to a data frame
-    # Then convert the row names (categories) to a column
-    .tmp_df <- as.data.frame(x[[c_var]]) %>%
-      tibble::rownames_to_column(var = "category")
-    # Rename the columns
-    names(.tmp_df) <- c("category", "n")
-    # add the variable name as a column
-    .tmp_df$variable <- c_var
-    # combine with the earlier declared data frame
-    .cat_df <- rbind(.cat_df, .tmp_df)
-  }
-  # Return the data frame
-  return(.cat_df)
 }
 
 generate_file_path <- function(
@@ -195,11 +133,29 @@ load_variables_file <- function(
 }
 
 max_decimal_places <- function(x) {
+  # Filter NAS
   .x <- x[!is.na(x)]
+  # Get a vector of decimal places using regex
+  # and ignoring scientific notation e.g., 3.5e-13
   dps <- sapply(
     .x, function(y) {
       nchar(sub("^-?\\d*\\.?", "", format(y, scientific = FALSE)))
     }
   )
+  # Return the maximum number of decimal places
   return(max(dps))
+}
+
+get_n_missing <- function(
+  df,
+  column
+) {
+  # Return the number of rows with NAs
+  return(
+    nrow( # Number of Rows with just NA
+      as.data.frame( # Ensure it's a df as subsetting a single column
+        df[is.na(df[column]), ]
+      )
+    )
+  )
 }
