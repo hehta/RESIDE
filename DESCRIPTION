@@ -22,8 +22,6 @@ Depends:
 Imports:
     dplyr,
     magrittr,
-    purrr,
-    tidyr,
     bestNormalize,
     RDP,
     methods,
