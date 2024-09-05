@@ -13,6 +13,13 @@ An R package which allows data to be simulation from marginal distibutions obtai
 
 The RESIDE Package
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://hehta.github.io/RESIDE/}
+}
+
+}
 \author{
 \strong{Maintainer}: Ryan Field \email{ryan.field@glasgow.ac.uk} (\href{https://orcid.org/0000-0002-4424-9890}{ORCID})
 
