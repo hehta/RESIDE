@@ -9,7 +9,7 @@ get_continuous_summary <- function(
 ) {
   tryCatch({
     variable <- names(column)
-    quantile_df <- column
+    quantile_df <- na.omit(column)
     ## perform transformation and add to dataframe
     res <- suppressWarnings(
       bestNormalize::orderNorm(x = quantile_df[[variable]])
