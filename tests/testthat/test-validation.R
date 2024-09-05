@@ -1,4 +1,4 @@
-test_that("get_required_variables_work", {
+testthat::test_that("get_required_variables_work", {
   # Expect Equal
   testthat::expect_equal(
     get_required_variables("binary"),
@@ -26,7 +26,7 @@ test_that("get_required_variables_work", {
   )
 })
 
-test_that("is_variable_valid works", {
+testthat::test_that("is_variable_valid works", {
   testthat::expect_true(
     is_variable_valid(binary_df, "binary")
   )
