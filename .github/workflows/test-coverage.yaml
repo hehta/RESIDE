@@ -27,11 +27,6 @@ jobs:
             pkgdown
             remotes
 
-      - name: Install local registry
-        run: /bin/bash -c "$(curl -fsSL https://data.scrc.uk/static/localregistry.sh)"
-      - name: Start registry
-        run: $HOME/.fair/registry/scripts/start_fair_registry
-
       - name: Query dependencies
         run: |
           install.packages('remotes')
