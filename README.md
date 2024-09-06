@@ -61,6 +61,6 @@ export_marginal_distributions(marginals)
 marginals_imported <- import_marginal_distributions()
 
 # Synthesise data from the imported marginal distributions
-synthesis_data(marginals_imported)
+synthesise_data(marginals_imported)
 ```
 
