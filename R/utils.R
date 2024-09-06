@@ -19,26 +19,6 @@ get_missing_variables <- function(
   return(.missing_variables)
 }
 
-generate_file_path <- function(
-  file_name,
-  folder_path,
-  variable_type
-) {
-  # Create a file path, normalizing the folder path first
-  # to get an absolute path
-  .file_path <- file.path(normalizePath(folder_path), file_name)
-  # Cat a message to state what is being exported and where
-  cat(
-    "Exporting",
-    variable_type,
-    "to:",
-    .file_path,
-    "\n"
-  )
-  # Return the file path
-  return(.file_path)
-}
-
 get_full_file_path <- function(
   folder_path,
   file_path
@@ -160,4 +140,20 @@ get_n_missing <- function(
       )
     )
   )
+}
+
+.write_csv <- function(
+  df,
+  file_path,
+  variable_type
+) {
+  # Cat a message to state what is being exported and where
+  cat(
+    "Exporting",
+    variable_type,
+    "to:",
+    file_path,
+    "\n"
+  )
+  utils::write.csv(df, file_path)
 }

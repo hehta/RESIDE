@@ -1,27 +1,3 @@
-testthat::test_that("generate_file_path works", {
-  file_name <- "test.csv"
-  folder_path <- tempdir()
-  variable_type <- "continuous"
-  expected_regex <- paste0(
-    "Exporting ",
-    variable_type,
-    " to: ",
-    "?.+"
-  )
-  file_path <- testthat::expect_output(
-    generate_file_path(
-      file_name,
-      folder_path,
-      variable_type
-    ),
-    expected_regex
-  )
-  testthat::expect_contains(
-    file_path,
-    file.path(normalizePath(folder_path), file_name)
-  )
-})
-
 testthat::test_that("get_full_file_path works", {
   file_path <- get_full_file_path(
     ".",
@@ -57,4 +33,30 @@ testthat::test_that("load_variables_file works", {
     load_variables_file("nonexistent.csv", "binary"),
     regexp = "Error reading binary variables from nonexistent.csv does the file exist?" # nolint line_length
   )
+})
+
+testthat::test_that(".write_csv works", {
+  file_name <- "test.csv"
+  folder_path <- tempdir()
+  file_path <- get_full_file_path(
+    folder_path,
+    "test.csv"
+  )
+  variable_type <- "continuous"
+  expected_regex <- paste0(
+    "Exporting ",
+    variable_type,
+    " to: ",
+    file_path
+  )
+  df <- data.frame(test = "test")
+  testthat::expect_output(
+    .write_csv(
+      df,
+      file_path,
+      variable_type
+    ),
+    expected_regex
+  )
+  testthat::expect_true(file.exists(file_path))
 })
