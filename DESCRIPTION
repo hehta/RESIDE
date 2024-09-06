@@ -1,6 +1,6 @@
 Package: RESIDE
 Title: Rapid Easy Synthesis to Inform Data Extraction
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     c(person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4424-9890")),
