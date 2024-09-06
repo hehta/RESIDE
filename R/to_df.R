@@ -18,6 +18,10 @@ binary_to_df <- function(
 quantiles_to_df <- function(
   x
 ) {
+  # Return an empty dataframe if there are no variables
+  if (length(x) < 1) {
+    return(data.frame())
+  }
   # Using lapply select the quantiles list from each
   # variables list
   .quantiles <- lapply(x, \(.x) .x[["quantiles"]])
@@ -30,6 +34,10 @@ quantiles_to_df <- function(
 continuous_to_df <- function(
   x
 ) {
+  # Return an empty dataframe if there are no variables
+  if (length(x) < 1) {
+    return(data.frame())
+  }
   # Use lapply to extract the summary (list) of each variable
   # from the variables list
   .summaries <- lapply(x, \(.x) .x[["summary"]])

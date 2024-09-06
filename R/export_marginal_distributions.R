@@ -20,7 +20,6 @@
 #' @rdname export_marginal_distributions
 #' @export
 #' @importFrom methods is
-#' @importFrom utils write.csv
 export_marginal_distributions <- function(
   x,
   folder_path = ".",
@@ -44,60 +43,64 @@ export_marginal_distributions <- function(
   # Check there are categorical variables
   if ("categorical_variables" %in% names(x)) {
     # Generate the absolute os appropriate file path
-    .file_path <- generate_file_path(
-      "categorical_variables.csv",
+    .file_path <- get_full_file_path(
       folder_path,
-      "Categorical Variables"
+      "categorical_variables.csv"
     )
     # Convert the marginals to a data frame
     .categorical_df <- categorical_to_df(x$categorical_variables)
-    # Write the file
-    utils::write.csv(.categorical_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.categorical_df) > 0) {
+      .write_csv(.categorical_df, .file_path, "categorical")
+    }
   }
 
   # Check there are categorical variables
   if ("binary_variables" %in% names(x)) {
     # Generate the absolute os appropriate file path
-    .file_path <- generate_file_path(
-      "binary_variables.csv",
+    .file_path <- get_full_file_path(
       folder_path,
-      "Binary Variables"
+      "binary_variables.csv"
     )
     .binary_df <- binary_to_df(x$binary_variables)
-    # Write the file
-    utils::write.csv(.binary_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.binary_df) > 0) {
+      .write_csv(.binary_df, .file_path, "binary")
+    }
   }
 
   if ("continuous_variables" %in% names(x)) {
     # Generate the absolute os appropriate file path for marginals
-    .file_path <- generate_file_path(
-      "continuous_variables.csv",
+    .file_path <- get_full_file_path(
       folder_path,
-      "Continuous Variables"
+      "continuous_variables.csv"
     )
     # Convert the marginals to a data frame
     .continuous_df <- continuous_to_df(x$continuous_variables)
-    # Write the file for marginals
-    utils::write.csv(.continuous_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.continuous_df) > 0) {
+      .write_csv(.continuous_df, .file_path, "continuous")
+    }
     # Convert the quantiles to a data frame
     .quantiles_df <- quantiles_to_df(x$continuous_variables)
     # Generate the absolute os appropriate file path for quantiles
-    .file_path <- generate_file_path(
-      "continuous_quantiles.csv",
+    .file_path <- get_full_file_path(
       folder_path,
-      "Continuous Quantiles"
+      "continuous_quantiles.csv"
     )
-    # Write the file for quantiles
-    utils::write.csv(.quantiles_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.quantiles_df) > 0) {
+      .write_csv(.quantiles_df, .file_path, "quantiles")
+    }
   }
   # Write the summary file (needed for the number of rows)
-  utils::write.csv(
+  .write_csv(
     x[["summary"]],
-    generate_file_path(
-      "summary.csv",
+    get_full_file_path(
       folder_path,
-      "Summary"
-    )
+      "summary.csv"
+    ),
+    "summary"
   )
 
 }

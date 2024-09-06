@@ -5,5 +5,6 @@
 #' @importFrom magrittr "%>%"
 #' @importFrom stats approx
 #' @importFrom stats na.omit
+#' @importFrom utils write.csv
 #'
 "_PACKAGE"
