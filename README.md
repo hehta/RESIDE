@@ -10,18 +10,18 @@
 An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).
 
 # Installation
-Currently this package can be install using 'devtools' or 'remotes'
+Currently this package can be install using `devtools` or `remotes`
 
 ## Devtools
 ```
 install.packages("devtools")
-devtools::install_github("audrey-b/BUGSnet")
+devtools::install_github("hehta/RESIDE")
 ```
 
 ## Remotes
 ```
 install.packages("remotes")
-remotes::install_github("audrey-b/BUGSnet")
+remotes::install_github("hehta/RESIDE")
 ```
 
 # Usage
