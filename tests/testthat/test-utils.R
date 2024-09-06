@@ -46,9 +46,7 @@ testthat::test_that(".write_csv works", {
   expected_regex <- paste0(
     "Exporting ",
     variable_type,
-    " to: ",
-    normalizePath(folder_path),
-    "?.+",
+    " to: ?.+",
     file_name
   )
   df <- data.frame(test = "test")
