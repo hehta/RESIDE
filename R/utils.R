@@ -83,9 +83,9 @@ get_variables_path <- function(
   if (file_path == "" && !file.exists(.full_file_path)) {
     message(
       paste0(
-        "No file for ",
+        "Info: No file for ",
         variable_type,
-        " found"
+        " variables found"
       )
     )
     # And return and empty string
@@ -96,7 +96,9 @@ get_variables_path <- function(
     stop(
       paste0(
         variable_type,
-        " Must Exist"
+        " variables file ",
+        .full_file_path,
+        " must Exist"
       )
     )
   }

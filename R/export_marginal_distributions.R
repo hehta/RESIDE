@@ -51,8 +51,10 @@ export_marginal_distributions <- function(
     )
     # Convert the marginals to a data frame
     .categorical_df <- categorical_to_df(x$categorical_variables)
-    # Write the file
-    utils::write.csv(.categorical_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.categorical_df) > 0) {
+      utils::write.csv(.categorical_df, .file_path)
+    }
   }
 
   # Check there are categorical variables
@@ -64,8 +66,10 @@ export_marginal_distributions <- function(
       "Binary Variables"
     )
     .binary_df <- binary_to_df(x$binary_variables)
-    # Write the file
-    utils::write.csv(.binary_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.binary_df) > 0) {
+      utils::write.csv(.binary_df, .file_path)
+    }
   }
 
   if ("continuous_variables" %in% names(x)) {
@@ -87,8 +91,10 @@ export_marginal_distributions <- function(
       folder_path,
       "Continuous Quantiles"
     )
-    # Write the file for quantiles
-    utils::write.csv(.quantiles_df, .file_path)
+    # Write the file if there are any rows
+    if (nrow(.quantiles_df) > 0) {
+      utils::write.csv(.quantiles_df, .file_path)
+    }
   }
   # Write the summary file (needed for the number of rows)
   utils::write.csv(

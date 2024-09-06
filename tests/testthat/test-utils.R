@@ -35,7 +35,7 @@ testthat::test_that("get_full_file_path works", {
 testthat::test_that("get_variables_path works", {
   testthat::expect_message(
     get_variables_path(".", "", "binary"),
-    regexp = "No file for binary found"
+    regexp = "Info: No file for binary variables found"
   )
   testthat::expect_equal(
     "",
@@ -43,7 +43,7 @@ testthat::test_that("get_variables_path works", {
   )
   testthat::expect_error(
     get_variables_path(".", "nonexistent.csv", "binary"),
-    regexp = "binary Must Exist"
+    regexp = "binary variables file .+ must Exist"
   )
 })
 
