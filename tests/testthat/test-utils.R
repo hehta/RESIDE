@@ -47,7 +47,9 @@ testthat::test_that(".write_csv works", {
     "Exporting ",
     variable_type,
     " to: ",
-    file_path
+    normalizePath(folder_path),
+    "?.+",
+    file_name
   )
   df <- data.frame(test = "test")
   testthat::expect_output(
