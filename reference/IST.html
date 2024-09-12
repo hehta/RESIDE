@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RESIDE</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,340 +43,464 @@
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
     <p>A data frame with 19435 rows and 112 columns:</p><dl><dt>AGE</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: Age in years</p></dd>
 
 <dt>CMPLASP</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables: Compliant for aspirin</p></dd>
 
 <dt>CMPLHEP</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables: Compliant for heparin</p></dd>
 
 <dt>CNTRYNUM</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables: Country code</p></dd>
 
 <dt>COUNTRY</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables: Abbreviated country code</p></dd>
 
 <dt>DALIVE</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days:
+Discharged alive from hospital</p></dd>
 
 <dt>DALIVED</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days:
+Date Discharged alive from hospital</p></dd>
 
 <dt>DAP</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Non trial antiplatelet drug (Y/N)</p></dd>
 
 <dt>DASP14</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Aspirin given for 14 days
+or till death or discharge (Y/N)</p></dd>
 
 <dt>DASPLT</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Discharged on long term aspirin (Y/N)</p></dd>
 
 <dt>DAYLOCAL</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: Estimate of local day of week
+(assuming RDATE is Oxford)</p></dd>
 
 <dt>DCAA</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Calcium antagonists (Y/N)</p></dd>
 
 <dt>DCAREND</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Carotid surgery (Y/N)</p></dd>
 
 <dt>DDEAD</dt>
-<dd><p>#</p></dd>
+<dd><p>Other events within 14 days:
+Other events within 14 days: Dead on discharge form</p></dd>
 
 <dt>DDEADC</dt>
-<dd><p>#</p></dd>
+<dd><p>Other events within 14 days: Cause of death
+(1-Initial stroke/2-Recurrent stroke (ischaemic or unknown
+/3-Recurrent stroke (haemorrhagic)/4-Pneumonia
+/5-Coronary heart disease/6-Pulmonary embolism
+/7-Other vascular or unknown/8-Non-vascular/0-unknown)</p></dd>
 
 <dt>DDEADD</dt>
-<dd><p>#</p></dd>
+<dd><p>Date of dead on discharge form (yyyy/mm/dd);
+NOTE: this death is not necessarily within 14 days of randomisation</p></dd>
 
 <dt>DDEADX</dt>
-<dd><p>#</p></dd>
+<dd><p>Other events within 14 days: Comment on death</p></dd>
 
 <dt>DDIAGHA</dt>
-<dd><p>#</p></dd>
+<dd><p>Final diagnosis of initial event: Haemorrhagic stroke</p></dd>
 
 <dt>DDIAGISC</dt>
-<dd><p>#</p></dd>
+<dd><p>Final diagnosis of initial event: Ischaemic stroke</p></dd>
 
 <dt>DDIAGUN</dt>
-<dd><p>#</p></dd>
+<dd><p>Final diagnosis of initial event: Indeterminate stroke</p></dd>
 
 <dt>DEAD1</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Initial stroke</p></dd>
 
 <dt>DEAD2</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Reccurent ischaemic/unknown stroke</p></dd>
 
 <dt>DEAD3</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Reccurent haemorrhagic stroke</p></dd>
 
 <dt>DEAD4</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Pneumonia</p></dd>
 
 <dt>DEAD5</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Coronary heart disease</p></dd>
 
 <dt>DEAD6</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Pulmonary embolism</p></dd>
 
 <dt>DEAD7</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Other vascular or unknown</p></dd>
 
 <dt>DEAD8</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Non vascular</p></dd>
 
 <dt>DGORM</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Glycerol or manitol (Y/N)</p></dd>
 
 <dt>DHAEMD</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Haemodilution (Y/N)</p></dd>
 
 <dt>DHH14</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Medium dose heparin given for 14 days
+etc in pilot (combine with above)</p></dd>
 
 <dt>DIED</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables: Indicator variable for death
+(1=died; 0=did not die)</p></dd>
 
 <dt>DIVH</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Non trial intravenous heparin (Y/N)</p></dd>
 
 <dt>DLH14</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Low dose heparin given for 14 days
+or till death/discharge (Y/N)</p></dd>
 
 <dt>DMAJNCH</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Major non-cerebral haemorrhage (Y/N)</p></dd>
 
 <dt>DMAJNCHD</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital:</p></dd>
 
 <dt>DMAJNCHX</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital:</p></dd>
 
 <dt>DMH14</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Date of Major non-cerebral haemorrhage
+(yyyy/mm/dd)</p></dd>
 
 <dt>DNOSTRK</dt>
-<dd><p>#</p></dd>
+<dd><p>Final diagnosis of initial event: Not a stroke</p></dd>
 
 <dt>DNOSTRKX</dt>
-<dd><p>#</p></dd>
+<dd><p>Final diagnosis of initial event: Comment on Not a stroke</p></dd>
 
 <dt>DOAC</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Other anticoagulants (Y/N)</p></dd>
 
 <dt>DPE</dt>
-<dd><p>#</p></dd>
+<dd><p>Other events within 14 days: Pulmonary embolism</p></dd>
 
 <dt>DPED</dt>
-<dd><p>#</p></dd>
+<dd><p>Other events within 14 days:
+Date of Pulmonary embolism (yyyy/mm/dd)</p></dd>
 
 <dt>DPLACE</dt>
-<dd><p>#</p></dd>
+<dd><p>Other events within 14 days: Discharge destination
+(A-Home
+/B-Relatives home
+/C-Residential care
+/D-Nursing home
+/E-Other hospital departments
+/U-Unknown)</p></dd>
 
 <dt>DRSH</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days: Haemorrhagic stroke</p></dd>
 
 <dt>DRSHD</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days:
+Date of Haemorrhagic stroke (yyyy/mm/dd)</p></dd>
 
 <dt>DRSISC</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days: Ischaemic recurrent stroke</p></dd>
 
 <dt>DRSISCD</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days:
+Date of Ischaemic recurrent stroke (yyyy/mm/dd)</p></dd>
 
 <dt>DRSUNK</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days: Unknown type</p></dd>
 
 <dt>DRSUNKD</dt>
-<dd><p>#</p></dd>
+<dd><p>Recurrent stroke within 14 days:
+Date of Unknown type (yyyy/mm/dd)</p></dd>
 
 <dt>DSCH</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Non trial subcutaneous heparin (Y/N)</p></dd>
 
 <dt>DSIDE</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Other side effect (Y/N)</p></dd>
 
 <dt>DSIDED</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge
+form about treatments given in hospital: Date of Other side effect</p></dd>
 
 <dt>DSIDEX</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Comment of Other side effect</p></dd>
 
 <dt>DSTER</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Steroids (Y/N)</p></dd>
 
 <dt>DTHROMB</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital: Thrombolysis (Y/N)</p></dd>
 
 <dt>DVT14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of deep vein thrombosis on discharge form</p></dd>
 
 <dt>EXPD14</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Predicted probability of death at 14 days</p></dd>
 
 <dt>EXPD6</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Predicted probability of death at 6 month</p></dd>
 
 <dt>EXPDD</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Predicted probability of death/dependence at 6 month</p></dd>
 
 <dt>FAP</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: On antiplatelet drugs</p></dd>
 
 <dt>FDEAD</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: Dead at six month follow-up (Y/N)</p></dd>
 
 <dt>FDEADC</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: Cause of death (1-Initial stroke
+/2-Recurrent stroke (ischaemic or unknown)
+/3-Recurrent stroke (haemorrhagic)
+/4-Pneumonia
+/5-Coronary heart disease
+/6-Pulmonary embolism
+/7-Other vascular or unknown
+/8-Non-vascular
+/0-unknown)</p></dd>
 
 <dt>FDEADD</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: Date of death;
+NOTE: this death is not necessarily within 6 months of randomisation</p></dd>
 
 <dt>FDEADX</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: Comment on death</p></dd>
 
 <dt>FDENNIS</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months:
+Dependent at 6 month follow-up (Y/N)</p></dd>
 
 <dt>FLASTD</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: Date of last contact</p></dd>
 
 <dt>FOAC</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months: On anticoagulants</p></dd>
 
 <dt>FPLACE</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months:
+Place of residance at 6 month follow-up (
+A-Home
+/B-Relatives home
+/C-Residential care
+/D-Nursing home
+/E-Other hospital departments
+/U-Unknown)</p></dd>
 
 <dt>FRECOVER</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected at 6 months:
+Fully recovered at 6 month follow-up (Y/N)</p></dd>
 
 <dt>FU1_COMP</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Date discharge form completed</p></dd>
 
 <dt>FU1_RECD</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Date discharge form received</p></dd>
 
 <dt>FU2_DONE</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Date 6 month follow-up done</p></dd>
 
 <dt>H14</dt>
-<dd><p>#</p></dd>
+<dd><p>ndicator variables for specific causes of death:
+Cerebral bleed/heamorrhagic stroke within 14 days;
+this is slightly wider definition than DRSH an is used for analysis of
+cerebral bleeds</p></dd>
 
 <dt>HOSPNUM</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: Hospital number</p></dd>
 
 <dt>HOURLOCAL</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: Local time – hours</p></dd>
 
 <dt>HTI14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of haemorrhagic transformation within 14 days</p></dd>
 
 <dt>ID14</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Indicator of death at 14 days</p></dd>
 
 <dt>ISC14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of ischaemic stroke within 14 days</p></dd>
 
 <dt>MINLOCAL</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: Local time – minutes</p></dd>
 
 <dt>NCB14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of any non-cerebral bleed within 14 days</p></dd>
 
 <dt>NCCODE</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Coding of compliance
+(see Table 3) <a href="https://doi.org/10.1186/1745-6215-13-24" class="external-link">doi:10.1186/1745-6215-13-24</a></p></dd>
 
 <dt>NK14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of indeterminate stroke within 14 days</p></dd>
 
 <dt>OCCODE</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Six month outcome (
+1-dead
+/2-dependent
+/3-not recovered
+/4-recovered
+/8 or 9 – missing status</p></dd>
 
 <dt>ONDRUG</dt>
-<dd><p>#</p></dd>
+<dd><p>Data collected on 14 day/discharge form
+about treatments given in hospital:
+Estimate of time in days on trial treatment</p></dd>
 
 <dt>PE14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of pulmonary embolism within 14 days</p></dd>
 
 <dt>RASP3</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Aspirin within 3 days prior to randomisation (Y/N)</p></dd>
 
 <dt>RATRIAL</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Atrial fibrillation (Y/N); not coded for pilot phase - 984 patients</p></dd>
 
 <dt>RCONSC</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Conscious state at randomisation
+(F - fully alert, D - drowsy, U - unconscious)</p></dd>
 
 <dt>RCT</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+CT before randomisation (Y/N)</p></dd>
 
 <dt>RDATE</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Date of randomisation</p></dd>
 
 <dt>RDEF1</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Face deficit (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF2</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Arm/hand deficit (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF3</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Leg/foot deficit (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF4</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Dysphasia (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF5</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Hemianopia (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF6</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Visuospatial disorder (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF7</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Brainstem/cerebellar signs (Y/N/C=can't assess)</p></dd>
 
 <dt>RDEF8</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Other deficit (Y/N/C=can't assess)</p></dd>
 
 <dt>RDELAY</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Delay between stroke and randomisation in hours</p></dd>
 
 <dt>RHEP24</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Heparin within 24 hours prior to randomisation (Y/N)</p></dd>
 
 <dt>RSBP</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Systolic blood pressure at randomisation (mmHg)</p></dd>
 
 <dt>RSLEEP</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Symptoms noted on waking (Y/N)</p></dd>
 
 <dt>RVISINF</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Infarct visible on CT (Y/N)</p></dd>
 
 <dt>RXASP</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Trial aspirin allocated (Y/N)</p></dd>
 
 <dt>RXHEP</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data:
+Trial heparin allocated (M/L/N) \[M is coded as H=high in pilot\]</p></dd>
 
 <dt>SET14D</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Know to be dead or alive at 14 days (1=Yes, 0=No);
+this does not necessarily mean that we know outcome at 6 monts
+– see OCCODE for this</p></dd>
 
 <dt>SEX</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: M=male; F=female</p></dd>
 
 <dt>STRK14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of any stroke within 14 days</p></dd>
 
 <dt>STYPE</dt>
-<dd><p>#</p></dd>
+<dd><p>Randomisation data: Stroke subtype (TACS/PACS/POCS/LACS/other</p></dd>
 
 <dt>TD</dt>
-<dd><p>#</p></dd>
+<dd><p>Other data and derived variables:
+Time of death or censoring in days</p></dd>
 
 <dt>TRAN14</dt>
-<dd><p>#</p></dd>
+<dd><p>Indicator variables for specific causes of death:
+Indicator of major non-cerebral bleed within 14 days</p></dd>
 
 ...
 
@@ -387,7 +511,8 @@
 Sandercock, Peter; Niewada, Maciej; Czlonkowska, Anna. (2011).
 International Stroke Trial database (version 2), [dataset].
 University of Edinburgh. Department of Clinical Neurosciences.
-https://doi.org/10.7488/ds/104.
+<a href="https://doi.org/10.7488/ds/104" class="external-link">doi:10.7488/ds/104</a>
+
 Under ODC-by licence</p>
     </div>
     <div class="section level2">
