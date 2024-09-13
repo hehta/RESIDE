@@ -97,6 +97,10 @@ load_variables_file <- function(
   }
   # Try to read the file
   tryCatch({
+    # Check if file exist to prevent warning
+    if (!file.exists(file_path)) {
+      stop("File does not exist")
+    }
     return(
       utils::read.csv(
         file_path
