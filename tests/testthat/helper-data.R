@@ -19,3 +19,15 @@ summary_df <- read.csv(
 )
 
 empty_df <- data.frame()
+
+marginal_distibutions <- get_marginal_distributions(
+  IST,
+  variables = c(
+    "SEX",
+    "AGE",
+    "ID14",
+    "RSBP",
+    "RATRIAL",
+    "SET14D"
+  )
+)
