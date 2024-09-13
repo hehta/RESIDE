@@ -1,4 +1,4 @@
-data(ist)
+data(IST)
 
 testthat::test_that("get_missing_variables works", {
   testthat::expect_equal(
