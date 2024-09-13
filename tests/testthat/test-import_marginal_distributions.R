@@ -1,16 +1,6 @@
 testthat::test_that("Import Marginal Distributions works", {
   temp_dir <- tempdir()
-  expected_marginals <- get_marginal_distributions(
-    IST,
-    variables = c(
-      "SEX",
-      "AGE",
-      "ID14",
-      "RSBP",
-      "RATRIAL",
-      "SET14D"
-    )
-  )
+  expected_marginals <- marginal_distibutions
   export_marginal_distributions(
     expected_marginals,
     folder_path = temp_dir

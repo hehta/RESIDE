@@ -32,10 +32,10 @@ export_marginal_distributions <- function(
   # if the user wants the folder to be created
   if (create_folder) {
     # Create the folder, ignore warnings (folder exists)
-    dir.create(normalizePath(folder_path), showWarnings = FALSE)
+    dir.create(folder_path, showWarnings = FALSE)
   }
   # Check the foleder exists (even if created)
-  if (! dir.exists(normalizePath(folder_path))) {
+  if (! dir.exists(folder_path)) {
     stop(
       "Directory must exist, hint: set create_folder to TRUE"
     )

@@ -1,0 +1,53 @@
+testthat::test_that("export_marginal_distributions works", {
+  # Test class assumption
+  testthat::expect_error(
+    export_marginal_distributions(list()),
+    regexp = "^.*object must be of class RESIDE.*$"
+  )
+  marginals <- marginal_distibutions
+  temp_dir <- get_full_file_path(tempdir(), "test")
+  # Test folder doesn't exits
+  testthat::expect_error(
+    export_marginal_distributions(
+      marginals,
+      "./dirdoesnotexist"
+    ),
+    regexp = "^.*Directory must exist, hint: set create_folder to TRUE.*$"
+  )
+  # Test folder creation
+  export_marginal_distributions(
+    marginals,
+    temp_dir,
+    create_folder = TRUE
+  )
+  testthat::expect_true(
+    all(
+      dir.exists(temp_dir),
+      file.exists(
+        normalizePath(
+          file.path(temp_dir, "categorical_variables.csv")
+        )
+      ),
+      file.exists(
+        normalizePath(
+          file.path(temp_dir, "binary_variables.csv")
+        )
+      ),
+      file.exists(
+        normalizePath(
+          file.path(temp_dir, "continuous_variables.csv")
+        )
+      ),
+      file.exists(
+        normalizePath(
+          file.path(temp_dir, "continuous_quantiles.csv")
+        )
+      ),
+      file.exists(
+        normalizePath(
+          file.path(temp_dir, "summary.csv")
+        )
+      )
+    )
+  )
+})
