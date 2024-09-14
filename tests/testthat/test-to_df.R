@@ -21,6 +21,14 @@ testthat::test_that("binary_to_df works", {
     )
   )
   testthat::expect_gt(nrow(binary_df), 1)
+
+  expected_df <- data.frame() %>%
+    tibble::rownames_to_column(var = "variable")
+
+  testthat::expect_equal(
+    binary_to_df(list()),
+    expected_df
+  )
 })
 
 testthat::test_that("quantiles_to_df works", {
@@ -34,6 +42,11 @@ testthat::test_that("quantiles_to_df works", {
     )
   )
   testthat::expect_gt(nrow(quantiles_df), 1)
+
+  testthat::expect_equal(
+    quantiles_to_df(list()),
+    data.frame()
+  )
 })
 
 testthat::test_that("continuous_to_df works", {
@@ -47,6 +60,11 @@ testthat::test_that("continuous_to_df works", {
     )
   )
   testthat::expect_gt(nrow(continuous_df), 1)
+
+  testthat::expect_equal(
+    continuous_to_df(list()),
+    data.frame(variable = c())
+  )
 })
 
 testthat::test_that("categorical_to_df works", {
@@ -60,4 +78,9 @@ testthat::test_that("categorical_to_df works", {
     )
   )
   testthat::expect_gt(nrow(categorical_df), 1)
+
+  testthat::expect_equal(
+    categorical_to_df(list()),
+    data.frame(variable = c())
+  )
 })
