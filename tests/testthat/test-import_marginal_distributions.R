@@ -1,5 +1,5 @@
 testthat::test_that("Import Marginal Distributions works", {
-  temp_dir <- tempdir()
+  temp_dir <- new_temp_dir()
   expected_marginals <- marginal_distibutions
   export_marginal_distributions(
     expected_marginals,
