@@ -37,7 +37,7 @@ testthat::test_that("load_variables_file works", {
 
 testthat::test_that(".write_csv works", {
   file_name <- "test.csv"
-  folder_path <- tempdir()
+  folder_path <- new_temp_dir()
   file_path <- get_full_file_path(
     folder_path,
     "test.csv"
@@ -59,4 +59,51 @@ testthat::test_that(".write_csv works", {
     expected_regex
   )
   testthat::expect_true(file.exists(file_path))
+})
+
+testthat::test_that("marginal_files_exist", {
+  expected_files <- c(
+    "binary_variables.csv",
+    "categorical_variables.csv",
+    "continuous_variables.csv",
+    "continuous_quantiles.csv",
+    "summary.csv"
+  )
+  temp_dir <- new_temp_dir()
+  export_marginal_distributions(
+    marginal_distibutions,
+    temp_dir
+  )
+  expect_equal(
+    marginal_files_exist(temp_dir),
+    expected_files
+  )
+})
+
+testthat::test_that("remove_marginal_files works", {
+  temp_dir <- new_temp_dir()
+  export_marginal_distributions(
+    marginal_distibutions,
+    temp_dir
+  )
+  remove_marginal_files(temp_dir)
+  expect_equal(
+    marginal_files_exist(temp_dir),
+    c()
+  )
+  export_marginal_distributions(
+    marginal_distibutions,
+    temp_dir
+  )
+  testthat::local_mocked_bindings(
+    marginal_files_exist = function(...) c("other_file.csv")
+  )
+  testthat::expect_error(
+    remove_marginal_files(temp_dir),
+    regexp = "^.*other_file.csv.*$"
+  )
+  expect_equal(
+    marginal_files_exist(temp_dir),
+    c("other_file.csv")
+  )
 })

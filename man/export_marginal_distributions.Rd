@@ -4,7 +4,12 @@
 \alias{export_marginal_distributions}
 \title{Export Marginal Distributions}
 \usage{
-export_marginal_distributions(x, folder_path = ".", create_folder = FALSE)
+export_marginal_distributions(
+  x,
+  folder_path = ".",
+  create_folder = FALSE,
+  force = FALSE
+)
 }
 \arguments{
 \item{x}{an Object of type RESIDE from get_marginal_distributions()}
@@ -13,6 +18,9 @@ export_marginal_distributions(x, folder_path = ".", create_folder = FALSE)
 
 \item{create_folder}{if the folder does not exist should it be created,
 Default: FALSE}
+
+\item{force}{if the folder already contains marginal distribution files
+should they be removed, Default: FALSE}
 }
 \value{
 No Explicit Return

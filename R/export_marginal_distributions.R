@@ -4,6 +4,8 @@
 #' @param folder_path path to folder where to save files, Default: '.'
 #' @param create_folder if the folder does not exist should it be created,
 #' Default: FALSE
+#' @param force if the folder already contains marginal distribution files
+#' should they be removed, Default: FALSE
 #' @return No Explicit Return
 #' @details Exports each of the marginal distributions to CSV files
 #' within a given folder, along with the continuous quantiles.
@@ -23,7 +25,8 @@
 export_marginal_distributions <- function(
   x,
   folder_path = ".",
-  create_folder = FALSE
+  create_folder = FALSE,
+  force = FALSE
 ) {
   # Check class
   if (!methods::is(x, "RESIDE")) {
@@ -39,6 +42,25 @@ export_marginal_distributions <- function(
     stop(
       "Directory must exist, hint: set create_folder to TRUE"
     )
+  }
+  # Check existing files
+  # Get a list of existing files
+  .existing_files <- marginal_files_exist(folder_path)
+  # Check if list is empty
+  if (length(.existing_files) > 0) {
+    # if not forcing through an error
+    if (!force) {
+      stop(paste(
+        "Marginal files:",
+        .existing_files,
+        "already exists",
+        sep = " ",
+        collapse = ", "
+      ))
+    }
+    # Otherwise (try to) remove the files
+  } else {
+    remove_marginal_files(folder_path)
   }
   # Check there are categorical variables
   if ("categorical_variables" %in% names(x)) {

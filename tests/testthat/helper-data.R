@@ -31,3 +31,22 @@ marginal_distibutions <- get_marginal_distributions(
     "SET14D"
   )
 )
+
+# Quck and dirty random string function
+random_string <- function() {
+  return(
+    runif(1, 1000000000000, 9999999999999) %>% round %>% as.character
+  )
+}
+
+# Function to return a new directory in the temporary directory
+new_temp_dir <- function() {
+  .temp_dir <- file.path(
+    tempdir(),
+    random_string()
+  )
+  dir.create(.temp_dir)
+  return(
+    .temp_dir
+  )
+}

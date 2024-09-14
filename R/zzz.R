@@ -10,3 +10,12 @@ utils::globalVariables(c(
   "variables",
   "max_dp"
 ))
+
+# Global filenames
+.marginal_file_names <- c(
+  "binary_variables.csv",
+  "categorical_variables.csv",
+  "continuous_variables.csv",
+  "continuous_quantiles.csv",
+  "summary.csv"
+)

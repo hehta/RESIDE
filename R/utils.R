@@ -161,3 +161,43 @@ get_n_missing <- function(
   )
   utils::write.csv(df, file_path)
 }
+
+marginal_files_exist <- function(folder_path) {
+  .files_exist <- c()
+  for (.file in .marginal_file_names) {
+    if (
+      file.exists(
+        file.path(
+          normalizePath(folder_path),
+          .file
+        )
+      )
+    ) {
+      .files_exist <- c(.files_exist, .file)
+    }
+  }
+  return(.files_exist)
+}
+
+remove_marginal_files <- function(folder_path) {
+  # Loop through expected files
+  for (.file in .marginal_file_names){
+    unlink(
+      file.path(
+        normalizePath(folder_path),
+        .file
+      ),
+      force = TRUE
+    )
+  }
+  .marginal_files <- marginal_files_exist(folder_path)
+  if (length(.marginal_files) > 0) {
+    stop(paste(
+      "Could not remove existing files the
+      following files will need to be deleted manually:",
+      .marginal_files,
+      sep = " ",
+      collapse = ", "
+    ))
+  }
+}
