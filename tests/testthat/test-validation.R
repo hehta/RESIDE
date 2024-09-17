@@ -66,3 +66,115 @@ testthat::test_that("is_variable_valid works", {
     regexp = "^summary not valid.+$"
   )
 })
+
+testthat::test_that("is_variables_valid works", {
+  # Test true returned when all valid
+  expect_true(
+    is_variables_valid(
+      binary_df,
+      categorical_df,
+      continuous_df,
+      quantile_df,
+      summary_df
+    )
+  )
+
+  # Test TRUE on empty (Not summary)
+  expect_true(
+    is_variables_valid(
+      data.frame(),
+      data.frame(),
+      data.frame(),
+      data.frame(),
+      summary_df
+    )
+  )
+
+  # Test FALSE on empty (summary)
+  expect_true(
+    is_variables_valid(
+      data.frame(),
+      data.frame(),
+      data.frame(),
+      data.frame(),
+      data.frame()
+    )
+  )
+
+  # Expect FALSE when invalid
+  expect_false(
+    is_variables_valid(
+      summary_df,
+      categorical_df,
+      continuous_df,
+      quantile_df,
+      summary_df
+    )
+  )
+
+  expect_false(
+    is_variables_valid(
+      binary_df,
+      continuous_df,
+      continuous_df,
+      quantile_df,
+      summary_df
+    )
+  )
+
+  expect_false(
+    is_variables_valid(
+      binary_df,
+      categorical_df,
+      binary_df,
+      quantile_df,
+      summary_df
+    )
+  )
+
+  expect_false(
+    is_variables_valid(
+      binary_df,
+      categorical_df,
+      continuous_df,
+      continuous_df,
+      summary_df
+    )
+  )
+
+  expect_false(
+    is_variables_valid(
+      binary_df,
+      categorical_df,
+      continuous_df,
+      quantile_df,
+      continuous_df
+    )
+  )
+
+  # Expect FALSE when continuous and quantiles don't match
+  quantile_df_rm <- quantile_df
+  quantile_df_rm <- quantile_df_rm[1:16, ]
+
+  expect_false(
+    is_variables_valid(
+      binary_df,
+      categorical_df,
+      continuous_df,
+      quantile_df_rm,
+      summary_df
+    )
+  )
+
+  testthat::expect_output(
+    is_variables_valid(
+      binary_df,
+      categorical_df,
+      continuous_df,
+      quantile_df_rm,
+      summary_df
+    ),
+    regexp = "^.*Continuous variables do not match quantiles.*$"
+  )
+
+})
