@@ -4,19 +4,12 @@
 \alias{get_marginal_distributions}
 \title{Generate Marginal Distributions for a given data frame}
 \usage{
-get_marginal_distributions(
-  df,
-  variables = c(),
-  ignore_na = TRUE,
-  print = FALSE
-)
+get_marginal_distributions(df, variables = c(), print = FALSE)
 }
 \arguments{
 \item{df}{Data frame to get the marginal distributions from}
 
 \item{variables}{(Optional) variable (columns) to select, Default: c()}
-
-\item{ignore_na}{Currently unuses, Default: TRUE}
 
 \item{print}{Whether to print the marginal distributions
 to the console, Default: FALSE}

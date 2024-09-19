@@ -3,7 +3,6 @@
 #' data frame with options to specify which variables to use.
 #' @param df Data frame to get the marginal distributions from
 #' @param variables (Optional) variable (columns) to select, Default: c()
-#' @param ignore_na Currently unuses, Default: TRUE
 #' @param print Whether to print the marginal distributions
 #' to the console, Default: FALSE
 #' @return A list of marginal distributions of an S3 RESIDE Class
@@ -38,7 +37,6 @@
 get_marginal_distributions <- function(
   df,
   variables = c(),
-  ignore_na = TRUE,
   print = FALSE
 ) {
   # Check if variables is set
