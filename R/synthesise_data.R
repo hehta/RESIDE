@@ -2,7 +2,8 @@
 #' @description Allows the synthesis of data from marginal
 #' distributions obtained from a Trusted Research Environment (TRE)
 #' @param marginals an object of class RESIDE
-#' @param covariance_matrix Covariance Matrix not yet implemented, Default: NULL
+#' @param correlation_matrix Correlation Matrix
+#' see \code{\link{export_empty_cor_matrix}}, Default: NULL
 #' @param ... Additional parameters currently none are used.
 #' @return a data frame of simulated data
 #' @details DETAILS
@@ -22,7 +23,7 @@
 #' @importFrom simstudy genData
 synthesise_data <- function(
   marginals,
-  covariance_matrix = NULL,
+  correlation_matrix = NULL,
   ...
 ) {
   # Check class
@@ -30,8 +31,8 @@ synthesise_data <- function(
     stop("object must be of class RESIDE")
   }
   # @todo add covaraince matrix for correlations
-  if (!is.null(covariance_matrix)) {
-    stop("correllations a not yet supported")
+  if (!is.null(correlation_matrix)) {
+    synthesise_data_cor(marginals, correlation_matrix)
   } else {
     synthesise_data_no_cor(marginals)
   }
@@ -105,6 +106,72 @@ synthesise_data_no_cor <- function(
   return(sim_df)
 }
 
+# Internal function to synthesise data without correlations
+synthesise_data_cor <- function(
+  marginals,
+  correlation_matrix
+) {
+  # Predifine dataDefinition
+  data_def <- NULL
+
+  # If there are categorical variables
+  if ("categorical_variables" %in% names(marginals)) {
+    #Define categorical variables
+    data_def <- define_categorical_binary(
+      marginals$categorical_variables,
+      marginals$summary$n_row,
+      data_def
+    )
+  }
+
+  # If there are binary variables
+  if ("binary_variables" %in% names(marginals)) {
+    # Define binary variables
+    data_def <- define_binary(
+      marginals$binary_variables,
+      data_def
+    )
+  }
+
+  # If there are continuous variables
+  if ("continuous_variables" %in% names(marginals)) {
+    # Define continuous variables
+    data_def <- define_continuous(
+      marginals$continuous_variables,
+      data_def
+    )
+  }
+
+  # Synthesise the data
+  sim_df <- simstudy::genCorFlex(
+    marginals$summary$n_row,
+    data_def,
+    corMatrix = correlation_matrix
+  )
+
+  # Back transform continuous variables
+  for (variable_name in names(marginals$continuous_variables)) {
+    sim_df[[variable_name]] <-
+      approx(
+        marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
+        marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
+        xout = sim_df[[variable_name]], rule = 2:1
+      )$y
+    # Round to original decimal places
+    sim_df[[variable_name]] <- round(
+      sim_df[[variable_name]],
+      marginals$continuous_variables[[variable_name]]$summary$max_dp
+    )
+  }
+  # Add missing values (MAR)
+  sim_df <- add_missingness(
+    sim_df,
+    marginals
+  )
+  # Return the data frame
+  return(sim_df)
+}
+
 define_categorical <- function(
   categorical_summary,
   n_row,
@@ -135,6 +202,27 @@ define_categorical <- function(
       formula = paste0(.probs, collapse = ";"),
       variance = paste0(.labs, collapse = ";")
     )
+  }
+  # Return the definitions
+  return(.data_def)
+}
+
+define_categorical_binary <- function(
+  categorical_summary,
+  n_row,
+  data_def
+) {
+  .data_def <- data_def
+  # Loop through the variables
+  for (.col in names(categorical_summary)){
+    for (.cat in names(categorical_summary[[.col]])) {
+      .data_def <- simstudy::defData(
+        .data_def,
+        varname = paste0(.col, "_", .cat),
+        dist = "binary",
+        formula = (categorical_summary[[.col]][[.cat]] / n_row)
+      )
+    }
   }
   # Return the definitions
   return(.data_def)
@@ -221,3 +309,92 @@ add_missingness <- function(
   return(.df)
 }
 
+#' @title Export an empty correlation matrix
+#' @description A function to export a correlation matrix with
+#' the required variables as a csv file
+#' @param marginals The marginal distributions
+#' @param folder_path Folder to export to, Default: '.'
+#' @param create_folder Whether the folder should be created, Default: TRUE
+#' @return NULL
+#' @details This function will export an empty correlation matrix
+#' as a csv file, it will contain all the necessary variables including
+#' dummy variables for factors.
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  marginals <- get_marginal_distributions(IST)
+#'  export_empty_cor_matrix
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[simstudy]{genCorMat}}
+#'  \code{\link[rio]{export}}
+#' @rdname export_empty_cor_matrix
+#' @export
+#' @importFrom simstudy genCorMat
+#' @importFrom rio export
+export_empty_cor_matrix <- function(
+  marginals,
+  folder_path = ".",
+  create_folder = TRUE
+) {
+  if (create_folder) {
+    # Create the folder, ignore warnings (folder exists)
+    dir.create(folder_path, showWarnings = FALSE)
+  }
+  # Check the foleder exists (even if created)
+  if (! dir.exists(folder_path)) {
+    stop(
+      "Directory must exist, hint: set create_folder to TRUE"
+    )
+  }
+  .df <- synthesise_data_cor(marginals, NULL)
+  .cor_matrix <- simstudy::genCorMat(ncol(.df) - 1, rho = 0)
+  colnames(.cor_matrix) <- names(.df)[2:length(names(.df))]
+  rownames(.cor_matrix) <- names(.df)[2:length(names(.df))]
+  rio::export(.cor_matrix, "correlation_matrix.csv", row.names = TRUE)
+  invisible(NULL)
+}
+
+#' @title Import a correlation matrix
+#' @description Imports a correlation matrix from a csv file generated by
+#' \code{\link{export_empty_cor_matrix}}
+#' @param file_path A path to the csv file
+#' @return a matrix of correlations that can be used with
+#' \code{\link{synthesise_data}}
+#' @details A function to import the user specified correlations
+#' generated from the csv file exported by the
+#' \code{\link{export_empty_cor_matrix}} function
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'    import_cor_matix("correlation_matrix.csv")
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[rio]{import}}
+#'  \code{\link[tibble]{rownames}}
+#'  \code{\link[matrixcalc]{is.positive.semi.definite}}
+#' @rdname import_cor_matrix
+#' @export
+#' @importFrom rio import
+#' @importFrom tibble column_to_rownames
+#' @importFrom matrixcalc is.positive.semi.definite
+import_cor_matrix <- function(
+  file_path
+) {
+  if (!file.exists(normalizePath(file_path))) {
+    stop("Correlation file must exist")
+  }
+  .cor_matrix <- rio::import(file_path)
+  .cor_matrix <- .cor_matrix %>%
+    tibble::column_to_rownames(names(.cor_matrix)[1])
+  .cor_matrix <- as.matrix(.cor_matrix)
+  if (!isSymmetric(.cor_matrix)) {
+    stop("The correlation matrix needs to be symetrical")
+  }
+  if (!matrixcalc::is.positive.semi.definite(.cor_matrix)) {
+    stop("The correlation matrix needs to be positive semi definite")
+  }
+  return(.cor_matrix)
+}
