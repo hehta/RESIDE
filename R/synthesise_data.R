@@ -215,10 +215,12 @@ define_categorical_binary <- function(
   .data_def <- data_def
   # Loop through the variables
   for (.col in names(categorical_summary)){
+    # Lopp through the categories
     for (.cat in names(categorical_summary[[.col]])) {
+      # Add the catergory to the definitions as dummy (binary) variables
       .data_def <- simstudy::defData(
         .data_def,
-        varname = paste0(.col, "_", .cat),
+        varname = paste(.col, .cat, sep = "_"),
         dist = "binary",
         formula = (categorical_summary[[.col]][[.cat]] / n_row)
       )
@@ -332,7 +334,7 @@ add_missingness <- function(
 #' @rdname export_empty_cor_matrix
 #' @export
 #' @importFrom simstudy genCorMat
-#' @importFrom rio export
+#' @importFrom utils write.csv
 export_empty_cor_matrix <- function(
   marginals,
   folder_path = ".",
@@ -352,7 +354,7 @@ export_empty_cor_matrix <- function(
   .cor_matrix <- simstudy::genCorMat(ncol(.df) - 1, rho = 0)
   colnames(.cor_matrix) <- names(.df)[2:length(names(.df))]
   rownames(.cor_matrix) <- names(.df)[2:length(names(.df))]
-  rio::export(.cor_matrix, "correlation_matrix.csv", row.names = TRUE)
+  utils::write.csv(.cor_matrix, "correlation_matrix.csv", row.names = TRUE)
   invisible(NULL)
 }
 
@@ -377,7 +379,7 @@ export_empty_cor_matrix <- function(
 #'  \code{\link[matrixcalc]{is.positive.semi.definite}}
 #' @rdname import_cor_matrix
 #' @export
-#' @importFrom rio import
+#' @importFrom utils read.csv
 #' @importFrom tibble column_to_rownames
 #' @importFrom matrixcalc is.positive.semi.definite
 import_cor_matrix <- function(
@@ -386,7 +388,7 @@ import_cor_matrix <- function(
   if (!file.exists(normalizePath(file_path))) {
     stop("Correlation file must exist")
   }
-  .cor_matrix <- rio::import(file_path)
+  .cor_matrix <- utils::read.csv(file_path)
   .cor_matrix <- .cor_matrix %>%
     tibble::column_to_rownames(names(.cor_matrix)[1])
   .cor_matrix <- as.matrix(.cor_matrix)
@@ -397,4 +399,24 @@ import_cor_matrix <- function(
     stop("The correlation matrix needs to be positive semi definite")
   }
   return(.cor_matrix)
+}
+
+convert_factors <- function(
+  simulated_data,
+  marginals
+) {
+  .categorical_summary <- marginals$categorical_variables
+  .total_row <- marginals$summary$n_row
+  .categorical_names <- c()
+  for (.col in names(.categorical_summary)){
+    for (.cat in names(.categorical_summary[[.col]])) {
+      .categorical_names <- c(
+        .categorical_names,
+        paste(.col, .cat, sep = "_")
+      )
+    }
+  }
+  for (.variable in .categorical_names) {
+    .variable_df <- simulated_data[, .categorical_names]
+  }
 }

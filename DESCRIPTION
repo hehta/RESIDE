@@ -26,7 +26,8 @@ Imports:
     RDP,
     methods,
     tibble,
-    simstudy
+    simstudy,
+    matrixcalc
 LazyData: true
 Config/testthat/edition: 3
 URL: https://hehta.github.io/RESIDE/
