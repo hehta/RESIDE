@@ -149,6 +149,12 @@ synthesise_data_cor <- function(
     corMatrix = correlation_matrix
   )
 
+  # Replace dummy categories where rows add up to more than 1
+  sim_df <- convert_factors(
+    sim_df,
+    marginals
+  )
+
   # Back transform continuous variables
   for (variable_name in names(marginals$continuous_variables)) {
     sim_df[[variable_name]] <-
@@ -405,18 +411,42 @@ convert_factors <- function(
   simulated_data,
   marginals
 ) {
-  .categorical_summary <- marginals$categorical_variables
-  .total_row <- marginals$summary$n_row
-  .categorical_names <- c()
-  for (.col in names(.categorical_summary)){
-    for (.cat in names(.categorical_summary[[.col]])) {
-      .categorical_names <- c(
-        .categorical_names,
-        paste(.col, .cat, sep = "_")
-      )
+  categorical_summary <- marginals$categorical_variables
+
+  .n_row <- marginals$summary$n_row
+
+  for (.col in names(categorical_summary)){
+    cat_names <- c()
+    probs <- c()
+    for (.cat in names(categorical_summary[[.col]])) {
+      cat_name <- paste(.col, .cat, sep = "_")
+      cat_names <- c(cat_names, cat_name)
+      probs <- c(probs, (categorical_summary[[.col]][[.cat]] / .n_row))
     }
+    variable_df <- simulated_data[, cat_names]
+
+    variable_df[rowSums(variable_df) == 0, ] <-
+      replace_0_rows(nrow(variable_df[rowSums(variable_df) == 0,]), probs)
+
+    variable_df[rowSums(variable_df) > 1, ] <-
+      replace_1_rows(variable_df[rowSums(variable_df) > 1,], probs)
+
+    simulated_data[, cat_names] <- variable_df
   }
-  for (.variable in .categorical_names) {
-    .variable_df <- simulated_data[, .categorical_names]
-  }
+
+  return(simulated_data)
+
+}
+
+replace_0_rows <- function(n_rows, probs) {
+  rtn_row <- as.data.frame(rbind(rep(0, length(probs))))
+  rtn_row[, match(max(probs), probs)] <- 1
+  return(rtn_row)
+}
+
+replace_1_rows <- function(rows, probs) {
+  rtn_rows <- rows * rbind(rep(probs, length(nrow(rows))))
+  rtn_rows[rtn_rows != max(probs)] <- 0
+  rtn_rows[rtn_rows == max(probs)] <- 1
+  return(rtn_rows)
 }
