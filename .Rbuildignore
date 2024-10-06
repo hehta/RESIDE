@@ -4,6 +4,7 @@
 ^\.gitignore$
 ^\.github$
 ^README\.md$
+^LICENSE.md$
 ^CITATION\.cff$
 ^_pkgdown\.yml$
 ^docs$

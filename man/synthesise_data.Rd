@@ -5,14 +5,15 @@
 \alias{synthesize_data}
 \title{Synthesise data from marginal distributions}
 \usage{
-synthesise_data(marginals, covariance_matrix = NULL, ...)
+synthesise_data(marginals, correlation_matrix = NULL, ...)
 
-synthesize_data(marginals, covariance_matrix = NULL, ...)
+synthesize_data(marginals, correlation_matrix = NULL, ...)
 }
 \arguments{
 \item{marginals}{an object of class RESIDE}
 
-\item{covariance_matrix}{Covariance Matrix not yet implemented, Default: NULL}
+\item{correlation_matrix}{Correlation Matrix
+see \code{\link{export_empty_cor_matrix}}, Default: NULL}
 
 \item{...}{Additional parameters currently none are used.}
 }
