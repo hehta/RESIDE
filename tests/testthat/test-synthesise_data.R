@@ -21,6 +21,10 @@ testthat::test_that("synthesise_data works", {
 })
 
 testthat::test_that("synthesise_data works", {
+  testthat::expect_error(
+    synthesise_data()(list()),
+    regexp = "^.*object must be of class RESIDE.*$"
+  )
   marginals <- get_marginal_distributions(IST, c(
     variables = c(
       "SEX",
@@ -37,7 +41,7 @@ testthat::test_that("synthesise_data works", {
   correlations <- import_cor_matrix(
     file.path(temp_dir, "correlation_matrix.csv")
   )
-  sim_data_cor <- synthesise_data(marginals)
+  sim_data_cor <- synthesise_data(marginals, correlations)
   testthat::expect_true(is.data.frame(sim_data_cor))
   testthat::expect_equal(marginals$summary$n_row, nrow(sim_data_cor))
   testthat::expect_equal(marginals$summary$n_col + 1, ncol(sim_data_cor))
