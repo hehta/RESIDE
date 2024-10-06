@@ -78,7 +78,7 @@ synthesise_data_no_cor <- function(
   return(sim_df)
 }
 
-# Internal function to synthesise data without correlations
+# Internal function to synthesise data with correlations
 synthesise_data_cor <- function(
   marginals,
   correlation_matrix

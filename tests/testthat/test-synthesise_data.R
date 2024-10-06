@@ -22,7 +22,7 @@ testthat::test_that("synthesise_data works", {
 
 testthat::test_that("synthesise_data works", {
   testthat::expect_error(
-    synthesise_data()(list()),
+    synthesise_data(list()),
     regexp = "^.*object must be of class RESIDE.*$"
   )
   marginals <- get_marginal_distributions(IST, c(
