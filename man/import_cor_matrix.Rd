@@ -4,10 +4,10 @@
 \alias{import_cor_matrix}
 \title{Import a correlation matrix}
 \usage{
-import_cor_matrix(file_path)
+import_cor_matrix(file_path = "./correlation_matrix.csv")
 }
 \arguments{
-\item{file_path}{A path to the csv file}
+\item{file_path}{A path to the csv file, Default: './correlation_matrix.csv'}
 }
 \value{
 a matrix of correlations that can be used with

@@ -47,35 +47,7 @@ synthesise_data_no_cor <- function(
   marginals
 ) {
   # Predifine dataDefinition
-  data_def <- NULL
-
-  # If there are categorical variables
-  if ("categorical_variables" %in% names(marginals)) {
-    # Define categorical variables
-    data_def <- define_categorical(
-      marginals$categorical_variables,
-      marginals$summary$n_row,
-      data_def
-    )
-  }
-
-  # If there are binary variables
-  if ("binary_variables" %in% names(marginals)) {
-    # Define binary variables
-    data_def <- define_binary(
-      marginals$binary_variables,
-      data_def
-    )
-  }
-
-  # If there are continuous variables
-  if ("continuous_variables" %in% names(marginals)) {
-    # Define continuous variables
-    data_def <- define_continuous(
-      marginals$continuous_variables,
-      data_def
-    )
-  }
+  data_def <- get_data_def(marginals, FALSE)
 
   # Synthesise the data
   sim_df <- simstudy::genData(
@@ -111,36 +83,7 @@ synthesise_data_cor <- function(
   marginals,
   correlation_matrix
 ) {
-  # Predifine dataDefinition
-  data_def <- NULL
-
-  # If there are categorical variables
-  if ("categorical_variables" %in% names(marginals)) {
-    #Define categorical variables
-    data_def <- define_categorical_binary(
-      marginals$categorical_variables,
-      marginals$summary$n_row,
-      data_def
-    )
-  }
-
-  # If there are binary variables
-  if ("binary_variables" %in% names(marginals)) {
-    # Define binary variables
-    data_def <- define_binary(
-      marginals$binary_variables,
-      data_def
-    )
-  }
-
-  # If there are continuous variables
-  if ("continuous_variables" %in% names(marginals)) {
-    # Define continuous variables
-    data_def <- define_continuous(
-      marginals$continuous_variables,
-      data_def
-    )
-  }
+  data_def <- get_data_def(marginals, TRUE)
 
   # Synthesise the data
   sim_df <- simstudy::genCorFlex(
@@ -150,9 +93,14 @@ synthesise_data_cor <- function(
   )
 
   # Replace dummy categories where rows add up to more than 1
-  sim_df <- convert_factors(
+  sim_df <- fix_factors(
     sim_df,
     marginals
+  )
+
+  sim_df <- restore_factors(
+    sim_df,
+    marginals$categorical_variables
   )
 
   # Back transform continuous variables
@@ -174,36 +122,85 @@ synthesise_data_cor <- function(
     sim_df,
     marginals
   )
+  # Reorder dataframe
+  column_names <- c("id", get_data_def(marginals)[["varname"]])
+  sim_df <- sim_df %>%
+    dplyr::select(dplyr::any_of(column_names))
   # Return the data frame
   return(sim_df)
+}
+
+get_data_def <- function(
+  marginals,
+  use_correlations = FALSE
+) {
+  # Predifine dataDefinition
+  data_def <- NULL
+
+  # If there are categorical variables
+  if ("categorical_variables" %in% names(marginals)) {
+    #Define categorical variables dependant on correlations
+    if (use_correlations) {
+      data_def <- define_categorical_binary(
+        marginals$categorical_variables,
+        marginals$summary$n_row,
+        data_def
+      )
+    } else {
+      data_def <- define_categorical(
+        marginals$categorical_variables,
+        marginals$summary$n_row,
+        data_def
+      )
+    }
+  }
+
+  # If there are binary variables
+  if ("binary_variables" %in% names(marginals)) {
+    # Define binary variables
+    data_def <- define_binary(
+      marginals$binary_variables,
+      data_def
+    )
+  }
+
+  # If there are continuous variables
+  if ("continuous_variables" %in% names(marginals)) {
+    # Define continuous variables
+    data_def <- define_continuous(
+      marginals$continuous_variables,
+      data_def
+    )
+  }
+  return(data_def)
 }
 
 define_categorical <- function(
   categorical_summary,
   n_row,
-  data_def
+  data_def = NULL
 ) {
   # Explicitly copy the definitions
   .data_def <- data_def
   # Loop through the variables
-  for (.col in names(categorical_summary)){
+  for (.column in names(categorical_summary)){
     # Forward declare the categories
     .labs <- c()
     # Forward declare the probabilities
     .probs <- c()
     # Loop through the categories
-    for (.cat in names(categorical_summary[[.col]])) {
+    for (.cat in names(categorical_summary[[.column]])) {
       # Add the category to the categories
       .labs <- c(.labs, .cat)
       # Add the probability to the probabilities
-      .probs <- c(.probs, (categorical_summary[[.col]][[.cat]] / n_row))
+      .probs <- c(.probs, (categorical_summary[[.column]][[.cat]] / n_row))
     }
     # Add the definition to the definitions
     # Specifying a categorical distribution
     # Giving the categories and probabilities of each
     .data_def <- simstudy::defData(
       .data_def,
-      varname = .col,
+      varname = .column,
       dist = "categorical",
       formula = paste0(.probs, collapse = ";"),
       variance = paste0(.labs, collapse = ";")
@@ -216,19 +213,19 @@ define_categorical <- function(
 define_categorical_binary <- function(
   categorical_summary,
   n_row,
-  data_def
+  data_def = NULL
 ) {
   .data_def <- data_def
   # Loop through the variables
-  for (.col in names(categorical_summary)){
+  for (.column in names(categorical_summary)){
     # Lopp through the categories
-    for (.cat in names(categorical_summary[[.col]])) {
+    for (.cat in names(categorical_summary[[.column]])) {
       # Add the catergory to the definitions as dummy (binary) variables
       .data_def <- simstudy::defData(
         .data_def,
-        varname = paste(.col, .cat, sep = "_"),
+        varname = paste(.column, .cat, sep = "_"),
         dist = "binary",
-        formula = (categorical_summary[[.col]][[.cat]] / n_row)
+        formula = (categorical_summary[[.column]][[.cat]] / n_row)
       )
     }
   }
@@ -238,20 +235,20 @@ define_categorical_binary <- function(
 
 define_binary <- function(
   binary_summary,
-  data_def
+  data_def = NULL
 ) {
   # Explicitly copy the definitions
   .data_def <- data_def
   # Loop through the variables
-  for (.col in names(binary_summary)){
+  for (.column in names(binary_summary)){
     # Add the variable to the definitions
     # Specifying a binary distribution
     # Using mean as the probability
     .data_def <- simstudy::defData(
       .data_def,
-      varname = .col,
+      varname = .column,
       dist = "binary",
-      formula = binary_summary[[.col]][["mean"]]
+      formula = binary_summary[[.column]][["mean"]]
     )
   }
   return(.data_def)
@@ -259,21 +256,21 @@ define_binary <- function(
 
 define_continuous <- function(
   continuous_summary,
-  data_def
+  data_def = NULL
 ) {
   # Explicitly copy the definitions
   .data_def <- data_def
   # Loop through the variables
-  for (.col in names(continuous_summary)) {
+  for (.column in names(continuous_summary)) {
     # Add the variable to the definition
     # Specifying a normal distribution
     # Using mean and standard deviation
     .data_def <- simstudy::defData(
       .data_def,
-      varname = .col,
+      varname = .column,
       dist = "normal",
-      formula = continuous_summary[[.col]][["summary"]][["mean"]],
-      variance = continuous_summary[[.col]][["summary"]][["sd"]]
+      formula = continuous_summary[[.column]][["summary"]][["mean"]],
+      variance = continuous_summary[[.column]][["summary"]][["sd"]]
     )
   }
   return(.data_def)
@@ -322,6 +319,7 @@ add_missingness <- function(
 #' the required variables as a csv file
 #' @param marginals The marginal distributions
 #' @param folder_path Folder to export to, Default: '.'
+#' @param file_name (optional) file name, Default: 'correlation_matrix.csv'
 #' @param create_folder Whether the folder should be created, Default: TRUE
 #' @return NULL
 #' @details This function will export an empty correlation matrix
@@ -331,7 +329,7 @@ add_missingness <- function(
 #' \dontrun{
 #' if(interactive()){
 #'  marginals <- get_marginal_distributions(IST)
-#'  export_empty_cor_matrix
+#'  export_empty_cor_matrix(marginals)
 #'  }
 #' }
 #' @seealso
@@ -344,8 +342,13 @@ add_missingness <- function(
 export_empty_cor_matrix <- function(
   marginals,
   folder_path = ".",
+  file_name = "correlation_matrix.csv",
   create_folder = TRUE
 ) {
+  # Check class
+  if (!methods::is(marginals, "RESIDE")) {
+    stop("object must be of class RESIDE")
+  }
   if (create_folder) {
     # Create the folder, ignore warnings (folder exists)
     dir.create(folder_path, showWarnings = FALSE)
@@ -356,18 +359,26 @@ export_empty_cor_matrix <- function(
       "Directory must exist, hint: set create_folder to TRUE"
     )
   }
-  .df <- synthesise_data_cor(marginals, NULL)
-  .cor_matrix <- simstudy::genCorMat(ncol(.df) - 1, rho = 0)
-  colnames(.cor_matrix) <- names(.df)[2:length(names(.df))]
-  rownames(.cor_matrix) <- names(.df)[2:length(names(.df))]
-  utils::write.csv(.cor_matrix, "correlation_matrix.csv", row.names = TRUE)
+  # Get the data definition, to get all the variable names,
+  # including the dummy variables
+  data_def <- get_data_def(marginals, TRUE)
+  # Generate an empty correlation matrix with a default correlation of 0
+  .cor_matrix <- simstudy::genCorMat(nrow(data_def), rho = 0)
+  # Set the column names
+  colnames(.cor_matrix) <- data_def[["varname"]]
+  # Set the row names
+  rownames(.cor_matrix) <- data_def[["varname"]]
+  # Join the file path
+  .file_path <- file.path(normalizePath(folder_path), file_name)
+  # Write the CSV with the row names
+  utils::write.csv(.cor_matrix, .file_path, row.names = TRUE)
   invisible(NULL)
 }
 
 #' @title Import a correlation matrix
 #' @description Imports a correlation matrix from a csv file generated by
 #' \code{\link{export_empty_cor_matrix}}
-#' @param file_path A path to the csv file
+#' @param file_path A path to the csv file, Default: './correlation_matrix.csv'
 #' @return a matrix of correlations that can be used with
 #' \code{\link{synthesise_data}}
 #' @details A function to import the user specified correlations
@@ -389,64 +400,143 @@ export_empty_cor_matrix <- function(
 #' @importFrom tibble column_to_rownames
 #' @importFrom matrixcalc is.positive.semi.definite
 import_cor_matrix <- function(
-  file_path
+  file_path = "./correlation_matrix.csv"
 ) {
-  if (!file.exists(normalizePath(file_path))) {
-    stop("Correlation file must exist")
+  if (!file.exists(file_path)) {
+    stop("Correlation file must exist.")
   }
   .cor_matrix <- utils::read.csv(file_path)
   .cor_matrix <- .cor_matrix %>%
     tibble::column_to_rownames(names(.cor_matrix)[1])
   .cor_matrix <- as.matrix(.cor_matrix)
   if (!isSymmetric(.cor_matrix)) {
-    stop("The correlation matrix needs to be symetrical")
+    stop("The correlation matrix needs to be symetrical.")
   }
   if (!matrixcalc::is.positive.semi.definite(.cor_matrix)) {
-    stop("The correlation matrix needs to be positive semi definite")
+    stop("The correlation matrix needs to be positive semi definite.")
   }
   return(.cor_matrix)
 }
 
-convert_factors <- function(
+# With correlations it is possible that the dummy variables for a single
+# category do not add up to one, we will fix that here
+fix_factors <- function(
   simulated_data,
   marginals
 ) {
+  # Get the categorical summary from the marginals
   categorical_summary <- marginals$categorical_variables
-
-  .n_row <- marginals$summary$n_row
-
-  for (.col in names(categorical_summary)){
+  # Extract the number for rows from the marginals
+  n_row <- marginals$summary$n_row
+  # Loop throught the columns
+  for (.column in names(categorical_summary)){
+    # Forward declare catefory names
     cat_names <- c()
+    # Forward declare probabilies
     probs <- c()
-    for (.cat in names(categorical_summary[[.col]])) {
-      cat_name <- paste(.col, .cat, sep = "_")
+    # Loop through the categories
+    for (.cat in names(categorical_summary[[.column]])) {
+      # Get the dummy variable name for the category
+      cat_name <- paste(.column, .cat, sep = "_")
+      # Add the dummy variable name to the category names
       cat_names <- c(cat_names, cat_name)
-      probs <- c(probs, (categorical_summary[[.col]][[.cat]] / .n_row))
+      # Calculate the probaby for the category and add it to the probabilities
+      probs <- c(probs, (categorical_summary[[.column]][[.cat]] / n_row))
     }
+    # Subset only the dummy variables for the current category
     variable_df <- simulated_data[, cat_names]
 
+    # Check that all the probabilities are unique
+    probs <- check_probs(probs)
+
+    # Replace any row where the dummy variables total 0
+    # (indecating no category was selected)
     variable_df[rowSums(variable_df) == 0, ] <-
-      replace_0_rows(nrow(variable_df[rowSums(variable_df) == 0,]), probs)
+      replace_zero_rows(variable_df[rowSums(variable_df) == 0, ], probs)
 
+    # Replace any row where the dummy variables total 1
+    # (indecating more than one category was selected)
     variable_df[rowSums(variable_df) > 1, ] <-
-      replace_1_rows(variable_df[rowSums(variable_df) > 1,], probs)
-
+      replace_one_rows(variable_df[rowSums(variable_df) > 1, ], probs)
+    # Replace the columns with the corrected columns
     simulated_data[, cat_names] <- variable_df
   }
-
+  # Return the corrected data frame
   return(simulated_data)
-
 }
 
-replace_0_rows <- function(n_rows, probs) {
-  rtn_row <- as.data.frame(rbind(rep(0, length(probs))))
-  rtn_row[, match(max(probs), probs)] <- 1
+# Function to replace a row for dummy categorical
+# variables where the dummy colums add up to zero
+# indicating that a category has not been selected
+# in which case the category with the highest probability
+# is selected
+replace_zero_rows <- function(rows, probs) {
+  rtn_row <- as.data.frame(rbind(probs))
+  rtn_row[rtn_row != max(probs)] <- 0
+  rtn_row[rtn_row == max(probs)] <- 1
   return(rtn_row)
 }
 
-replace_1_rows <- function(rows, probs) {
-  rtn_rows <- rows * rbind(rep(probs, length(nrow(rows))))
-  rtn_rows[rtn_rows != max(probs)] <- 0
-  rtn_rows[rtn_rows == max(probs)] <- 1
+# Function to replace a row for dummy categorical
+# variables where the dummy colums add up more than one
+# indicating that more than one category has been selected
+# in which case out of the categories selected,
+# the one with the higher probability is chosen.
+replace_one_rows <- function(rows, probs) {
+  # Turn probabilities into row in data frame
+  prob_rows <- as.data.frame(rbind(probs))
+  # duplicate the row to match the number of rows in `rows`
+  prob_rows <- rbind(prob_rows, prob_rows[rep(1, nrow(rows) - 1), ])
+  # multiply the rows by the probabilities
+  rtn_rows <- as.data.frame(as.matrix(rows) * as.matrix(prob_rows))
+  # add the maximum value for each row
+  rtn_rows$row_max <- apply(rtn_rows, 1, max, na.rm = TRUE)
+  # take the maximum value to a new data frame
+  rtn_rows_max <- rtn_rows[, "row_max"]
+  # remove the maximum value from the old data frame
+  rtn_rows$row_max <- NULL
+  # devide each column in the rows by the maximum values
+  # leaving 1 for the column with the max value
+  rtn_rows <- rtn_rows / rtn_rows_max
+  # set all the other columns to 0
+  rtn_rows[rtn_rows != 1] <- 0
   return(rtn_rows)
+}
+
+# Convert factors back from dummy categories
+restore_factors <- function(
+  simulated_data,
+  categorical_summary
+) {
+  # Forward declare the category names
+  category_names <- c()
+  # loop through the categorical variables
+  for (.column in names(categorical_summary)){
+    # Add the variable as a column to the data frame
+    simulated_data[[.column]] <- ""
+    # Loop through the categories
+    for (.cat in names(categorical_summary[[.column]])) {
+      # Define the dummy category name
+      cat_name <- paste(.column, .cat, sep = "_")
+      # Add the category to the list of category names
+      category_names <- c(category_names, cat_name)
+      # If the indicator (1) for the dummy variable set the category
+      # to the current category
+      simulated_data[simulated_data[[cat_name]] == 1, ][[.column]] <- .cat
+    }
+  }
+  # Remove dummy variables
+  simulated_data[, category_names] <- list(NULL)
+  # Return the modified data
+  return(simulated_data)
+}
+
+# There is a small chance that the probabilities could be equal
+# if this is the cas add noise to allow them to be used to select the
+# highest probability.
+check_probs <- function(probs) {
+  while (any(duplicated(probs))) {
+    probs <- jitter(probs)
+  }
+  return(probs)
 }
