@@ -1,13 +1,14 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://hehta.github.io/RESIDE/404.html</loc></url>
-<url><loc>https://hehta.github.io/RESIDE/LICENSE-text.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/LICENSE.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/authors.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/index.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/IST.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/RESIDE-package.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/export_empty_cor_matrix.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/export_marginal_distributions.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/get_marginal_distributions.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/import_cor_matrix.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/import_marginal_distributions.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/index.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/print.RESIDE.html</loc></url>
