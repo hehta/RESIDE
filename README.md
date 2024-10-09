@@ -10,7 +10,7 @@
 An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).
 
 # Installation
-Currently this package can be install using `devtools` or `remotes`
+Currently this package can be installed using `devtools` or `remotes`
 
 ## Devtools
 ```

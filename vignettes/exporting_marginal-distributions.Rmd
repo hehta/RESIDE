@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 # Obtaining Marginal Distributions
-Marginal distributions should first be obtained using the get_marginal_distributions function.
+Marginal distributions should first be obtained using the `get_marginal_distributions()` function.
 
 To obtain the marginal distributions for all variables you should only specify the dataset:
 ```{r get_marginal_distributions}
@@ -65,15 +65,17 @@ library(RESIDE)
 marginals <- get_marginal_distributions(IST)
 export_marginal_distributions(marginals)
 ```
+
 By default the marginal distributions will be exported to the current working directory, this can be changed using the folder path parameter:
 ```{r export_marginal_distributions_folder_path}
 library(RESIDE)
 marginals <- get_marginal_distributions(IST)
 export_marginal_distributions(
   marginals,
-  folder_path = "/Users/ryan/marginals
+  folder_path = "/Users/ryan/marginals"
 )
 ```
+
 This folder should exist and not contain any previously exported marginal distributions.
 You can create the folder automatically using the create_folder parameter:
 ```{r export_marginal_distributions_create_folder}
@@ -81,17 +83,36 @@ library(RESIDE)
 marginals <- get_marginal_distributions(IST)
 export_marginal_distributions(
   marginals,
-  folder_path = "/Users/ryan/marginals,
+  folder_path = "/Users/ryan/marginals",
   create_folder = TRUE
 )
 ```
-## Files created by `export_marginal_distributions`
-The following files will be created by the `export_marginal_distributions` function:
-- *binary_variables.csv* - Contains the marginal distributions for binary variables including: Variable Name, Mean, Number of Missing Observations.
-- *categorical_variables.csv* Contains the marginal distributions for categorical variables including: Variable Name & Category Name and the Number of Observations in Each Category, **NB** Missing Observations are coded as a separate category labelled missing.
-- *continuous_variables.csv* - Contains the marginal distributions for continuous variables including: Variable Name, Transformed Mean, Transformed Standard Deviation, Number of Missing Observations and the Number of Decimal Places.
-- *continuous_quantiles.csv* - Contains the Quantile mapping to allow for back transformation. For each continuous variable this contains the original quantile value, the transformed quantile value and an epsilon value to indicate the amount of thinning applied.
+
+## Files created by `export_marginal_distributions()`
+The following files will be created by the `export_marginal_distributions()` function:
+
+- *binary_variables.csv* - Contains the marginal distributions for binary variables including:
+  - Variable Name
+    - Mean
+    - Number of Missing Observations
+- *categorical_variables.csv* Contains the marginal distributions for categorical variables including:
+  - Variable Name & Category Name
+  - Number of Observations in Each Category
+  - **NB** Missing Observations are coded as a separate category labelled missing.
+- *continuous_variables.csv* - Contains the marginal distributions for continuous variables including:
+  - Variable Name
+  - Transformed Mean
+  - Transformed Standard Deviation
+  - Number of Missing Observations
+  - Number of Decimal Places
+- *continuous_quantiles.csv* - Contains the Quantile mapping to allow for back transformation. For each continuous variable this contains: 
+  - The original quantile value
+  - The transformed quantile value
+  - An epsilon value to indicate the amount of thinning applied
 - *summary.csv* - Contains and overall summary of the dataset including:
-the Number of Rows, Columns and Variable Names (for validation).
+  - Number of Rows
+  - Number of Columns
+  - Variable Names (for validation)
+
 These files should then be sent to the user.
 **NB** If there are no variables of a certain type the corresponding file will not be created.
