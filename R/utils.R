@@ -7,7 +7,7 @@ get_missing_variables <- function(
 ) {
   # Set up a vector for missing variables
   .missing_variables <- c()
-  # Loop throught the variables
+  # Loop through the variables
   for (variable in variables) {
     # If the variable is not in the columns of the data frame
     if (!variable %in% names(df)) {

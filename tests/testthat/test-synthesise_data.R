@@ -103,10 +103,10 @@ testthat::test_that("check_probs works", {
 
 testthat::test_that("get_data_def works", {
   data_def <- get_data_def(
-    marginal_distibutions
+    marginal_distributions
   )
   data_def_cor <- get_data_def(
-    marginal_distibutions,
+    marginal_distributions,
     TRUE
   )
   testthat::expect_true(
@@ -127,14 +127,14 @@ testthat::test_that("get_data_def works", {
     )
   )
   data_var_names <- c(
-    names(marginal_distibutions$categorical_variables),
-    names(marginal_distibutions$binary_variables),
-    names(marginal_distibutions$continuous_variables)
+    names(marginal_distributions$categorical_variables),
+    names(marginal_distributions$binary_variables),
+    names(marginal_distributions$continuous_variables)
   )
   testthat::expect_true(
     all(data_def[["varname"]] %in% data_var_names)
   )
-  categorical_summary <- marginal_distibutions$categorical_variables
+  categorical_summary <- marginal_distributions$categorical_variables
   cat_names <- c()
   for (.column in names(categorical_summary)){
     for (.cat in names(categorical_summary[[.column]])) {
@@ -146,8 +146,8 @@ testthat::test_that("get_data_def works", {
   }
   data_var_cor_names <- c(
     cat_names,
-    names(marginal_distibutions$binary_variables),
-    names(marginal_distibutions$continuous_variables)
+    names(marginal_distributions$binary_variables),
+    names(marginal_distributions$continuous_variables)
   )
   testthat::expect_true(
     all(data_def_cor[["varname"]] %in% data_var_cor_names)
@@ -155,8 +155,8 @@ testthat::test_that("get_data_def works", {
 })
 
 testthat::test_that("define_categorical works", {
-  categorical_summary <- marginal_distibutions$categorical_variables
-  n_row <- marginal_distibutions$summary$n_row
+  categorical_summary <- marginal_distributions$categorical_variables
+  n_row <- marginal_distributions$summary$n_row
   data_def <- NULL
   catergorical_def <- define_categorical(
     categorical_summary,
@@ -173,8 +173,8 @@ testthat::test_that("define_categorical works", {
 })
 
 testthat::test_that("define_categorical_binary works", {
-  categorical_summary <- marginal_distibutions$categorical_variables
-  n_row <- marginal_distibutions$summary$n_row
+  categorical_summary <- marginal_distributions$categorical_variables
+  n_row <- marginal_distributions$summary$n_row
   data_def <- NULL
   categorical_binary_def <- define_categorical_binary(
     categorical_summary,
@@ -200,7 +200,7 @@ testthat::test_that("define_categorical_binary works", {
 })
 
 testthat::test_that("define_binary works", {
-  binary_summary <- marginal_distibutions$binary_variables
+  binary_summary <- marginal_distributions$binary_variables
   data_def <- NULL
   binary_def <- define_binary(
     binary_summary,
@@ -216,7 +216,7 @@ testthat::test_that("define_binary works", {
 })
 
 testthat::test_that("define_continuous works", {
-  continuous_summary <- marginal_distibutions$continuous_variables
+  continuous_summary <- marginal_distributions$continuous_variables
   data_def <- NULL
   continuous_def <- define_continuous(
     continuous_summary,
@@ -237,7 +237,7 @@ testthat::test_that("export_empty_cor_matrix works", {
     export_empty_cor_matrix(list()),
     regexp = "^.*object must be of class RESIDE.*$"
   )
-  marginals <- marginal_distibutions
+  marginals <- marginal_distributions
   temp_dir <- get_full_file_path(new_temp_dir(), "test")
   # Test folder doesn't exits
   testthat::expect_error(
@@ -284,7 +284,7 @@ testthat::test_that("import_cor_matrix_works", {
     import_cor_matrix(cor_non_finite),
     regexp = "^.*The correlation matrix needs to be positive semi definite.*$"
   )
-  marginals <- marginal_distibutions
+  marginals <- marginal_distributions
   temp_dir <- get_full_file_path(new_temp_dir(), "test")
   export_empty_cor_matrix(
     marginals,

@@ -125,7 +125,7 @@ import_marginal_distributions <- function(
     .categorical_summary[[variable]] <- n
   }
 
-  # Forware declare binary sumamry list
+  # Forward declare binary summary list
   .binary_summary <- list()
   # Loop through variables (use unique rather than levels to maintain order)
   for (variable in unique(as.factor(.binary_variables$variable))) {

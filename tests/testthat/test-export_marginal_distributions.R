@@ -4,7 +4,7 @@ testthat::test_that("export_marginal_distributions works", {
     export_marginal_distributions(list()),
     regexp = "^.*object must be of class RESIDE.*$"
   )
-  marginals <- marginal_distibutions
+  marginals <- marginal_distributions
   temp_dir <- get_full_file_path(new_temp_dir(), "test")
   # Test folder doesn't exits
   testthat::expect_error(
@@ -55,12 +55,12 @@ testthat::test_that("export_marginal_distributions works", {
 testthat::test_that("export_marginal_distributions errors", {
   temp_dir <- new_temp_dir()
   export_marginal_distributions(
-    marginal_distibutions,
+    marginal_distributions,
     temp_dir
   )
   testthat::expect_error(
     export_marginal_distributions(
-      marginal_distibutions,
+      marginal_distributions,
       temp_dir
     ),
     regexp = "^Marginal files:.*already exists.*$"

@@ -25,7 +25,7 @@ generated from the csv file exported by the
 \examples{
 \dontrun{
 if(interactive()){
-   import_cor_matix("correlation_matrix.csv")
+   import_cor_matrix("correlation_matrix.csv")
  }
 }
 }

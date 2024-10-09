@@ -1,0 +1,97 @@
+---
+title: "Exporting Marginal Distributions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Exporting Marginal Distributions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Obtaining Marginal Distributions
+Marginal distributions should first be obtained using the get_marginal_distributions function.
+
+To obtain the marginal distributions for all variables you should only specify the dataset:
+```{r get_marginal_distributions}
+library(RESIDE)
+marginals <- get_marginal_distributions(IST)
+```
+
+To obtain marginal distributions for select variables, you should specify the variables using the variables parameter:
+```{r get_marginal_distributions_select}
+library(RESIDE)
+marginals <- get_marginal_distributions(
+  IST,
+  variables = c(
+    "SEX",
+    "AGE",
+    "ID14",
+    "RSBP",
+    "RATRIAL",
+    "SET14D",
+    "DSIDED"
+  )
+)
+```
+
+# Printing the Marginal Distributions Prior to Export
+Marginal distributions can be printed when generating marginal distributions using the print parameter:
+```{r get_marginal_distributions_print}
+library(RESIDE)
+marginals <- get_marginal_distributions(
+  IST,
+  print = TRUE
+)
+```
+
+Or from a stored marginals object:
+```{r marginal_distributions_print}
+library(RESIDE)
+marginals <- get_marginal_distributions(IST)
+print(marginals)
+```
+
+# Exporting Marginal Distributions
+Marginal distributions can be exported using the export_marginal_distributions() function:
+```{r export_marginal_distributions}
+library(RESIDE)
+marginals <- get_marginal_distributions(IST)
+export_marginal_distributions(marginals)
+```
+By default the marginal distributions will be exported to the current working directory, this can be changed using the folder path parameter:
+```{r export_marginal_distributions_folder_path}
+library(RESIDE)
+marginals <- get_marginal_distributions(IST)
+export_marginal_distributions(
+  marginals,
+  folder_path = "/Users/ryan/marginals
+)
+```
+This folder should exist and not contain any previously exported marginal distributions.
+You can create the folder automatically using the create_folder parameter:
+```{r export_marginal_distributions_create_folder}
+library(RESIDE)
+marginals <- get_marginal_distributions(IST)
+export_marginal_distributions(
+  marginals,
+  folder_path = "/Users/ryan/marginals,
+  create_folder = TRUE
+)
+```
+## Files created by `export_marginal_distributions`
+The following files will be created by the `export_marginal_distributions` function:
+- *binary_variables.csv* - Contains the marginal distributions for binary variables including: Variable Name, Mean, Number of Missing Observations.
+- *categorical_variables.csv* Contains the marginal distributions for categorical variables including: Variable Name & Category Name and the Number of Observations in Each Category, **NB** Missing Observations are coded as a separate category labelled missing.
+- *continuous_variables.csv* - Contains the marginal distributions for continuous variables including: Variable Name, Transformed Mean, Transformed Standard Deviation, Number of Missing Observations and the Number of Decimal Places.
+- *continuous_quantiles.csv* - Contains the Quantile mapping to allow for back transformation. For each continuous variable this contains the original quantile value, the transformed quantile value and an epsilon value to indicate the amount of thinning applied.
+- *summary.csv* - Contains and overall summary of the dataset including:
+the Number of Rows, Columns and Variable Names (for validation).
+These files should then be sent to the user.
+**NB** If there are no variables of a certain type the corresponding file will not be created.

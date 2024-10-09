@@ -6,7 +6,7 @@
 \alias{RESIDE-package}
 \title{RESIDE: Rapid Easy Synthesis to Inform Data Extraction}
 \description{
-An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).
+An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).
 }
 \details{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}

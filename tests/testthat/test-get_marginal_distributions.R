@@ -1,4 +1,4 @@
-testthat::test_that("Test get_marginal_distibutions works as it should", {
+testthat::test_that("Test get_marginal_distributions works as it should", {
   # Test non character variables
   testthat::expect_error(
     get_marginal_distributions(

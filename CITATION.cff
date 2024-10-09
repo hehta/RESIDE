@@ -9,7 +9,7 @@ type: software
 license: GPL-3.0-or-later
 title: 'RESIDE: Rapid Easy Synthesis to Inform Data Extraction'
 version: 0.3.0
-abstract: An R package which allows data to be simulation from marginal distibutions
+abstract: An R package which allows data to be simulation from marginal distributions
   obtained from Trusted Research Environments (TREs).
 authors:
 - family-names: Field
