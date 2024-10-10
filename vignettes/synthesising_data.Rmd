@@ -15,6 +15,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+Data is synthesised by sampling from a multivariate cumulative distribution (Copula), using the `simstudy` package.
+
 # Without Correlations
 Data can be synthesised from marginal distributions using the `synthesise_data()` function:
 ```{r synthesise data}

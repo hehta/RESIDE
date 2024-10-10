@@ -1,6 +1,7 @@
 ---
 title: "The RESIDE Package"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 vignette: >
   %\VignetteIndexEntry{The RESIDE Package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -8,9 +9,11 @@ vignette: >
 ---
 
 # Introduction
-The Rapid Easy Synthesis to Inform Data Extraction (RESIDE) Package was developed to assist researchers with planning analysis, prior to obtaining data from Trusted Research Environments (TREs) also known as safe havens.
+The Rapid Easy Synthesis to Inform Data Extraction (RESIDE) Package was developed to assist researchers with planning analysis, prior to obtaining data from Trusted Research Environments (TREs) also known as safe havens [@hubbard_trusted_2021; @gao_national_2022; @lea_data_2016].
 
-Obtaining data from TREs is can be a lengthy process due to data governance, in which time a researcher may not be able to start their analysis. With the RESIDE package, a researcher can obtain the marginal distributions of a dataset held by a trusted research environment and simulate a synthetic dataset. Thus allowing them to explore what the data looks like prior to gaining access to it. This approach allows the researched to explore variables, including their missingness and plan their analysis appropriately. Additionally, it allows the research to start writing code for their analysis as the structure of the synthetic data will be the same as that on the TRE. The RESIDE package also allows the researcher to specify **assumed** correlations based on expertise or previous research when simulating the data to also allow the researcher to test analysis. **NB** When using correlations it is not possible to maintain the marginal distributions.
+Obtaining data from TREs is can be a lengthy process due to data governance [@gao_national_2022], in which time a researcher may not be able to start their analysis. With the RESIDE package, a researcher can obtain the marginal distributions of a dataset held by a trusted research environment and simulate a synthetic dataset. Thus allowing them to explore what the data looks like prior to gaining access to it. This approach allows the researched to explore variables, including their missingness and plan their analysis appropriately. Additionally, it allows the research to start writing code for their analysis as the structure of the synthetic data will be the same as that on the TRE. The RESIDE package also allows the researcher to specify **assumed** correlations based on expertise or previous research when simulating the data to also allow the researcher to test analysis.
+
+**NB** When using correlations it is not possible to maintain the marginal distributions.
 
 # Methods
 ## Generating Marginal Distributions
@@ -22,7 +25,9 @@ Marginal distributions can be generated for a given dataset within a TRE using t
 
 Binary variables are detected automatically by testing the min and maximum values of numeric variables, if they fall between 0 and 1, the variable is assumed binary; currently there is no way of manually overriding this, but this is planned for a future update. For binary variables the mean is used to represent the marginal distributions, allowing this to be used as a probability when simulating data.
 
-Currently any factor variable or variable containing non numeric characters will be treated as categorical, this however means that the burden is on the TRE to ensure that any variables containing non numeric characters are categorical. For categorical variables, the number of each category is used to represent the marginal distributions, allowing the probability of each category to be calculated when simulating data. **NB** currently there is no automated checking to see if a category contains less than a certain percent, or if there are an excess number of categories therefore it is up to the TRE to ensure that this is checked and if necessary adjusted prior to generating the marginal distributions.
+Currently any factor variable or variable containing non numeric characters will be treated as categorical, this however means that the burden is on the TRE to ensure that any variables containing non numeric characters are categorical. For categorical variables, the number of each category is used to represent the marginal distributions, allowing the probability of each category to be calculated when simulating data.
+
+**NB** Currently there is no automated checking to see if a category contains less than a certain percent, or if there are an excess number of categories therefore it is up to the TRE to ensure that this is checked and if necessary adjusted prior to generating the marginal distributions.
 
 Any other numeric variable is treated as a continuous variable. To prevent the need to specify a distribution when simulating data, continuous variables are transformed using Ordered Quantile normalisation from the `bestNormalize` package. The mean and standard deviation of the transformed variable(s) are used as the marginal distributions to allow the simulation of the variable using a normal distribution. Additionally the mapping table is exported to allow the variables to be back transformed.
 

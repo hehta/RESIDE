@@ -59,7 +59,7 @@ print(marginals)
 ```
 
 # Exporting Marginal Distributions
-Marginal distributions can be exported using the export_marginal_distributions() function:
+Marginal distributions can be exported using the `export_marginal_distributions()` function:
 ```{r export_marginal_distributions}
 library(RESIDE)
 marginals <- get_marginal_distributions(IST)
@@ -115,4 +115,5 @@ The following files will be created by the `export_marginal_distributions()` fun
   - Variable Names (for validation)
 
 These files should then be sent to the user.
+
 **NB** If there are no variables of a certain type the corresponding file will not be created.
