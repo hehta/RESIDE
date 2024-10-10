@@ -1,6 +1,7 @@
 ##################################################################
 ##                     Validation Functions                     ##
 ##################################################################
+# Check that variables are valid
 is_variables_valid <- function(
   binary_variables,
   categorical_variables,
@@ -51,6 +52,8 @@ is_variables_valid <- function(
   return(TRUE)
 }
 
+# Wrapper function to check a variable is valid
+# based on it's type.
 is_variable_valid <- function(
   variable_df,
   variable_type
@@ -74,6 +77,8 @@ is_variable_valid <- function(
   return(TRUE)
 }
 
+# Function to return the variable names as a list
+# for a given variable type.
 get_required_variables <- function(
   variable_type
 ) {

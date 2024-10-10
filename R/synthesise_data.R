@@ -3,19 +3,27 @@
 #' distributions obtained from a Trusted Research Environment (TRE)
 #' @param marginals an object of class RESIDE
 #' @param correlation_matrix Correlation Matrix
-#' see \code{\link{export_empty_cor_matrix}}, Default: NULL
+#' see \code{\link{export_empty_cor_matrix}} and
+#' \code{\link{import_cor_matrix}}, Default: NULL
 #' @param ... Additional parameters currently none are used.
 #' @return a data frame of simulated data
-#' @details DETAILS
+#' @details This function will synthesise a dataset from marginals imported
+#' using \code{\link{import_marginal_distributions}}.
+#' By default the dataset will not contain correlations,
+#' however user specified correlations can be added using
+#' the \code{correlation_matrix} parameter,
+#' see \code{\link{export_empty_cor_matrix}} and
+#' \code{\link{import_cor_matrix}} for more details.
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'    marginals <- get_marginal_distributions(IST)
+#'    marginals <- import_marginal_distributions()
 #'    df <- synthesise_data(marginals)
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[methods]{is}}
+#'  \code{\link{export_empty_cor_matrix}}
+#'  \code{\link{import_cor_matrix}}
 #' @rdname synthesise_data
 #' @export
 #' @importFrom methods is
@@ -30,7 +38,7 @@ synthesise_data <- function(
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")
   }
-  # @todo add covaraince matrix for correlations
+  # @todo add covariance matrix for correlations
   if (!is.null(correlation_matrix)) {
     synthesise_data_cor(marginals, correlation_matrix)
   } else {
@@ -46,7 +54,7 @@ synthesize_data <- synthesise_data
 synthesise_data_no_cor <- function(
   marginals
 ) {
-  # Predifine dataDefinition
+  # Predefine dataDefinition
   data_def <- get_data_def(marginals, FALSE)
 
   # Synthesise the data
@@ -134,12 +142,12 @@ get_data_def <- function(
   marginals,
   use_correlations = FALSE
 ) {
-  # Predifine dataDefinition
+  # Predefine dataDefinition
   data_def <- NULL
 
   # If there are categorical variables
   if ("categorical_variables" %in% names(marginals)) {
-    #Define categorical variables dependant on correlations
+    # Define categorical variables dependant on correlations
     if (use_correlations) {
       data_def <- define_categorical_binary(
         marginals$categorical_variables,
@@ -218,9 +226,9 @@ define_categorical_binary <- function(
   .data_def <- data_def
   # Loop through the variables
   for (.column in names(categorical_summary)){
-    # Lopp through the categories
+    # Loop through the categories
     for (.cat in names(categorical_summary[[.column]])) {
-      # Add the catergory to the definitions as dummy (binary) variables
+      # Add the category to the definitions as dummy (binary) variables
       .data_def <- simstudy::defData(
         .data_def,
         varname = paste(.column, .cat, sep = "_"),
@@ -316,7 +324,7 @@ add_missingness <- function(
 
 #' @title Export an empty correlation matrix
 #' @description A function to export a correlation matrix with
-#' the required variables as a csv file
+#' the required variables as a csv file.
 #' @param marginals The marginal distributions
 #' @param folder_path Folder to export to, Default: '.'
 #' @param file_name (optional) file name, Default: 'correlation_matrix.csv'
@@ -324,17 +332,22 @@ add_missingness <- function(
 #' @return NULL
 #' @details This function will export an empty correlation matrix
 #' as a csv file, it will contain all the necessary variables including
-#' dummy variables for factors.
+#' dummy variables for factors. Dummy variables for factors may contain
+#' a missing category to represent missing data. Correlations should be
+#' added to the empty CSV and the imported using the
+#' \code{\link{import_marginal_distributions}} function.
+#' Correlations should be supplied using rank order correlations.
+#' The correlation matrix should be symmetric and positive semi definite.
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  marginals <- get_marginal_distributions(IST)
+#'  marginals <- import_marginal_distributions()
 #'  export_empty_cor_matrix(marginals)
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[simstudy]{genCorMat}}
-#'  \code{\link[rio]{export}}
+#'  \code{\link{import_marginal_distributions}}
+#'  \code{\link{import_cor_matrix}}
 #' @rdname export_empty_cor_matrix
 #' @export
 #' @importFrom simstudy genCorMat
@@ -353,7 +366,7 @@ export_empty_cor_matrix <- function(
     # Create the folder, ignore warnings (folder exists)
     dir.create(folder_path, showWarnings = FALSE)
   }
-  # Check the foleder exists (even if created)
+  # Check the folder exists (even if created)
   if (! dir.exists(folder_path)) {
     stop(
       "Directory must exist, hint: set create_folder to TRUE"
@@ -383,16 +396,18 @@ export_empty_cor_matrix <- function(
 #' \code{\link{synthesise_data}}
 #' @details A function to import the user specified correlations
 #' generated from the csv file exported by the
-#' \code{\link{export_empty_cor_matrix}} function
+#' \code{\link{export_empty_cor_matrix}} function.
+#' Correlations should be entered into the CSV file,
+#' using rank order correlations. The correlation matrix
+#' should be symmetric and be positive semi definite.
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'    import_cor_matix("correlation_matrix.csv")
+#'    import_cor_matrix("correlation_matrix.csv")
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[rio]{import}}
-#'  \code{\link[tibble]{rownames}}
+#'  \code{\link{export_empty_cor_matrix}}
 #'  \code{\link[matrixcalc]{is.positive.semi.definite}}
 #' @rdname import_cor_matrix
 #' @export
@@ -410,7 +425,7 @@ import_cor_matrix <- function(
     tibble::column_to_rownames(names(.cor_matrix)[1])
   .cor_matrix <- as.matrix(.cor_matrix)
   if (!isSymmetric(.cor_matrix)) {
-    stop("The correlation matrix needs to be symetrical.")
+    stop("The correlation matrix needs to be symmetrical.")
   }
   if (!matrixcalc::is.positive.semi.definite(.cor_matrix)) {
     stop("The correlation matrix needs to be positive semi definite.")
@@ -428,11 +443,11 @@ fix_factors <- function(
   categorical_summary <- marginals$categorical_variables
   # Extract the number for rows from the marginals
   n_row <- marginals$summary$n_row
-  # Loop throught the columns
+  # Loop through the columns
   for (.column in names(categorical_summary)){
-    # Forward declare catefory names
+    # Forward declare category names
     cat_names <- c()
-    # Forward declare probabilies
+    # Forward declare probabilities
     probs <- c()
     # Loop through the categories
     for (.cat in names(categorical_summary[[.column]])) {
@@ -440,7 +455,8 @@ fix_factors <- function(
       cat_name <- paste(.column, .cat, sep = "_")
       # Add the dummy variable name to the category names
       cat_names <- c(cat_names, cat_name)
-      # Calculate the probaby for the category and add it to the probabilities
+      # Calculate the probability for the category
+      # and add it to the probabilities
       probs <- c(probs, (categorical_summary[[.column]][[.cat]] / n_row))
     }
     # Subset only the dummy variables for the current category
@@ -450,12 +466,12 @@ fix_factors <- function(
     probs <- check_probs(probs)
 
     # Replace any row where the dummy variables total 0
-    # (indecating no category was selected)
+    # (indicating no category was selected)
     variable_df[rowSums(variable_df) == 0, ] <-
       replace_zero_rows(variable_df[rowSums(variable_df) == 0, ], probs)
 
     # Replace any row where the dummy variables total 1
-    # (indecating more than one category was selected)
+    # (indicating more than one category was selected)
     variable_df[rowSums(variable_df) > 1, ] <-
       replace_one_rows(variable_df[rowSums(variable_df) > 1, ], probs)
     # Replace the columns with the corrected columns
@@ -466,7 +482,7 @@ fix_factors <- function(
 }
 
 # Function to replace a row for dummy categorical
-# variables where the dummy colums add up to zero
+# variables where the dummy columns add up to zero
 # indicating that a category has not been selected
 # in which case the category with the highest probability
 # is selected
@@ -478,7 +494,7 @@ replace_zero_rows <- function(rows, probs) {
 }
 
 # Function to replace a row for dummy categorical
-# variables where the dummy colums add up more than one
+# variables where the dummy columns add up more than one
 # indicating that more than one category has been selected
 # in which case out of the categories selected,
 # the one with the higher probability is chosen.
@@ -495,7 +511,7 @@ replace_one_rows <- function(rows, probs) {
   rtn_rows_max <- rtn_rows[, "row_max"]
   # remove the maximum value from the old data frame
   rtn_rows$row_max <- NULL
-  # devide each column in the rows by the maximum values
+  # divide each column in the rows by the maximum values
   # leaving 1 for the column with the max value
   rtn_rows <- rtn_rows / rtn_rows_max
   # set all the other columns to 0
@@ -532,7 +548,7 @@ restore_factors <- function(
 }
 
 # There is a small chance that the probabilities could be equal
-# if this is the cas add noise to allow them to be used to select the
+# if this is the case add noise to allow them to be used to select the
 # highest probability.
 check_probs <- function(probs) {
   while (any(duplicated(probs))) {

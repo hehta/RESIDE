@@ -42,10 +42,12 @@ Trusted Research Environment (TRE)
 \details{
 This function will import marginal distributions as generated
 within a Trusted Research Environment (TRE) using the function
-export_marginal_distributions(), the folder_path allows the path of the files
+\code{\link{export_marginal_distributions}}.
+The folder_path allows the path of the files
 provided by the TRE to be imported,
-this will default to the current working directory. The file parameters will
-provide the default file names if no filenames are specified.
+this will default to the current working directory.
+The file parameters will provide the default file names
+if no filenames are specified.
 }
 \examples{
 \dontrun{
@@ -55,6 +57,5 @@ if(interactive()){
 }
 }
 \seealso{
-\code{\link[dplyr]{select}}
-\code{\link[tibble]{as_tibble}}
+\code{\link{synthesise_data}}
 }

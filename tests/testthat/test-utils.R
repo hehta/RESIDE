@@ -71,7 +71,7 @@ testthat::test_that("marginal_files_exist", {
   )
   temp_dir <- new_temp_dir()
   export_marginal_distributions(
-    marginal_distibutions,
+    marginal_distributions,
     temp_dir
   )
   expect_equal(
@@ -83,7 +83,7 @@ testthat::test_that("marginal_files_exist", {
 testthat::test_that("remove_marginal_files works", {
   temp_dir <- new_temp_dir()
   export_marginal_distributions(
-    marginal_distibutions,
+    marginal_distributions,
     temp_dir
   )
   remove_marginal_files(temp_dir)
@@ -92,7 +92,7 @@ testthat::test_that("remove_marginal_files works", {
     c()
   )
   export_marginal_distributions(
-    marginal_distibutions,
+    marginal_distributions,
     temp_dir
   )
   testthat::local_mocked_bindings(

@@ -18,7 +18,7 @@ to the console, Default: FALSE}
 A list of marginal distributions of an S3 RESIDE Class
 }
 \description{
-Generate Marginal Distibutions from a given
+Generate Marginal Distributions from a given
 data frame with options to specify which variables to use.
 }
 \details{
@@ -47,5 +47,5 @@ if(interactive()){
 }
 }
 \seealso{
-\code{\link[dplyr]{mutate_all}}
+\code{\link{export_marginal_distributions}}
 }

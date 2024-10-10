@@ -1,5 +1,5 @@
 #' @title Generate Marginal Distributions for a given data frame
-#' @description Generate Marginal Distibutions from a given
+#' @description Generate Marginal Distributions from a given
 #' data frame with options to specify which variables to use.
 #' @param df Data frame to get the marginal distributions from
 #' @param variables (Optional) variable (columns) to select, Default: c()
@@ -29,7 +29,7 @@
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[dplyr]{mutate_all}}
+#'  \code{\link{export_marginal_distributions}}
 #' @rdname get_marginal_distributions
 #' @export
 #' @importFrom magrittr %>%
@@ -91,7 +91,7 @@ get_marginal_distributions <- function(
   .categorical_summary <- list()
   # Loop through categorical variables
   for (.column in .categorical_variables) {
-    # add (factor) summary to categortical summary
+    # add (factor) summary to categorical summary
     .categorical_summary[[.column]] <- summary(df[[.column]])
   }
 
@@ -148,7 +148,7 @@ get_variable_types <- function(df) {
         .categorical_variables,
         .column
       )
-      # if numberic it's either binary or continuous
+      # if numeric it's either binary or continuous
     } else if (is.numeric(df[[.column]])) {
       # If between 0 and 1 it's binary
       if (

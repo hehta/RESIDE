@@ -1,0 +1,73 @@
+---
+title: "Synthesising Data from Marginals"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Synthesising Data from Marginals}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Data is synthesised by sampling from a multivariate cumulative distribution (Copula), using the `simstudy` package.
+
+# Without Correlations
+Data can be synthesised from marginal distributions using the `synthesise_data()` function:
+```{r synthesise data}
+library(RESIDE)
+marginals <- import_marginal_distributions()
+simulated_data <- synthesise_data(marginals)
+```
+
+# With correlations
+User specified correlations can be added to the synthesised data by supplying a correlation matrix. An empty correlations matrix can be generated using the `export_empty_cor_matrix()` function:
+```{r export_cor_matrix}
+library(RESIDE)
+marginals <- import_marginal_distributions()
+export_empty_cor_matrix(marginals)
+```
+The folder path and file name can be specified using the `folder_path` and `file_name` parameters respectively. By default the correlation matrix will be exported to the current working directory, with the filename *correlation_matrix.csv*
+
+The exported CSV file will be a symmetric table which looks like:
+```{r print_cor_matrix, eval = TRUE, echo = FALSE}
+.cor_matrix <- utils::read.csv("correlation_matrix.csv")
+.cor_matrix <- tibble::column_to_rownames(.cor_matrix, names(.cor_matrix)[1])
+DT::datatable(
+  .cor_matrix,
+  options = list(
+    pageLength=10, scrollX='400px'
+  )
+)
+```
+
+Correlations should then be added to the CSV file, without modifying the column / row names. Correlations should use rank order correlations. Categorical variables are represented as dummy variables named using the format variable name underscore category name e.g. SEX_F.
+**Note** the correlation matrix should be symmetrical and positive semi definite.
+
+Once the correlations have been added to the CSV file, the correlations can be imported using the `import_cor_matrix' function:
+```{r import_cor_matrix}
+library(RESIDE)
+correlation_matrix <- import_cor_matrix()
+```
+By default the filename for the correlation matrix is that of the exported filename (`correlation_matrix.csv`) and is imported from the current working directory. This can be changed by specifying a `file_path` using the corresponding parameter of the `import_cor_matrix()` function, this file path should be a relative or absolute file path.
+
+The `import_cor_matrix()` function will produce and error if the matrix is not symmetrical and positive semi definite, or the file does not exist.
+
+With a correlation matrix data can now be synthesised with the user specified correlations using the `synthesise_data()` function, specifying the correlation matrix imported by the `import_cor_matrix()` function:
+```{r synthesise_data_with_correlations}
+library(RESIDE)
+marginals <- import_marginal_distributions()
+export_empty_cor_matrix(marginals)
+correlation_matrix <- import_cor_matrix()
+simulated_data <- synthesise_data(
+  marginals,
+  correlation_matrix
+)
+```
+
+**NB** It is not possible to completely maintain the marginal distributions when specifying correlations, this is a known limitation and is not likely to change.

@@ -22,22 +22,27 @@ export_empty_cor_matrix(
 }
 \description{
 A function to export a correlation matrix with
-the required variables as a csv file
+the required variables as a csv file.
 }
 \details{
 This function will export an empty correlation matrix
 as a csv file, it will contain all the necessary variables including
-dummy variables for factors.
+dummy variables for factors. Dummy variables for factors may contain
+a missing category to represent missing data. Correlations should be
+added to the empty CSV and the imported using the
+\code{\link{import_marginal_distributions}} function.
+Correlations should be supplied using rank order correlations.
+The correlation matrix should be symmetric and positive semi definite.
 }
 \examples{
 \dontrun{
 if(interactive()){
- marginals <- get_marginal_distributions(IST)
+ marginals <- import_marginal_distributions()
  export_empty_cor_matrix(marginals)
  }
 }
 }
 \seealso{
-\code{\link[simstudy]{genCorMat}}
-\code{\link[rio]{export}}
+\code{\link{import_marginal_distributions}}
+\code{\link{import_cor_matrix}}
 }

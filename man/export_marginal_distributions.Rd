@@ -5,14 +5,15 @@
 \title{Export Marginal Distributions}
 \usage{
 export_marginal_distributions(
-  x,
+  marginals,
   folder_path = ".",
   create_folder = FALSE,
   force = FALSE
 )
 }
 \arguments{
-\item{x}{an Object of type RESIDE from get_marginal_distributions()}
+\item{marginals}{an Object of type RESIDE from
+\code{\link{import_cor_matrix}}}
 
 \item{folder_path}{path to folder where to save files, Default: '.'}
 
@@ -23,7 +24,7 @@ Default: FALSE}
 should they be removed, Default: FALSE}
 }
 \value{
-No Explicit Return
+No Explicit Return (NULL)
 }
 \description{
 Export the marginal distributions to CSV files
@@ -41,6 +42,5 @@ if(interactive()){
 }
 }
 \seealso{
-\code{\link[methods]{is}}
-\code{\link[utils]{write.table}}
+\code{\link{get_marginal_distributions}}
 }

@@ -7,10 +7,10 @@
 
 # RESIDE: Rapid Easy Synthesis to Inform Data Extraction
 
-An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).
+An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).
 
 # Installation
-Currently this package can be install using `devtools` or `remotes`
+Currently this package can be installed using `devtools` or `remotes`
 
 ## Devtools
 ```
@@ -29,19 +29,19 @@ remotes::install_github("hehta/RESIDE")
 ## Trusted Research Environments (TRE's)
 There are two main functions:
 
-### `get_marginal_distributions`
+### `get_marginal_distributions()`
 This function will get the marginal distributions and store them in an R object.
 
-### `export_marginal_distributions`
+### `export_marginal_distributions()`
 This function will export the marginal distributions to csv files.
 
 ## End Users
 Once you have obtained the marginal distributions from a TRE, you can import them and simulated data using the following functions:
 
-### `import_marginal_distributions`
+### `import_marginal_distributions()`
 This function will import the marginal distributions from the csv files provided by a TRE and store them in an R object.
 
-### `synthesise_data`
+### `synthesise_data()`
 This function will synthesise data base on the imported marginal distributions.
 
 # Worked Example Using the Internation Stroke Trial
