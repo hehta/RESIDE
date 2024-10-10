@@ -17,7 +17,14 @@ Trusted Research Environment (TRE)"></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/RESIDE.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/exporting_marginal-distributions.html">Exporting Marginal Distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/importing_marginal_distributions.html">Importing Marginal Distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/synthesising_data.html">Synthesising Data from Marginals</a></li>
+  </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -92,15 +99,16 @@ Default: 'summary.csv' see details.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function will import marginal distributions as generated
 within a Trusted Research Environment (TRE) using the function
-export_marginal_distributions(), the folder_path allows the path of the files
+<code><a href="export_marginal_distributions.html">export_marginal_distributions</a></code>.
+The folder_path allows the path of the files
 provided by the TRE to be imported,
-this will default to the current working directory. The file parameters will
-provide the default file names if no filenames are specified.</p>
+this will default to the current working directory.
+The file parameters will provide the default file names
+if no filenames are specified.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></code>
-<code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></code></p></div>
+    <div class="dont-index"><p><code><a href="synthesise_data.html">synthesise_data</a></code></p></div>
     </div>
 
     <div class="section level2">

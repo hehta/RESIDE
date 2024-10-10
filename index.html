@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Rapid Easy Synthesis to Inform Data Extraction">
-<meta name="description" content="An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).">
-<meta property="og:description" content="An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).">
+<meta name="description" content="An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).">
+<meta property="og:description" content="An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,7 +31,16 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/RESIDE.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/exporting_marginal-distributions.html">Exporting Marginal Distributions</a></li>
+    <li><a class="dropdown-item" href="articles/importing_marginal_distributions.html">Importing Marginal Distributions</a></li>
+    <li><a class="dropdown-item" href="articles/synthesising_data.html">Synthesising Data from Marginals</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -48,12 +57,12 @@
 <div class="section level1">
 <div class="page-header"><h1 id="reside-rapid-easy-synthesis-to-inform-data-extraction">RESIDE: Rapid Easy Synthesis to Inform Data Extraction<a class="anchor" aria-label="anchor" href="#reside-rapid-easy-synthesis-to-inform-data-extraction"></a>
 </h1></div>
-<p>An R package which allows data to be simulation from marginal distibutions obtained from Trusted Research Environments (TREs).</p>
+<p>An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).</p>
 </div>
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h1>
-<p>Currently this package can be install using <code>devtools</code> or <code>remotes</code></p>
+<p>Currently this package can be installed using <code>devtools</code> or <code>remotes</code></p>
 <div class="section level2">
 <h2 id="devtools">Devtools<a class="anchor" aria-label="anchor" href="#devtools"></a>
 </h2>
@@ -64,7 +73,7 @@
 <h2 id="remotes">Remotes<a class="anchor" aria-label="anchor" href="#remotes"></a>
 </h2>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"hehta/RESIDE"</span><span class="op">)</span></span></code></pre>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"hehta/RESIDE"</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
 <div class="section level1">
@@ -76,13 +85,13 @@
 <p>There are two main functions:</p>
 <div class="section level3">
 <h3 id="get_marginal_distributions">
-<code>get_marginal_distributions</code><a class="anchor" aria-label="anchor" href="#get_marginal_distributions"></a>
+<code>get_marginal_distributions()</code><a class="anchor" aria-label="anchor" href="#get_marginal_distributions"></a>
 </h3>
 <p>This function will get the marginal distributions and store them in an R object.</p>
 </div>
 <div class="section level3">
 <h3 id="export_marginal_distributions">
-<code>export_marginal_distributions</code><a class="anchor" aria-label="anchor" href="#export_marginal_distributions"></a>
+<code>export_marginal_distributions()</code><a class="anchor" aria-label="anchor" href="#export_marginal_distributions"></a>
 </h3>
 <p>This function will export the marginal distributions to csv files.</p>
 </div>
@@ -93,13 +102,13 @@
 <p>Once you have obtained the marginal distributions from a TRE, you can import them and simulated data using the following functions:</p>
 <div class="section level3">
 <h3 id="import_marginal_distributions">
-<code>import_marginal_distributions</code><a class="anchor" aria-label="anchor" href="#import_marginal_distributions"></a>
+<code>import_marginal_distributions()</code><a class="anchor" aria-label="anchor" href="#import_marginal_distributions"></a>
 </h3>
 <p>This function will import the marginal distributions from the csv files provided by a TRE and store them in an R object.</p>
 </div>
 <div class="section level3">
 <h3 id="synthesise_data">
-<code>synthesise_data</code><a class="anchor" aria-label="anchor" href="#synthesise_data"></a>
+<code>synthesise_data()</code><a class="anchor" aria-label="anchor" href="#synthesise_data"></a>
 </h3>
 <p>This function will synthesise data base on the imported marginal distributions.</p>
 </div>
