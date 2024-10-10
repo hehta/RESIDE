@@ -9,7 +9,7 @@ Authors@R:
     person("Claudia", "Geue", , "cladia.geue@glasgow.ac.uk", role = "ctb",
            comment = c(ORCID = "0000-0003-2243-0733")))
 Description: An R package which allows data to be simulation from marginal distributions obtained from
-    Trusted Research Environments (TREs).
+    Trusted Research Environments ('TREs').
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
