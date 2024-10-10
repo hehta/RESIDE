@@ -1,3 +1,5 @@
+# Internal function to generate continuous marginals
+# and corresponding quantile mapping.
 get_continuous_summary <- function(
   column,
   probs =  seq(0, 1, 0.001),

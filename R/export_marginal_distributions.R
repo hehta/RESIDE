@@ -1,12 +1,13 @@
 #' @title Export Marginal Distributions
 #' @description Export the marginal distributions to CSV files
-#' @param x an Object of type RESIDE from get_marginal_distributions()
+#' @param marginals an Object of type RESIDE from
+#' \code{\link{import_cor_matrix}}
 #' @param folder_path path to folder where to save files, Default: '.'
 #' @param create_folder if the folder does not exist should it be created,
 #' Default: FALSE
 #' @param force if the folder already contains marginal distribution files
 #' should they be removed, Default: FALSE
-#' @return No Explicit Return
+#' @return No Explicit Return (NULL)
 #' @details Exports each of the marginal distributions to CSV files
 #' within a given folder, along with the continuous quantiles.
 #' @examples
@@ -17,19 +18,18 @@
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[methods]{is}}
-#'  \code{\link[utils]{write.table}}
+#'  \code{\link{get_marginal_distributions}}
 #' @rdname export_marginal_distributions
 #' @export
 #' @importFrom methods is
 export_marginal_distributions <- function(
-  x,
+  marginals,
   folder_path = ".",
   create_folder = FALSE,
   force = FALSE
 ) {
   # Check class
-  if (!methods::is(x, "RESIDE")) {
+  if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")
   }
   # if the user wants the folder to be created
@@ -63,14 +63,14 @@ export_marginal_distributions <- function(
     remove_marginal_files(folder_path)
   }
   # Check there are categorical variables
-  if ("categorical_variables" %in% names(x)) {
+  if ("categorical_variables" %in% names(marginals)) {
     # Generate the absolute os appropriate file path
     .file_path <- get_full_file_path(
       folder_path,
       "categorical_variables.csv"
     )
     # Convert the marginals to a data frame
-    .categorical_df <- categorical_to_df(x$categorical_variables)
+    .categorical_df <- categorical_to_df(marginals$categorical_variables)
     # Write the file if there are any rows
     if (nrow(.categorical_df) > 0) {
       .write_csv(.categorical_df, .file_path, "categorical")
@@ -78,33 +78,33 @@ export_marginal_distributions <- function(
   }
 
   # Check there are categorical variables
-  if ("binary_variables" %in% names(x)) {
+  if ("binary_variables" %in% names(marginals)) {
     # Generate the absolute os appropriate file path
     .file_path <- get_full_file_path(
       folder_path,
       "binary_variables.csv"
     )
-    .binary_df <- binary_to_df(x$binary_variables)
+    .binary_df <- binary_to_df(marginals$binary_variables)
     # Write the file if there are any rows
     if (nrow(.binary_df) > 0) {
       .write_csv(.binary_df, .file_path, "binary")
     }
   }
 
-  if ("continuous_variables" %in% names(x)) {
+  if ("continuous_variables" %in% names(marginals)) {
     # Generate the absolute os appropriate file path for marginals
     .file_path <- get_full_file_path(
       folder_path,
       "continuous_variables.csv"
     )
     # Convert the marginals to a data frame
-    .continuous_df <- continuous_to_df(x$continuous_variables)
+    .continuous_df <- continuous_to_df(marginals$continuous_variables)
     # Write the file if there are any rows
     if (nrow(.continuous_df) > 0) {
       .write_csv(.continuous_df, .file_path, "continuous")
     }
     # Convert the quantiles to a data frame
-    .quantiles_df <- quantiles_to_df(x$continuous_variables)
+    .quantiles_df <- quantiles_to_df(marginals$continuous_variables)
     # Generate the absolute os appropriate file path for quantiles
     .file_path <- get_full_file_path(
       folder_path,
@@ -117,12 +117,12 @@ export_marginal_distributions <- function(
   }
   # Write the summary file (needed for the number of rows)
   .write_csv(
-    x[["summary"]],
+    marginals[["summary"]],
     get_full_file_path(
       folder_path,
       "summary.csv"
     ),
     "summary"
   )
-
+  invisible(NULL)
 }

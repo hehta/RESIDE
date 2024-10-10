@@ -1,6 +1,7 @@
 ##################################################################
 ##                       Helper Functions                       ##
 ##################################################################
+# Returns a list of missing variables from a data frame.
 get_missing_variables <- function(
   df,
   variables
@@ -19,6 +20,8 @@ get_missing_variables <- function(
   return(.missing_variables)
 }
 
+# Joins a folder and file path normalising the folder path
+# The folder path must exist.
 get_full_file_path <- function(
   folder_path,
   file_path
@@ -33,6 +36,8 @@ get_full_file_path <- function(
   )
 }
 
+# Returns the file paths to each of the variables
+# dependant on the file and folder path specified.
 get_variables_path <- function(
   folder_path,
   file_path,
@@ -118,6 +123,9 @@ load_variables_file <- function(
   })
 }
 
+# Function to return the maximum decimal places
+# From on object that can be coerced into a numeric vector
+# e.g. a column
 max_decimal_places <- function(x) {
   # Filter NAS
   .x <- x[!is.na(x)]
@@ -132,6 +140,8 @@ max_decimal_places <- function(x) {
   return(max(dps))
 }
 
+# Returns the number of missing values from a given column
+# of a given data frame.
 get_n_missing <- function(
   df,
   column
@@ -146,6 +156,8 @@ get_n_missing <- function(
   )
 }
 
+# Writes a data frame to a CSV file with a given file name
+# whilst outputting information on the export
 .write_csv <- function(
   df,
   file_path,
@@ -162,9 +174,15 @@ get_n_missing <- function(
   utils::write.csv(df, file_path)
 }
 
+# Function to check if marginal files exist
+# in a given folder, returns a character vector
+# of the marginal files that exist.
 marginal_files_exist <- function(folder_path) {
+  # Forward declare vector for files that exist
   .files_exist <- c()
+  # loop through the default file names (see zzz.R)
   for (.file in .marginal_file_names) {
+    # If the file exists in the foleder
     if (
       file.exists(
         file.path(
@@ -173,15 +191,19 @@ marginal_files_exist <- function(folder_path) {
         )
       )
     ) {
+      # Add the file to the vector
       .files_exist <- c(.files_exist, .file)
     }
   }
+  # Return the vector
   return(.files_exist)
 }
 
+# Function to attempt to remove marginal files
 remove_marginal_files <- function(folder_path) {
-  # Loop through expected files
+  # Loop through expected files (see zzz.R)
   for (.file in .marginal_file_names){
+    # Remove the file using unlink with force = TRUE
     unlink(
       file.path(
         normalizePath(folder_path),
@@ -190,7 +212,9 @@ remove_marginal_files <- function(folder_path) {
       force = TRUE
     )
   }
+  # Check any marginal files still exist
   .marginal_files <- marginal_files_exist(folder_path)
+  # If any marginal files still exist error.
   if (length(.marginal_files) > 0) {
     stop(paste(
       "Could not remove existing files the

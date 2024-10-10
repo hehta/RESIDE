@@ -275,7 +275,7 @@ testthat::test_that("import_cor_matrix_works", {
     testthat::test_path("testdata", "correlation_matrix_asymetric.csv")
   testthat::expect_error(
     import_cor_matrix(cor_asymetric),
-    regexp = "^.*The correlation matrix needs to be symetrical.*$"
+    regexp = "^.*The correlation matrix needs to be symmetrical.*$"
   )
   # Test Non Finite
   cor_non_finite <-

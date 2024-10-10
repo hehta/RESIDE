@@ -29,7 +29,7 @@
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[dplyr]{mutate_all}}
+#'  \code{\link{export_marginal_distributions}}
 #' @rdname get_marginal_distributions
 #' @export
 #' @importFrom magrittr %>%

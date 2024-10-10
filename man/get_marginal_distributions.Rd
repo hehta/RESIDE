@@ -47,5 +47,5 @@ if(interactive()){
 }
 }
 \seealso{
-\code{\link[dplyr]{mutate_all}}
+\code{\link{export_marginal_distributions}}
 }

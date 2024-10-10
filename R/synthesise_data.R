@@ -3,19 +3,27 @@
 #' distributions obtained from a Trusted Research Environment (TRE)
 #' @param marginals an object of class RESIDE
 #' @param correlation_matrix Correlation Matrix
-#' see \code{\link{export_empty_cor_matrix}}, Default: NULL
+#' see \code{\link{export_empty_cor_matrix}} and
+#' \code{\link{import_cor_matrix}}, Default: NULL
 #' @param ... Additional parameters currently none are used.
 #' @return a data frame of simulated data
-#' @details DETAILS
+#' @details This function will synthesise a dataset from marginals imported
+#' using \code{\link{import_marginal_distributions}}.
+#' By default the dataset will not contain correlations,
+#' however user specified correlations can be added using
+#' the \code{correlation_matrix} parameter,
+#' see \code{\link{export_empty_cor_matrix}} and
+#' \code{\link{import_cor_matrix}} for more details.
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'    marginals <- get_marginal_distributions(IST)
+#'    marginals <- import_marginal_distributions()
 #'    df <- synthesise_data(marginals)
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[methods]{is}}
+#'  \code{\link{export_empty_cor_matrix}}
+#'  \code{\link{import_cor_matrix}}
 #' @rdname synthesise_data
 #' @export
 #' @importFrom methods is
@@ -316,7 +324,7 @@ add_missingness <- function(
 
 #' @title Export an empty correlation matrix
 #' @description A function to export a correlation matrix with
-#' the required variables as a csv file
+#' the required variables as a csv file.
 #' @param marginals The marginal distributions
 #' @param folder_path Folder to export to, Default: '.'
 #' @param file_name (optional) file name, Default: 'correlation_matrix.csv'
@@ -324,17 +332,22 @@ add_missingness <- function(
 #' @return NULL
 #' @details This function will export an empty correlation matrix
 #' as a csv file, it will contain all the necessary variables including
-#' dummy variables for factors.
+#' dummy variables for factors. Dummy variables for factors may contain
+#' a missing category to represent missing data. Correlations should be
+#' added to the empty CSV and the imported using the
+#' \code{\link{import_marginal_distributions}} function.
+#' Correlations should be supplied using rank order correlations.
+#' The correlation matrix should be symmetric and positive semi definite.
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  marginals <- get_marginal_distributions(IST)
+#'  marginals <- import_marginal_distributions()
 #'  export_empty_cor_matrix(marginals)
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[simstudy]{genCorMat}}
-#'  \code{\link[rio]{export}}
+#'  \code{\link{import_marginal_distributions}}
+#'  \code{\link{import_cor_matrix}}
 #' @rdname export_empty_cor_matrix
 #' @export
 #' @importFrom simstudy genCorMat
@@ -383,7 +396,10 @@ export_empty_cor_matrix <- function(
 #' \code{\link{synthesise_data}}
 #' @details A function to import the user specified correlations
 #' generated from the csv file exported by the
-#' \code{\link{export_empty_cor_matrix}} function
+#' \code{\link{export_empty_cor_matrix}} function.
+#' Correlations should be entered into the CSV file,
+#' using rank order correlations. The correlation matrix
+#' should be symmetric and be positive semi definite.
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -391,8 +407,7 @@ export_empty_cor_matrix <- function(
 #'  }
 #' }
 #' @seealso
-#'  \code{\link[rio]{import}}
-#'  \code{\link[tibble]{rownames}}
+#'  \code{\link{export_empty_cor_matrix}}
 #'  \code{\link[matrixcalc]{is.positive.semi.definite}}
 #' @rdname import_cor_matrix
 #' @export
@@ -410,7 +425,7 @@ import_cor_matrix <- function(
     tibble::column_to_rownames(names(.cor_matrix)[1])
   .cor_matrix <- as.matrix(.cor_matrix)
   if (!isSymmetric(.cor_matrix)) {
-    stop("The correlation matrix needs to be symetrical.")
+    stop("The correlation matrix needs to be symmetrical.")
   }
   if (!matrixcalc::is.positive.semi.definite(.cor_matrix)) {
     stop("The correlation matrix needs to be positive semi definite.")

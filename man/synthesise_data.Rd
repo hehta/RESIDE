@@ -13,7 +13,8 @@ synthesize_data(marginals, correlation_matrix = NULL, ...)
 \item{marginals}{an object of class RESIDE}
 
 \item{correlation_matrix}{Correlation Matrix
-see \code{\link{export_empty_cor_matrix}}, Default: NULL}
+see \code{\link{export_empty_cor_matrix}} and
+\code{\link{import_cor_matrix}}, Default: NULL}
 
 \item{...}{Additional parameters currently none are used.}
 }
@@ -25,16 +26,23 @@ Allows the synthesis of data from marginal
 distributions obtained from a Trusted Research Environment (TRE)
 }
 \details{
-DETAILS
+This function will synthesise a dataset from marginals imported
+using \code{\link{import_marginal_distributions}}.
+By default the dataset will not contain correlations,
+however user specified correlations can be added using
+the \code{correlation_matrix} parameter,
+see \code{\link{export_empty_cor_matrix}} and
+\code{\link{import_cor_matrix}} for more details.
 }
 \examples{
 \dontrun{
 if(interactive()){
-   marginals <- get_marginal_distributions(IST)
+   marginals <- import_marginal_distributions()
    df <- synthesise_data(marginals)
  }
 }
 }
 \seealso{
-\code{\link[methods]{is}}
+\code{\link{export_empty_cor_matrix}}
+\code{\link{import_cor_matrix}}
 }
