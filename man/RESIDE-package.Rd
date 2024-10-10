@@ -12,6 +12,11 @@ An R package which allows data to be simulation from marginal distributions obta
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 The RESIDE Package
+
+This work was supported by the UKRI Strength in Places Fund (SIPF)
+Competition, #' project number 107140.
+The project title is SIPF The Living Laboratory driving economic growth
+in Glasgow through real world implementation of precision medicine.
 }
 \seealso{
 Useful links:
