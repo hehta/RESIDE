@@ -24,9 +24,7 @@
 #' if no filenames are specified.
 #' @examples
 #' \dontrun{
-#' if(interactive()){
-#'    marginals <- import_marginal_distributions()
-#'  }
+#'   marginals <- import_marginal_distributions()
 #' }
 #' @seealso
 #'  \code{\link{synthesise_data}}

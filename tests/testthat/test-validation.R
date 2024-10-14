@@ -45,23 +45,23 @@ testthat::test_that("is_variable_valid works", {
   testthat::expect_true(
     is_variable_valid(empty_df, "quantile")
   )
-  testthat::expect_output(
+  testthat::expect_message(
     is_variable_valid(quantile_df, "continuous"),
     regexp = "^continuous not valid.+$"
   )
-  testthat::expect_output(
+  testthat::expect_message(
     is_variable_valid(binary_df, "categorical"),
     regexp = "^categorical not valid.+$"
   )
-  testthat::expect_output(
+  testthat::expect_message(
     is_variable_valid(continuous_df, "quantile"),
     regexp = "^quantile not valid.+$"
   )
-  testthat::expect_output(
+  testthat::expect_message(
     is_variable_valid(categorical_df, "binary"),
     regexp = "^binary not valid.+$"
   )
-  testthat::expect_output(
+  testthat::expect_message(
     is_variable_valid(categorical_df, "summary"),
     regexp = "^summary not valid.+$"
   )
@@ -166,7 +166,7 @@ testthat::test_that("is_variables_valid works", {
     )
   )
 
-  testthat::expect_output(
+  testthat::expect_message(
     is_variables_valid(
       binary_df,
       categorical_df,

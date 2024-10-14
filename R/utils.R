@@ -163,13 +163,14 @@ get_n_missing <- function(
   file_path,
   variable_type
 ) {
-  # Cat a message to state what is being exported and where
-  cat(
-    "Exporting",
-    variable_type,
-    "to:",
-    file_path,
-    "\n"
+  # Produce a message to state what is being exported and where
+  message(
+    paste(
+      "Exporting ",
+      variable_type,
+      "to: ",
+      file_path
+    )
   )
   utils::write.csv(df, file_path)
 }

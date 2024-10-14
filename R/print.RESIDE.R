@@ -2,25 +2,21 @@
 #' @description S3 override for print RESIDE
 #' @param x an object of class RESIDE
 #' @param ... Other parameters currently none are used
-#' @return NULL
+#' @return No return value, called to print to the terminal.
 #' @details S3 Override for RESIDE Class
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'    print(
-#'      marginal_distributions <- get_marginal_distributions(
-#'        IST,
-#'        variables <- c(
-#'          "SEX",
-#'          "AGE",
-#'          "ID14",
-#'          "RSBP",
-#'          "RATRIAL"
-#'        )
-#'      )
-#'    )
-#'  }
-#' }
+#' print(
+#'   marginal_distributions <- get_marginal_distributions(
+#'     IST,
+#'     variables <- c(
+#'       "SEX",
+#'       "AGE",
+#'       "ID14",
+#'       "RSBP",
+#'       "RATRIAL"
+#'     )
+#'   )
+#' )
 #' @rdname print.RESIDE
 #' @export
 #' @importFrom methods is

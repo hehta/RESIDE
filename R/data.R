@@ -34,7 +34,7 @@
 #'   \item{DCAREND}{Data collected on 14 day/discharge form
 #'   about treatments given in hospital: Carotid surgery (Y/N)}
 #'   \item{DDEAD}{Other events within 14 days:
-#'   Other events within 14 days: Dead on discharge form}
+#'   Dead on discharge form}
 #'   \item{DDEADC}{Other events within 14 days: Cause of death
 #'   (1-Initial stroke/2-Recurrent stroke (ischaemic or unknown
 #'   /3-Recurrent stroke (haemorrhagic)/4-Pneumonia
@@ -79,9 +79,11 @@
 #'   \item{DMAJNCH}{Data collected on 14 day/discharge form
 #'   about treatments given in hospital: Major non-cerebral haemorrhage (Y/N)}
 #'   \item{DMAJNCHD}{Data collected on 14 day/discharge form
-#'   about treatments given in hospital:}
+#'   about treatments given in hospital:
+#'   Date of Major non-cerebral haemorrhage (yyyy/mm/dd)}
 #'   \item{DMAJNCHX}{Data collected on 14 day/discharge form
-#'   about treatments given in hospital: }
+#'   about treatments given in hospital:
+#'   Comment of Major non-cerebral haemorrhage}
 #'   \item{DMH14}{Data collected on 14 day/discharge form
 #'   about treatments given in hospital: Date of Major non-cerebral haemorrhage
 #'   (yyyy/mm/dd)}
@@ -162,7 +164,7 @@
 #'   Date discharge form received}
 #'   \item{FU2_DONE}{Other data and derived variables:
 #'   Date 6 month follow-up done}
-#'   \item{H14}{ndicator variables for specific causes of death:
+#'   \item{H14}{Indicator variables for specific causes of death:
 #'   Cerebral bleed/heamorrhagic stroke within 14 days;
 #'   this is slightly wider definition than DRSH an is used for analysis of
 #'   cerebral bleeds}
@@ -242,7 +244,7 @@
 #'   \item{SEX}{Randomisation data: M=male; F=female}
 #'   \item{STRK14}{Indicator variables for specific causes of death:
 #'   Indicator of any stroke within 14 days}
-#'   \item{STYPE}{Randomisation data: Stroke subtype (TACS/PACS/POCS/LACS/other}
+#'   \item{STYPE}{Randomisation data: Stroke subtype (TACS/PACS/POCS/LACS/other)}
 #'   \item{TD}{Other data and derived variables:
 #'   Time of death or censoring in days}
 #'   \item{TRAN14}{Indicator variables for specific causes of death:

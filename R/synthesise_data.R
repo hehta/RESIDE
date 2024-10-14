@@ -16,10 +16,8 @@
 #' \code{\link{import_cor_matrix}} for more details.
 #' @examples
 #' \dontrun{
-#' if(interactive()){
 #'    marginals <- import_marginal_distributions()
 #'    df <- synthesise_data(marginals)
-#'  }
 #' }
 #' @seealso
 #'  \code{\link{export_empty_cor_matrix}}
@@ -340,10 +338,11 @@ add_missingness <- function(
 #' The correlation matrix should be symmetric and positive semi definite.
 #' @examples
 #' \dontrun{
-#' if(interactive()){
 #'  marginals <- import_marginal_distributions()
-#'  export_empty_cor_matrix(marginals)
-#'  }
+#'  export_empty_cor_matrix(
+#'    marginals,
+#'    folder_path = tempdir()
+#'   )
 #' }
 #' @seealso
 #'  \code{\link{import_marginal_distributions}}
@@ -402,9 +401,7 @@ export_empty_cor_matrix <- function(
 #' should be symmetric and be positive semi definite.
 #' @examples
 #' \dontrun{
-#' if(interactive()){
-#'    import_cor_matrix("correlation_matrix.csv")
-#'  }
+#'   import_cor_matrix("correlation_matrix.csv")
 #' }
 #' @seealso
 #'  \code{\link{export_empty_cor_matrix}}
