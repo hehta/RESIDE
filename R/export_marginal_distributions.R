@@ -7,16 +7,15 @@
 #' Default: FALSE
 #' @param force if the folder already contains marginal distribution files
 #' should they be removed, Default: FALSE
-#' @return No Explicit Return (NULL)
+#' @return No return value, called for exportation of files.
 #' @details Exports each of the marginal distributions to CSV files
 #' within a given folder, along with the continuous quantiles.
 #' @examples
-#' \dontrun{
-#' if(interactive()){
-#'    marginal_distributions <- get_marginal_distributions(IST)
-#'    export_marginal_distributions(marginal_distributions)
-#'  }
-#' }
+#' marginal_distributions <- get_marginal_distributions(IST)
+#' export_marginal_distributions(
+#'   marginal_distributions,
+#'   folder_path = tempdir()
+#' )
 #' @seealso
 #'  \code{\link{get_marginal_distributions}}
 #' @rdname export_marginal_distributions

@@ -44,13 +44,13 @@ testthat::test_that(".write_csv works", {
   )
   variable_type <- "continuous"
   expected_regex <- paste0(
-    "Exporting ",
+    "Exporting?.+",
     variable_type,
     " to: ?.+",
     file_name
   )
   df <- data.frame(test = "test")
-  testthat::expect_output(
+  testthat::expect_message(
     .write_csv(
       df,
       file_path,

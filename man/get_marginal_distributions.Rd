@@ -31,20 +31,16 @@ transformation. For categorical variables, the number of each category is
 stored, missing values are categorise as "missing".
 }
 \examples{
-\dontrun{
-if(interactive()){
-   marginal_distributions <- get_marginal_distributions(
-     IST,
-     variables <- c(
-       "SEX",
-       "AGE",
-       "ID14",
-       "RSBP",
-       "RATRIAL"
-     )
-   )
- }
-}
+marginal_distributions <- get_marginal_distributions(
+  IST,
+  variables <- c(
+    "SEX",
+    "AGE",
+    "ID14",
+    "RSBP",
+    "RATRIAL"
+  )
+)
 }
 \seealso{
 \code{\link{export_marginal_distributions}}

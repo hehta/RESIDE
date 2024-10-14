@@ -27,9 +27,7 @@ should be symmetric and be positive semi definite.
 }
 \examples{
 \dontrun{
-if(interactive()){
-   import_cor_matrix("correlation_matrix.csv")
- }
+  import_cor_matrix("correlation_matrix.csv")
 }
 }
 \seealso{

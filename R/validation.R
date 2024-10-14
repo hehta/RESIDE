@@ -42,7 +42,7 @@ is_variables_valid <- function(
     )
   )) {
     # Produce a helpful message
-    cat(
+    message(
       "Continuous variables do not match quantiles"
     )
     # Return FALSE
@@ -65,9 +65,11 @@ is_variable_valid <- function(
       get_required_variables(variable_type)[[1]] %in% names(variable_df)
     )) {
       # Else produce a handy message
-      cat(
-        variable_type,
-        "not valid \n"
+      message(
+        paste(
+          variable_type,
+          "not valid"
+        )
       )
       # And return FALSE
       return(FALSE)

@@ -11,6 +11,9 @@
 
 \item{...}{Other parameters currently none are used}
 }
+\value{
+No return value, called to print to the terminal.
+}
 \description{
 S3 override for print RESIDE
 }
@@ -18,20 +21,16 @@ S3 override for print RESIDE
 S3 Override for RESIDE Class
 }
 \examples{
-\dontrun{
-if(interactive()){
-   print(
-     marginal_distributions <- get_marginal_distributions(
-       IST,
-       variables <- c(
-         "SEX",
-         "AGE",
-         "ID14",
-         "RSBP",
-         "RATRIAL"
-       )
-     )
-   )
- }
-}
+print(
+  marginal_distributions <- get_marginal_distributions(
+    IST,
+    variables <- c(
+      "SEX",
+      "AGE",
+      "ID14",
+      "RSBP",
+      "RATRIAL"
+    )
+  )
+)
 }

@@ -36,10 +36,8 @@ see \code{\link{export_empty_cor_matrix}} and
 }
 \examples{
 \dontrun{
-if(interactive()){
    marginals <- import_marginal_distributions()
    df <- synthesise_data(marginals)
- }
 }
 }
 \seealso{

@@ -36,10 +36,11 @@ The correlation matrix should be symmetric and positive semi definite.
 }
 \examples{
 \dontrun{
-if(interactive()){
  marginals <- import_marginal_distributions()
- export_empty_cor_matrix(marginals)
- }
+ export_empty_cor_matrix(
+   marginals,
+   folder_path = tempdir()
+  )
 }
 }
 \seealso{
