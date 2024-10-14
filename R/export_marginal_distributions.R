@@ -11,11 +11,13 @@
 #' @details Exports each of the marginal distributions to CSV files
 #' within a given folder, along with the continuous quantiles.
 #' @examples
-#' marginal_distributions <- get_marginal_distributions(IST)
-#' export_marginal_distributions(
-#'   marginal_distributions,
-#'   folder_path = tempdir()
-#' )
+#' \donttest{
+#'   marginal_distributions <- get_marginal_distributions(IST)
+#'   export_marginal_distributions(
+#'     marginal_distributions,
+#'     folder_path = tempdir()
+#'   )
+#' }
 #' @seealso
 #'  \code{\link{get_marginal_distributions}}
 #' @rdname export_marginal_distributions

@@ -6,7 +6,7 @@
 \alias{RESIDE-package}
 \title{RESIDE: Rapid Easy Synthesis to Inform Data Extraction}
 \description{
-Developed to assist researchers with planning analysis, prior to obtaining data from Trusted Research Environments ('TREs') also known as safe havens Hubbard et al. (2021) \doi{10.5281/zenodo.4594704} Gao et al. (2022) \doi{10.2196/31684} Lea et al. (2016) <10.2196/medinform.5571>. With functionality to export and import marginal distributions as well as synthesise data, both with and without correlations from these marginal distributions. Using a multivariate cumulative distribution ('COPULA'). Additionally the International Stroke Trial ('IST') is included as an example dataset under ODC-By licence Sandercock et al. (2011) \doi{10.7488/ds/104}, Sandercock et al. (2011) \doi{10.1186/1745-6215-12-101}.
+Developed to assist researchers with planning analysis, prior to obtaining data from Trusted Research Environments ('TREs') also known as safe havens. With functionality to export and import marginal distributions as well as synthesise data, both with and without correlations from these marginal distributions. Using a multivariate cumulative distribution ('COPULA'). Additionally the International Stroke Trial ('IST') is included as an example dataset under 'ODC-By' licence 'Sandercock et al.' (2011) \doi{10.7488/ds/104}, 'Sandercock et al.' (2011) \doi{10.1186/1745-6215-12-101}.
 }
 \details{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
