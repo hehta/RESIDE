@@ -324,10 +324,10 @@ add_missingness <- function(
 #' @description A function to export a correlation matrix with
 #' the required variables as a csv file.
 #' @param marginals The marginal distributions
-#' @param folder_path Folder to export to, Default: '.'
+#' @param folder_path Folder to export to.
 #' @param file_name (optional) file name, Default: 'correlation_matrix.csv'
 #' @param create_folder Whether the folder should be created, Default: TRUE
-#' @return NULL
+#' @return No return value, called for exportation of files.
 #' @details This function will export an empty correlation matrix
 #' as a csv file, it will contain all the necessary variables including
 #' dummy variables for factors. Dummy variables for factors may contain
@@ -353,10 +353,14 @@ add_missingness <- function(
 #' @importFrom utils write.csv
 export_empty_cor_matrix <- function(
   marginals,
-  folder_path = ".",
+  folder_path,
   file_name = "correlation_matrix.csv",
   create_folder = TRUE
 ) {
+  # Check folder path
+  if (missing(folder_path)){
+    stop("A folder path must be provided.")
+  }
   # Check class
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")

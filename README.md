@@ -55,7 +55,7 @@ library(RESIDE)
 marginals <- get_marginal_distributions(IST)
 
 # Export the marginal distributions
-export_marginal_distributions(marginals)
+export_marginal_distributions(marginals, tempdir())
 
 # Import the exported marginal distributions
 marginals_imported <- import_marginal_distributions()

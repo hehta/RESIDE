@@ -2,7 +2,7 @@
 #' @description Export the marginal distributions to CSV files
 #' @param marginals an Object of type RESIDE from
 #' \code{\link{import_cor_matrix}}
-#' @param folder_path path to folder where to save files, Default: '.'
+#' @param folder_path path to folder where to save files.
 #' @param create_folder if the folder does not exist should it be created,
 #' Default: FALSE
 #' @param force if the folder already contains marginal distribution files
@@ -25,10 +25,14 @@
 #' @importFrom methods is
 export_marginal_distributions <- function(
   marginals,
-  folder_path = ".",
+  folder_path,
   create_folder = FALSE,
   force = FALSE
 ) {
+  # Check folder path
+  if (missing(folder_path)){
+    stop("A folder path must be provided.")
+  }
   # Check class
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")

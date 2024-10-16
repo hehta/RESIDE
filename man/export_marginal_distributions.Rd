@@ -6,7 +6,7 @@
 \usage{
 export_marginal_distributions(
   marginals,
-  folder_path = ".",
+  folder_path,
   create_folder = FALSE,
   force = FALSE
 )
@@ -15,7 +15,7 @@ export_marginal_distributions(
 \item{marginals}{an Object of type RESIDE from
 \code{\link{import_cor_matrix}}}
 
-\item{folder_path}{path to folder where to save files, Default: '.'}
+\item{folder_path}{path to folder where to save files.}
 
 \item{create_folder}{if the folder does not exist should it be created,
 Default: FALSE}

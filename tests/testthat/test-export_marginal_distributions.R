@@ -1,7 +1,12 @@
 testthat::test_that("export_marginal_distributions works", {
-  # Test class assumption
+  # Check folder path
   testthat::expect_error(
     export_marginal_distributions(list()),
+    regexp = "^.*A folder path must be provided.*$"
+  )
+  # Test class assumption
+  testthat::expect_error(
+    export_marginal_distributions(list(), tempdir()),
     regexp = "^.*object must be of class RESIDE.*$"
   )
   marginals <- marginal_distributions

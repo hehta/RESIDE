@@ -13,9 +13,11 @@ The Rapid Easy Synthesis to Inform Data Extraction (RESIDE) Package was develope
 
 Obtaining data from TREs is can be a lengthy process due to data governance [@gao_national_2022], in which time a researcher may not be able to start their analysis. With the RESIDE package, a researcher can obtain the marginal distributions of a dataset held by a trusted research environment and simulate a synthetic dataset. Thus allowing them to explore what the data looks like prior to gaining access to it. This approach allows the researched to explore variables, including their missingness and plan their analysis appropriately. Additionally, it allows the research to start writing code for their analysis as the structure of the synthetic data will be the same as that on the TRE. The RESIDE package also allows the researcher to specify **assumed** correlations based on expertise or previous research when simulating the data to also allow the researcher to test analysis.
 
-**NB** When using correlations it is not possible to maintain the marginal distributions.
+**NB** When using correlations it is not entirely possible to maintain all the marginal distributions.
 
 # Methods
+
+# For TRE's
 ## Generating Marginal Distributions
 Marginal distributions can be generated for a given dataset within a TRE using the `get_marginal_distributions()` function. Marginal distributions will be created for all variable types including:
 
@@ -34,6 +36,8 @@ Any other numeric variable is treated as a continuous variable. To prevent the n
 ## Exporting Marginal Distributions
 Marginal distributions are exported using the `export_marginal_distributions` function. Marginal distributions can be printed prior to export using the `print` function. See Exporting Marginal Distributions for more details.
 
+# For End Users
+
 ## Importing Marginal Distributions
 Marginal distributions can be imported using the `import_marginal_distributions` function. See importing marginal distributions for more details.
 
@@ -51,4 +55,4 @@ The package currently assumes that numeric variables which lie between 0 and 1 a
 The package currently assumes any variable of a character type is a categorical variable, this may cause issues if a dataset has erroneous characters. Additionally there is no limit on the number of categories or the minimum number within a category, leaving it up to the TRE to check this and preprocess these variables. Both these limitations will be addressed in future updates.
 
 ## Correlations
-It is not possible to maintain the marginal distributions and allow correlations to be specified, this is a known problem and is unlikely to be addressed.
+It is not entirely possible to maintain all the marginal distributions and allow correlations to be specified, this is a known problem and is unlikely to be addressed.
