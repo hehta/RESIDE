@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RESIDE</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">export_marginal_distributions</span><span class="op">(</span></span>
 <span>  <span class="va">marginals</span>,</span>
-<span>  folder_path <span class="op">=</span> <span class="st">"."</span>,</span>
+<span>  <span class="va">folder_path</span>,</span>
 <span>  create_folder <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  force <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -63,7 +63,7 @@
 
 
 <dt id="arg-folder-path">folder_path<a class="anchor" aria-label="anchor" href="#arg-folder-path"></a></dt>
-<dd><p>path to folder where to save files, Default: '.'</p></dd>
+<dd><p>path to folder where to save files.</p></dd>
 
 
 <dt id="arg-create-folder">create_folder<a class="anchor" aria-label="anchor" href="#arg-create-folder"></a></dt>
@@ -98,11 +98,11 @@ within a given folder, along with the continuous quantiles.</p>
 <span class="r-in"><span>    <span class="va">marginal_distributions</span>,</span></span>
 <span class="r-in"><span>    folder_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  categorical to:  /tmp/Rtmpig3sRP/categorical_variables.csv</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  binary to:  /tmp/Rtmpig3sRP/binary_variables.csv</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  continuous to:  /tmp/Rtmpig3sRP/continuous_variables.csv</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  quantiles to:  /tmp/Rtmpig3sRP/continuous_quantiles.csv</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  summary to:  /tmp/Rtmpig3sRP/summary.csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  categorical to:  /tmp/RtmpcPiVca/categorical_variables.csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  binary to:  /tmp/RtmpcPiVca/binary_variables.csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  continuous to:  /tmp/RtmpcPiVca/continuous_variables.csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  quantiles to:  /tmp/RtmpcPiVca/continuous_quantiles.csv</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Exporting  summary to:  /tmp/RtmpcPiVca/summary.csv</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

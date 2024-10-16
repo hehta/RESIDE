@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RESIDE</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,16 +88,17 @@ distribution (Copula), using the <code>simstudy</code> package.</p>
 </h2>
 <p>User specified correlations can be added to the synthesised data by
 supplying a correlation matrix. An empty correlations matrix can be
-generated using the <code><a href="../reference/export_empty_cor_matrix.html">export_empty_cor_matrix()</a></code> function:</p>
+generated using the <code><a href="../reference/export_empty_cor_matrix.html">export_empty_cor_matrix()</a></code> function,
+supplying the marginals imported using ‘import_marginal_distributions’
+and a folder path respectively:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hehta.github.io/RESIDE/">RESIDE</a></span><span class="op">)</span></span>
 <span><span class="va">marginals</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_marginal_distributions.html">import_marginal_distributions</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/export_empty_cor_matrix.html">export_empty_cor_matrix</a></span><span class="op">(</span><span class="va">marginals</span><span class="op">)</span></span></code></pre></div>
-<p>The folder path and file name can be specified using the
-<code>folder_path</code> and <code>file_name</code> parameters
-respectively. By default the correlation matrix will be exported to the
-current working directory, with the filename
-<em>correlation_matrix.csv</em></p>
+<span><span class="fu"><a href="../reference/export_empty_cor_matrix.html">export_empty_cor_matrix</a></span><span class="op">(</span><span class="va">marginals</span>, folder_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>By default the file wil be names <em>correlation_matrix.csv</em> but
+can be changed with the ‘file_name’ parameter *</li>
+</ul>
 <p>The exported CSV file will be a symmetric table which looks like:</p>
 <div class="datatables html-widget html-fill-item" id="htmlwidget-ac96cb3ee4656e2e9ec3" style="width:100%;height:auto;"></div>
 <script type="application/json" data-for="htmlwidget-ac96cb3ee4656e2e9ec3">{"x":{"filter":"none","vertical":false,"data":[["SEX_F","SEX_M","RATRIAL_missing","RATRIAL_N","RATRIAL_Y","ID14","SET14D","AGE","RSBP","DSIDED"],[1,0,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0],[0,0,0,1,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,1,0,0,0,0],[0,0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,1]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>SEX_F<\/th>\n      <th>SEX_M<\/th>\n      <th>RATRIAL_missing<\/th>\n      <th>RATRIAL_N<\/th>\n      <th>RATRIAL_Y<\/th>\n      <th>ID14<\/th>\n      <th>SET14D<\/th>\n      <th>AGE<\/th>\n      <th>RSBP<\/th>\n      <th>DSIDED<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":10,"scrollX":"400px","columnDefs":[{"className":"dt-right","targets":[1,2,3,4,5,6,7,8,9,10]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"SEX_F","targets":1},{"name":"SEX_M","targets":2},{"name":"RATRIAL_missing","targets":3},{"name":"RATRIAL_N","targets":4},{"name":"RATRIAL_Y","targets":5},{"name":"ID14","targets":6},{"name":"SET14D","targets":7},{"name":"AGE","targets":8},{"name":"RSBP","targets":9},{"name":"DSIDED","targets":10}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script><p>Correlations should then be added to the CSV file, without modifying
@@ -133,7 +134,7 @@ function, specifying the correlation matrix imported by the
 <span>  <span class="va">marginals</span>,</span>
 <span>  <span class="va">correlation_matrix</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><strong>NB</strong> It is not possible to completely maintain the
+<p><strong>NB</strong> It is not possible to entirely maintain all the
 marginal distributions when specifying correlations, this is a known
 limitation and is not likely to change.</p>
 </div>

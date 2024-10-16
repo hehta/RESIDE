@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">RESIDE</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
 <h2 id="remotes">Remotes<a class="anchor" aria-label="anchor" href="#remotes"></a>
 </h2>
 <pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"hehta/RESIDE"</span><span class="op">)</span></span></code></pre>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"hehta/RESIDE"</span><span class="op">)</span></span></code></pre>
 </div>
 </div>
 <div class="section level1">
@@ -126,7 +126,7 @@
 <span><span class="va">marginals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_marginal_distributions.html">get_marginal_distributions</a></span><span class="op">(</span><span class="va">IST</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Export the marginal distributions</span></span>
-<span><span class="fu"><a href="reference/export_marginal_distributions.html">export_marginal_distributions</a></span><span class="op">(</span><span class="va">marginals</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/export_marginal_distributions.html">export_marginal_distributions</a></span><span class="op">(</span><span class="va">marginals</span>, <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Import the exported marginal distributions</span></span>
 <span><span class="va">marginals_imported</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/import_marginal_distributions.html">import_marginal_distributions</a></span><span class="op">(</span><span class="op">)</span></span>
