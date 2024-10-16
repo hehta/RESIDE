@@ -6,7 +6,7 @@
 \usage{
 export_empty_cor_matrix(
   marginals,
-  folder_path = ".",
+  folder_path,
   file_name = "correlation_matrix.csv",
   create_folder = TRUE
 )
@@ -14,11 +14,14 @@ export_empty_cor_matrix(
 \arguments{
 \item{marginals}{The marginal distributions}
 
-\item{folder_path}{Folder to export to, Default: '.'}
+\item{folder_path}{Folder to export to.}
 
 \item{file_name}{(optional) file name, Default: 'correlation_matrix.csv'}
 
 \item{create_folder}{Whether the folder should be created, Default: TRUE}
+}
+\value{
+No return value, called for exportation of files.
 }
 \description{
 A function to export a correlation matrix with

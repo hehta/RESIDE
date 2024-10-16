@@ -232,9 +232,14 @@ testthat::test_that("define_continuous works", {
 })
 
 testthat::test_that("export_empty_cor_matrix works", {
+  # Test empty folder path
+  testthat::expect_error(
+    export_empty_cor_matrix(marginal_distributions),
+    regexp = "A folder path must be provided."
+  )
   # Test class assumption
   testthat::expect_error(
-    export_empty_cor_matrix(list()),
+    export_empty_cor_matrix(list(), tempdir()),
     regexp = "^.*object must be of class RESIDE.*$"
   )
   marginals <- marginal_distributions

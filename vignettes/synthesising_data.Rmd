@@ -26,13 +26,13 @@ simulated_data <- synthesise_data(marginals)
 ```
 
 # With correlations
-User specified correlations can be added to the synthesised data by supplying a correlation matrix. An empty correlations matrix can be generated using the `export_empty_cor_matrix()` function:
+User specified correlations can be added to the synthesised data by supplying a correlation matrix. An empty correlations matrix can be generated using the `export_empty_cor_matrix()` function, supplying the marginals imported using 'import_marginal_distributions' and a folder path respectively:
 ```{r export_cor_matrix}
 library(RESIDE)
 marginals <- import_marginal_distributions()
-export_empty_cor_matrix(marginals)
+export_empty_cor_matrix(marginals, folder_path = tempdir())
 ```
-The folder path and file name can be specified using the `folder_path` and `file_name` parameters respectively. By default the correlation matrix will be exported to the current working directory, with the filename *correlation_matrix.csv*
+* By default the file wil be names *correlation_matrix.csv* but can be changed with the 'file_name' parameter *
 
 The exported CSV file will be a symmetric table which looks like:
 ```{r print_cor_matrix, eval = TRUE, echo = FALSE}
@@ -70,4 +70,4 @@ simulated_data <- synthesise_data(
 )
 ```
 
-**NB** It is not possible to completely maintain the marginal distributions when specifying correlations, this is a known limitation and is not likely to change.
+**NB** It is not possible to entirely maintain all the marginal distributions when specifying correlations, this is a known limitation and is not likely to change.
