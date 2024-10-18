@@ -1,0 +1,205 @@
+---
+title: "Worked Example Using the IST Dataset"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Worked Example Using IST Dataset}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+This R Markdown document illustrates example usage of the RESIDE package using the IST dataset.
+
+# Setup
+Load the RESIDE package and set a seed for reproducibility and store the folder directory for export / import.
+```{r load-library}
+# Load the Library
+library(RESIDE)
+# Set the seed
+set.seed(1234)
+# Store the folder path used for import / export
+folder_path <- tempdir()
+```
+
+# Summarise original data
+Select the variables of interest and summarise. Selection of variables is optional, if the variables are known. They may not be known until the marginal distributions have been received.
+```{r summarise-data}
+# Select variables of interest from the IST dataset.
+IST_original <- IST |> dplyr::select(
+  AGE, # AGE at Randomisation
+  SEX, # SEX M/F
+  RATRIAL, # Atrial Fibrillation Y/N at Randomisation 
+  # (not coded for 984 patients in the pilot phase)
+  RSBP, # Systolic Blood Pressure at Randomisation
+  STRK14 # Indicator of Any Stroke at 14 days
+)
+
+# Convert the character variables to factors (to allow for summary)
+IST_original <- IST_original |> dplyr::mutate_if(is.character, factor)
+
+# Produce a summary of the variables
+summary(IST_original)
+
+```
+
+# Fit a cox model on the original data
+```{r original-model}
+# Load survival and dplyr libraries
+library(survival) # For Cox PH model
+library(dplyr) # For data manipulation
+
+# Stroke event is measured at 14 days, so set this for patients
+IST_original$DAY <- 14
+
+# Illustrate the 984 missing values
+sum(IST_original$RATRIAL == "")
+
+# Remove the missing values
+IST_original <- IST_original[!IST_original$RATRIAL == "",]
+
+# Drop the factor name for the missing values
+IST_original$RATRIAL <- droplevels(IST_original$RATRIAL)
+
+# Summarise the variable to show there are no longer missing values
+summary(IST_original$RATRIAL)
+
+# Fit a Cox PH model
+cox.ph <- coxph(Surv(DAY, STRK14) ~ AGE + SEX + RATRIAL + RSBP, data = IST_original) 
+
+# Output the summary of the Cox PH Model
+cox.ph
+```
+
+# Get the marginal distributions
+Use the `get_marginal_distributions()` function to get the marginal distributions, additionally selecting which variables using the `variables` parameter.
+```{r get-marginals}
+# Get the Marginal Distributions for the selected variables
+marginals <- get_marginal_distributions(
+  IST,
+  variables = c(
+    "AGE",
+    "SEX",
+    "RATRIAL",
+    "RSBP",
+    "STRK14"
+  )
+)
+
+```
+
+# Export the marginal distributions
+Export the marginal distributions using the `export_marginal_distributions()` function, using the `force` parameter to override any existing files.
+```{r export-marginals}
+# Export the Marginal Distributions
+export_marginal_distributions(marginals,
+                              folder_path = folder_path,
+                              force = TRUE)
+```
+# Reimport marginal distributions
+Import the exported marginal distributions using the `import_marginal_distributions()` function
+```{r import-marginals}
+# Import the Marginal Distributions
+imported_marginals <- import_marginal_distributions(folder_path = folder_path)
+```
+
+# Synthesise data from marginal distributions (without correlations)
+Synthesise data from the imported marginals using the `synthesise_data` function.
+```{r synthesis-data}
+# Synthesise a dataset from the imported Marginal Distributions (without correlations)
+sim_df <- synthesise_data(imported_marginals)
+```
+
+# Summarise the synthesised data
+Summarise the simulated data
+```{r summarise-sim-data}
+# Convert any Character variables to Factors
+sim_df <- sim_df |> dplyr::mutate_if(is.character, factor)
+# Summarise the synthesised data
+summary(sim_df)
+```
+
+# Fit a cox model on the simulated data
+Fit the same cox model as earlier except this time on the simulated data.
+```{r sim-data-model}
+
+# As before the events are measured at day 14
+sim_df$DAY <- 14
+
+# Show that the missing observations are in the data
+sum(sim_df$RATRIAL == "")
+
+# Remove the missing observations
+sim_df <- sim_df[!sim_df$RATRIAL == "",]
+
+# Remove the missing factor name
+sim_df$RATRIAL <- droplevels(sim_df$RATRIAL)
+
+# Show that there are no missing observations
+summary(sim_df$RATRIAL)
+
+# Fit the model on the synthesised data
+cox.ph.sim <- coxph(Surv(DAY, STRK14) ~ AGE + SEX + RATRIAL + RSBP, data = sim_df) 
+
+# Show a summary of the model
+cox.ph.sim
+```
+
+# Synthesise data with correlations
+Synthesise data from the imported marginals with correlations, by exporting an empty correlation matrix, then reimporting it and using the `correlation_matrix` parameter to specify the correlation matrix. Note the matrix was edited in R for this example but users would be expected to edit the correlation matrix in a program such as excel.
+```{r synthesis-data-cor}
+# Export an empty correlation matrix
+export_empty_cor_matrix(
+  imported_marginals,
+  folder_path = folder_path
+)
+# Reimport the matrix
+cor_matrix <- import_cor_matrix(file.path(folder_path, "correlation_matrix.csv"))
+# Add assumed correlations (note the symmetry)
+cor_matrix["RATRIAL_N", "STRK14"] <- -0.02
+cor_matrix["STRK14", "RATRIAL_N"] <- -0.02
+
+# Synthesise data specifying the correlation matrix
+sim_df_cor <- synthesise_data(imported_marginals, correlation_matrix = cor_matrix)
+```
+
+# Summarise the synthesised data
+Summarise the synthesised data (with correlations)
+```{r summarise-sim-data-cor}
+# Convert to Factors from Character variables
+sim_df_cor <- sim_df_cor |> dplyr::mutate_if(is.character, factor)
+# Summarise the synthesised dataset
+summary(sim_df_cor)
+```
+# Fit a cox model on the simulated data with correlations
+Using the synthesised data (with correlations) fit a Cox PH model, with the same parameters as earlier.
+```{r sim-data-model-cor}
+
+# Again events are measured at 14 days
+sim_df_cor$DAY <- 14
+
+# Again check that the missing values where added
+sum(sim_df_cor$RATRIAL == "")
+
+# Again remove the missing values
+sim_df_cor <- sim_df_cor[!sim_df_cor$RATRIAL == "",]
+
+# Again drop the missing factor
+sim_df_cor$RATRIAL <- droplevels(sim_df_cor$RATRIAL)
+
+# Show there are no missing values
+summary(sim_df_cor$RATRIAL)
+
+# Fit the model on the synthesised data (with correlations)
+cox.ph.sim.cor <- coxph(Surv(DAY, STRK14) ~ AGE + SEX + RATRIAL + RSBP, data = sim_df_cor)
+
+# Show a summary of the model
+cox.ph.sim.cor
+```
+
