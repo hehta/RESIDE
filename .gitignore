@@ -9,3 +9,4 @@ docs
 /Meta/
 inst/doc
 /RESIDE.Rcheck
+*.tar.gz

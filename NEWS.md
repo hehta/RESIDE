@@ -1,3 +1,7 @@
+# RESIDE 0.3.3
+
+* Update to vignette
+
 # RESIDE 0.3.2
 
 * Further fixes for CRAN Submission

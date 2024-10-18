@@ -1,8 +1,8 @@
 ---
-title: "Synthesising Data from Marginals"
+title: "Synthesising Data from Marginal Distributions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Synthesising Data from Marginals}
+  %\VignetteIndexEntry{Synthesising Data from Marginal Distributions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -34,15 +34,15 @@ Currently any factor variable or variable containing non numeric characters will
 Any other numeric variable is treated as a continuous variable. To prevent the need to specify a distribution when simulating data, continuous variables are transformed using Ordered Quantile normalisation from the `bestNormalize` package. The mean and standard deviation of the transformed variable(s) are used as the marginal distributions to allow the simulation of the variable using a normal distribution. Additionally the mapping table is exported to allow the variables to be back transformed.
 
 ## Exporting Marginal Distributions
-Marginal distributions are exported using the `export_marginal_distributions` function. Marginal distributions can be printed prior to export using the `print` function. See Exporting Marginal Distributions for more details.
+Marginal distributions are exported using the `export_marginal_distributions` function. Marginal distributions can be printed prior to export using the `print` function. See [Exporting Marginal Distributions](exporting_marginal_distributions.html) for more details.
 
 # For End Users
 
 ## Importing Marginal Distributions
-Marginal distributions can be imported using the `import_marginal_distributions` function. See importing marginal distributions for more details.
+Marginal distributions can be imported using the `import_marginal_distributions` function. See [Importing Marginal Distributions](importing_marginal_distributions.html) for more details.
 
 ## Data Simulation
-Data is simulated from a cumulative multivariate copula distribution using the `simstudy` package. Data can be simulated from marginal distributions using the `synthesise_data` function. See Synthesising Data and Synthesising Data with Correlations for more details.
+Data is simulated from a cumulative multivariate copula distribution using the `simstudy` package. Data can be simulated from marginal distributions using the `synthesise_data` function. See [Synthesising Data and Synthesising Data with Correlations](synthesising_data.html) for more details.
 
 
 # Limitations
