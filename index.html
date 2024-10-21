@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">RESIDE</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,10 +36,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/exporting_marginal_distributions.html">Exporting Marginal Distributions</a></li>
+<li><a class="dropdown-item" href="articles/exporting_marginal-distributions.html">Exporting Marginal Distributions</a></li>
     <li><a class="dropdown-item" href="articles/importing_marginal_distributions.html">Importing Marginal Distributions</a></li>
-    <li><a class="dropdown-item" href="articles/synthesising_data.html">Synthesising Data from Marginal Distributions</a></li>
-    <li><a class="dropdown-item" href="articles/worked_example.html">Worked Example Using the IST Dataset</a></li>
+    <li><a class="dropdown-item" href="articles/synthesising_data.html">Synthesising Data from Marginals</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -64,13 +63,7 @@
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h1>
-<div class="section level2">
-<h2 id="cran">CRAN<a class="anchor" aria-label="anchor" href="#cran"></a>
-</h2>
-<p>The latest release of this package can be installed from CRAN:</p>
-<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"RESIDE"</span><span class="op">)</span></span></code></pre>
-<p>Additionally the development version of this package can be installed using <code>devtools</code> or <code>remotes</code>:</p>
-</div>
+<p>Currently this package can be installed using <code>devtools</code> or <code>remotes</code></p>
 <div class="section level2">
 <h2 id="devtools">Devtools<a class="anchor" aria-label="anchor" href="#devtools"></a>
 </h2>
@@ -95,13 +88,13 @@
 <h3 id="get_marginal_distributions">
 <code>get_marginal_distributions()</code><a class="anchor" aria-label="anchor" href="#get_marginal_distributions"></a>
 </h3>
-<p>This function will get the marginal distributions and store them in an R object. See the documentation on <a href="https://hehta.github.io/RESIDE/articles/exporting_marginal_distributions.html">exporting marginal distributions</a> for further information.</p>
+<p>This function will get the marginal distributions and store them in an R object.</p>
 </div>
 <div class="section level3">
 <h3 id="export_marginal_distributions">
 <code>export_marginal_distributions()</code><a class="anchor" aria-label="anchor" href="#export_marginal_distributions"></a>
 </h3>
-<p>This function will export the marginal distributions to csv files. See the documentation on <a href="https://hehta.github.io/RESIDE/articles/exporting_marginal_distributions.html">exporting marginal distributions</a> for further information.</p>
+<p>This function will export the marginal distributions to csv files.</p>
 </div>
 </div>
 <div class="section level2">
@@ -112,20 +105,34 @@
 <h3 id="import_marginal_distributions">
 <code>import_marginal_distributions()</code><a class="anchor" aria-label="anchor" href="#import_marginal_distributions"></a>
 </h3>
-<p>This function will import the marginal distributions from the csv files provided by a TRE and store them in an R object. See the documentation on <a href="https://hehta.github.io/RESIDE/articles/importing_marginal_distributions.html">importing marginal distributions</a> for further information.</p>
+<p>This function will import the marginal distributions from the csv files provided by a TRE and store them in an R object.</p>
 </div>
 <div class="section level3">
 <h3 id="synthesise_data">
 <code>synthesise_data()</code><a class="anchor" aria-label="anchor" href="#synthesise_data"></a>
 </h3>
-<p>This function will synthesise data based on the imported marginal distributions. See the documentation on <a href="https://hehta.github.io/RESIDE/articles/synthesising_data.html">synthesising data</a> for further information.</p>
+<p>This function will synthesise data base on the imported marginal distributions.</p>
 </div>
 </div>
 </div>
 <div class="section level1">
 <h1 id="worked-example-using-the-internation-stroke-trial">Worked Example Using the Internation Stroke Trial<a class="anchor" aria-label="anchor" href="#worked-example-using-the-internation-stroke-trial"></a>
 </h1>
-<p>A worked example using the International Stroke Trial is available in the <a href="https://hehta.github.io/RESIDE/articles/worked_example.html">documentation</a>.</p>
+<p>The following is a worked example using the <a href="https://doi.org/10.7488/ds/104" class="external-link">International Stroke Trial (IST)</a> which has been included as a dataset in the package under ODC-by licence.</p>
+<pre><code><span><span class="co"># Load the package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://hehta.github.io/RESIDE/">RESIDE</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get the marginal distributions</span></span>
+<span><span class="va">marginals</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_marginal_distributions.html">get_marginal_distributions</a></span><span class="op">(</span><span class="va">IST</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Export the marginal distributions</span></span>
+<span><span class="fu"><a href="reference/export_marginal_distributions.html">export_marginal_distributions</a></span><span class="op">(</span><span class="va">marginals</span>, <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Import the exported marginal distributions</span></span>
+<span><span class="va">marginals_imported</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/import_marginal_distributions.html">import_marginal_distributions</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Synthesise data from the imported marginal distributions</span></span>
+<span><span class="fu"><a href="reference/synthesise_data.html">synthesise_data</a></span><span class="op">(</span><span class="va">marginals_imported</span><span class="op">)</span></span></code></pre>
 </div>
 <div class="section level1">
 <h1 id="funding">Funding<a class="anchor" aria-label="anchor" href="#funding"></a>
@@ -170,7 +177,6 @@
 <ul class="list-unstyled">
 <li><a href="https://hehta.github.io/RESIDE/"><img src="https://img.shields.io/badge/docs-RESIDE-blue" alt="Static Badge"></a></li>
 <li><a href="https://zenodo.org/doi/10.5281/zenodo.13693881" class="external-link"><img src="https://zenodo.org/badge/841077745.svg" alt="DOI"></a></li>
-<li><a href="https://cran.r-project.org/package=RESIDE" class="external-link"><img src="https://www.r-pkg.org/badges/version/RESIDE" alt="CRAN"></a></li>
 <li><a href="https://codecov.io/gh/hehta/RESIDE" class="external-link"><img src="https://codecov.io/gh/hehta/RESIDE/graph/badge.svg?token=17ZQNFWA40" alt="codecov"></a></li>
 <li><a href="https://github.com/hehta/RESIDE/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/hehta/RESIDE/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-Check"></a></li>
 </ul>
