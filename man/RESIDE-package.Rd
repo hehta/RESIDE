@@ -6,6 +6,8 @@
 \alias{RESIDE-package}
 \title{RESIDE: Rapid Easy Synthesis to Inform Data Extraction}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Developed to assist researchers with planning analysis, prior to obtaining data from Trusted Research Environments (TREs) also known as safe havens. With functionality to export and import marginal distributions as well as synthesise data, both with and without correlations from these marginal distributions. Using a multivariate cumulative distribution (COPULA). Additionally the International Stroke Trial (IST) is included as an example dataset under ODC-By licence Sandercock et al. (2011) \doi{10.7488/ds/104}, Sandercock et al. (2011) \doi{10.1186/1745-6215-12-101}.
 }
 \details{

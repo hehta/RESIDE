@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/hehta/RESIDE/graph/badge.svg?token=17ZQNFWA40)](https://codecov.io/gh/hehta/RESIDE)
 [![R-CMD-Check](https://github.com/hehta/RESIDE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hehta/RESIDE/actions/workflows/R-CMD-check.yaml)
 
-# RESIDE: Rapid Easy Synthesis to Inform Data Extraction
+# RESIDE: Rapid Easy Synthesis to Inform Data Extraction <a href="https://hehta.github.io/RESIDE/"><img src="man/figures/logo.png" align="right" height="139" alt="RESIDE website" /></a>
 
 An R package which allows data to be simulation from marginal distributions obtained from Trusted Research Environments (TREs).
 
