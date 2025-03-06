@@ -67,7 +67,7 @@ synthesise_data_no_cor <- function(
       approx(
         marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
         marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
-        xout = sim_df[[variable_name]], rule = 2:1
+        xout = sim_df[[variable_name]], rule = 2
       )$y
     # Round to original decimal places
     sim_df[[variable_name]] <- round(
@@ -115,7 +115,7 @@ synthesise_data_cor <- function(
       approx(
         marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
         marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
-        xout = sim_df[[variable_name]], rule = 2:1
+        xout = sim_df[[variable_name]], rule = 2
       )$y
     # Round to original decimal places
     sim_df[[variable_name]] <- round(
