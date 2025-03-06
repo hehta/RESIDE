@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Worked Example Using the IST Dataset">
 </head>
 <body>
@@ -204,11 +204,11 @@ marginal distributions, additionally selecting which variables using the
 <span><span class="fu"><a href="../reference/export_marginal_distributions.html">export_marginal_distributions</a></span><span class="op">(</span><span class="va">marginals</span>,</span>
 <span>                              folder_path <span class="op">=</span> <span class="va">folder_path</span>,</span>
 <span>                              force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exporting  categorical to:  /tmp/RtmpetDLRs/categorical_variables.csv</span></span>
-<span><span class="co">#&gt; Exporting  binary to:  /tmp/RtmpetDLRs/binary_variables.csv</span></span>
-<span><span class="co">#&gt; Exporting  continuous to:  /tmp/RtmpetDLRs/continuous_variables.csv</span></span>
-<span><span class="co">#&gt; Exporting  quantiles to:  /tmp/RtmpetDLRs/continuous_quantiles.csv</span></span>
-<span><span class="co">#&gt; Exporting  summary to:  /tmp/RtmpetDLRs/summary.csv</span></span></code></pre></div>
+<span><span class="co">#&gt; Exporting  categorical to:  /tmp/RtmpDC59au/categorical_variables.csv</span></span>
+<span><span class="co">#&gt; Exporting  binary to:  /tmp/RtmpDC59au/binary_variables.csv</span></span>
+<span><span class="co">#&gt; Exporting  continuous to:  /tmp/RtmpDC59au/continuous_variables.csv</span></span>
+<span><span class="co">#&gt; Exporting  quantiles to:  /tmp/RtmpDC59au/continuous_quantiles.csv</span></span>
+<span><span class="co">#&gt; Exporting  summary to:  /tmp/RtmpDC59au/summary.csv</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reimport-marginal-distributions">Reimport marginal distributions<a class="anchor" aria-label="anchor" href="#reimport-marginal-distributions"></a>
@@ -335,16 +335,14 @@ excel.</p>
 <span><span class="co">#&gt;  Median : 9718             Y:  664   Median :0.00000   Median :73.0  </span></span>
 <span><span class="co">#&gt;  Mean   : 9718                       Mean   :0.03828   Mean   :71.6  </span></span>
 <span><span class="co">#&gt;  3rd Qu.:14576                       3rd Qu.:0.00000   3rd Qu.:80.0  </span></span>
-<span><span class="co">#&gt;  Max.   :19435                       Max.   :1.00000   Max.   :98.0  </span></span>
-<span><span class="co">#&gt;                                                        NA's   :2     </span></span>
+<span><span class="co">#&gt;  Max.   :19435                       Max.   :1.00000   Max.   :99.0  </span></span>
 <span><span class="co">#&gt;       RSBP    </span></span>
 <span><span class="co">#&gt;  Min.   : 77  </span></span>
 <span><span class="co">#&gt;  1st Qu.:141  </span></span>
 <span><span class="co">#&gt;  Median :160  </span></span>
 <span><span class="co">#&gt;  Mean   :160  </span></span>
 <span><span class="co">#&gt;  3rd Qu.:176  </span></span>
-<span><span class="co">#&gt;  Max.   :291  </span></span>
-<span><span class="co">#&gt; </span></span></code></pre></div>
+<span><span class="co">#&gt;  Max.   :291</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fit-a-cox-model-on-the-simulated-data-with-correlations">Fit a cox model on the simulated data with correlations<a class="anchor" aria-label="anchor" href="#fit-a-cox-model-on-the-simulated-data-with-correlations"></a>
@@ -381,14 +379,13 @@ with the same parameters as earlier.</p>
 <span><span class="co">#&gt;     data = sim_df_cor)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;              coef exp(coef) se(coef)     z     p</span></span>
-<span><span class="co">#&gt; AGE      0.003310  1.003315 0.003198 1.035 0.301</span></span>
-<span><span class="co">#&gt; SEXM     0.025991  1.026332 0.090866 0.286 0.775</span></span>
-<span><span class="co">#&gt; RATRIALY 0.182675  1.200425 0.186449 0.980 0.327</span></span>
-<span><span class="co">#&gt; RSBP     0.000202  1.000202 0.001336 0.151 0.880</span></span>
+<span><span class="co">#&gt; AGE      0.003287  1.003292 0.003197 1.028 0.304</span></span>
+<span><span class="co">#&gt; SEXM     0.026197  1.026543 0.090866 0.288 0.773</span></span>
+<span><span class="co">#&gt; RATRIALY 0.182798  1.200571 0.186449 0.980 0.327</span></span>
+<span><span class="co">#&gt; RSBP     0.000207  1.000207 0.001336 0.155 0.877</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Likelihood ratio test=2.07  on 4 df, p=0.722</span></span>
-<span><span class="co">#&gt; n= 19282, number of events= 735 </span></span>
-<span><span class="co">#&gt;    (2 observations deleted due to missingness)</span></span></code></pre></div>
+<span><span class="co">#&gt; Likelihood ratio test=2.06  on 4 df, p=0.7241</span></span>
+<span><span class="co">#&gt; n= 19284, number of events= 735</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
