@@ -26,7 +26,8 @@ Suggests:
     knitr,
     rmarkdown,
     DT,
-    survival
+    survival,
+    pharmaversesdtm
 Depends: 
     R (>= 2.10)
 Imports:

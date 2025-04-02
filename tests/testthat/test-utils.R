@@ -87,7 +87,7 @@ testthat::test_that("remove_marginal_files works", {
     temp_dir
   )
   remove_marginal_files(temp_dir)
-  expect_equal(
+  testthat::expect_equal(
     marginal_files_exist(temp_dir),
     c()
   )
@@ -105,5 +105,14 @@ testthat::test_that("remove_marginal_files works", {
   expect_equal(
     marginal_files_exist(temp_dir),
     c("other_file.csv")
+  )
+})
+
+testthat::test_that("is_long_format works", {
+  testthat::expect_false(
+    is_long_format(pharmaversesdtm::dm, "USUBJID")
+  )
+  testthat::expect_true(
+    is_long_format(pharmaversesdtm::ae, "USUBJID")
   )
 })

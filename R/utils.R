@@ -226,3 +226,14 @@ remove_marginal_files <- function(folder_path) {
     ))
   }
 }
+
+is_long_format <- function(df, subject_identifier) {
+  if(! subject_identifier %in% names (df)){
+    stop("Subject Identifier must be in data")
+  }
+  unique_ids <- unique(df[[subject_identifier]])
+  if(length(unique_ids) < nrow(df)){
+    return(TRUE)
+  }
+  return(FALSE)
+}
