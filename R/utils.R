@@ -237,3 +237,30 @@ is_long_format <- function(df, subject_identifier) {
   }
   return(FALSE)
 }
+
+get_long_columns <- function(df, subject_identifier) {
+  # Forward declare long columns
+  long_columns = c()
+
+  # Get unique subjects
+  unique_subjects = unique(df[[subject_identifier]])
+  
+  # Loop through subjects
+  for(subject in unique_subjects) {
+    # Loop through columns
+    for(col in names(df)){
+      # Ignore any existing long columns
+      if(col %in% long_columns) {
+        break
+      }
+      # Get the rows for the subject
+      subject_rows <- df[df[[subject_identifier]] == subject,]
+      # Check if the column has different values for any row
+      if(length(unique(subject_rows[[col]])) > 1) {
+        # Add the column to the long columns list
+        long_columns = c(col, long_columns)
+      }
+    }
+  }
+  return(long_columns)
+}

@@ -116,3 +116,27 @@ testthat::test_that("is_long_format works", {
     is_long_format(pharmaversesdtm::ae, "USUBJID")
   )
 })
+
+testthat::test_that("get_long_columns works", {
+  expected = c(
+    "AEENDY",
+    "AESTDY",
+    "AEENDTC",
+    "AESTDTC",
+    "AEOUT",
+    "AEREL",
+    "AESOC",
+    "AEBODSYS",
+    "AEHLGT",
+    "AEHLT",
+    "AEDECOD",
+    "AELLT",
+    "AETERM",
+    "AESPID",
+    "AESEQ"  
+  )
+  testthat::expect_equal(
+    expected,
+    get_long_columns(pharmaversesdtm::ae, "USUBJID")
+  )
+})
