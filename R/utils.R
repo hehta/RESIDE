@@ -227,6 +227,7 @@ remove_marginal_files <- function(folder_path) {
   }
 }
 
+# Function to determine if a data frame is in long format
 is_long_format <- function(df, subject_identifier) {
   if(! subject_identifier %in% names (df)){
     stop("Subject Identifier must be in data")
@@ -238,6 +239,7 @@ is_long_format <- function(df, subject_identifier) {
   return(FALSE)
 }
 
+# Function to get the long (format) columns from a data frame
 get_long_columns <- function(df, subject_identifier) {
   # Forward declare long columns
   long_columns = c()
@@ -264,3 +266,20 @@ get_long_columns <- function(df, subject_identifier) {
   }
   return(long_columns)
 }
+
+# Function to convert a data frame from long to wide format
+long_to_wide <- function(df, subject_identifier) {
+
+  long_columns <- get_long_columns(df, subject_identifier)
+
+  wide_df <- 
+    df %>%
+      group_by_at(subject_identifier) %>%
+        mutate(row = row_number()) %>%
+            tidyr::pivot_wider(
+              names_from = row,
+              names_sep = ".",
+              values_from = all_of(long_columns)
+            )
+  }
+  return(wide_df)
