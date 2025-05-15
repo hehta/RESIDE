@@ -3,6 +3,7 @@
 ^\.Rproj\.user$
 ^\.gitignore$
 ^\.github$
+^\.vscode$
 ^README\.md$
 ^LICENSE.md$
 ^CITATION\.cff$

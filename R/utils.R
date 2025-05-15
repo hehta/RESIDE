@@ -149,7 +149,7 @@ get_n_missing <- function(
   # Return the number of rows with NAs
   return(
     nrow( # Number of Rows with just NA
-      as.data.frame( # Ensure it's a df as subsetting a single column
+      as.data.frame( # Ensure it's a df as sub-setting a single column
         df[is.na(df[column]), ]
       )
     )
@@ -183,7 +183,7 @@ marginal_files_exist <- function(folder_path) {
   .files_exist <- c()
   # loop through the default file names (see zzz.R)
   for (.file in .marginal_file_names) {
-    # If the file exists in the foleder
+    # If the file exists in the folder
     if (
       file.exists(
         file.path(
@@ -229,11 +229,11 @@ remove_marginal_files <- function(folder_path) {
 
 # Function to determine if a data frame is in long format
 is_long_format <- function(df, subject_identifier) {
-  if(! subject_identifier %in% names (df)){
+  if (! subject_identifier %in% names(df)) {
     stop("Subject Identifier must be in data")
   }
   unique_ids <- unique(df[[subject_identifier]])
-  if(length(unique_ids) < nrow(df)){
+  if (length(unique_ids) < nrow(df)) {
     return(TRUE)
   }
   return(FALSE)
@@ -242,25 +242,24 @@ is_long_format <- function(df, subject_identifier) {
 # Function to get the long (format) columns from a data frame
 get_long_columns <- function(df, subject_identifier) {
   # Forward declare long columns
-  long_columns = c()
+  long_columns <- c()
 
   # Get unique subjects
-  unique_subjects = unique(df[[subject_identifier]])
-  
+  unique_subjects <- unique(df[[subject_identifier]])
+
   # Loop through subjects
-  for(subject in unique_subjects) {
+  for (subject in unique_subjects) {
     # Loop through columns
-    for(col in names(df)){
+    for (col in names(df)){
       # Ignore any existing long columns
-      if(col %in% long_columns) {
-        break
-      }
-      # Get the rows for the subject
-      subject_rows <- df[df[[subject_identifier]] == subject,]
-      # Check if the column has different values for any row
-      if(length(unique(subject_rows[[col]])) > 1) {
-        # Add the column to the long columns list
-        long_columns = c(col, long_columns)
+      if (!col %in% long_columns) {
+        # Get the rows for the subject
+        subject_rows <- df[df[[subject_identifier]] == subject, ]
+        # Check if the column has different values for any row
+        if (length(unique(subject_rows[[col]])) > 1) {
+          # Add the column to the long columns list
+          long_columns <- c(col, long_columns)
+        }
       }
     }
   }
@@ -272,14 +271,14 @@ long_to_wide <- function(df, subject_identifier) {
 
   long_columns <- get_long_columns(df, subject_identifier)
 
-  wide_df <- 
+  wide_df <-
     df %>%
-      group_by_at(subject_identifier) %>%
-        mutate(row = row_number()) %>%
-            tidyr::pivot_wider(
-              names_from = row,
-              names_sep = ".",
-              values_from = all_of(long_columns)
-            )
-  }
+    dplyr::group_by(dplyr::pick({{subject_identifier}})) %>%
+    mutate(row = dplyr::row_number()) %>%
+    tidyr::pivot_wider(
+      names_from = row,
+      names_sep = ".",
+      values_from = tidyr::all_of(long_columns)
+    )
   return(wide_df)
+}

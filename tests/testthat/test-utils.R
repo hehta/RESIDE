@@ -118,7 +118,15 @@ testthat::test_that("is_long_format works", {
 })
 
 testthat::test_that("get_long_columns works", {
-  expected = c(
+  expected <- c(
+    "AESER",
+    "AESDISAB",
+    "AESCAN",
+    "AESLIFE",
+    "AESDTH",
+    "AESHOSP",
+    "AEDTC",
+    "AESEV",
     "AEENDY",
     "AESTDY",
     "AEENDTC",
@@ -133,10 +141,19 @@ testthat::test_that("get_long_columns works", {
     "AELLT",
     "AETERM",
     "AESPID",
-    "AESEQ"  
+    "AESEQ"
   )
   testthat::expect_equal(
     expected,
     get_long_columns(pharmaversesdtm::ae, "USUBJID")
+  )
+})
+
+testthat::test_that("long_to_wide works", {
+  subject_identifier <- "USUBJID"
+  unique_subjects <- unique(pharmaversesdtm::ae[[subject_identifier]])
+  testthat::expect_equal(
+    nrow(long_to_wide(pharmaversesdtm::ae, subject_identifier)),
+    length(unique_subjects)
   )
 })
