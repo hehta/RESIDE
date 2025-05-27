@@ -1,7 +1,10 @@
 #' @title Generate Marginal Distributions for a given data frame
 #' @description Generate Marginal Distributions from a given
 #' data frame with options to specify which variables to use.
-#' @param df Data frame to get the marginal distributions from
+#' @param df Data frame or a \code{"list"} of data frames
+#' to get the marginal distributions from
+#' @param subject_identifier (Optional) Subject identifier required if a
+#' list of data frames is provided, Default: ""
 #' @param variables (Optional) variable (columns) to select, Default: c()
 #' @param print Whether to print the marginal distributions
 #' to the console, Default: FALSE
@@ -32,9 +35,24 @@
 #' @importFrom dplyr mutate_if
 get_marginal_distributions <- function(
   df,
+  subject_identifier = "",
   variables = c(),
-  print = FALSE
+  print = FALSE,
+  retype = TRUE
 ) {
+  original_df <- df
+  original_variables <- ""
+  n_dataframes <- 1
+
+  # Check if df is a list
+  if (is.list(df)) {
+    df <- .list_to_df(
+      df,
+      subject_identifier
+    )
+    n_dataframes <- length(df)
+  }
+
   # Check if variables is set
   df <- as.data.frame(df)
   if (length(variables > 1)) {
@@ -57,14 +75,29 @@ get_marginal_distributions <- function(
     df <- df[variables]
   }
 
+  if (retype) {
+    hablar::retype(df)
+  }
+
   # Replace missing values for characters with "missing"
   df <- df %>% dplyr::mutate_if(
     is.character,
     function(x) ifelse(x == "", "missing", x)
   )
 
+  df <- df %>% dplyr::mutate(
+    dplyr::across(
+      dplyr::where(function(x) all(is.na(x))), ~  "missing"
+    )
+  )
+
   # Ensure characters are factors
   df <- df %>% dplyr::mutate_if(is.character, factor)
+
+  # Remove subject identifier from df
+  if (subject_identifier %in% names(df)) {
+    df[[subject_identifier]] <- NULL
+  }
 
   # Get variable types
   .variable_types <- get_variable_types(df)
@@ -76,7 +109,7 @@ get_marginal_distributions <- function(
   .binary_summary <- list()
   # Loop through binary variables
   for (.column in .binary_variables) {
-    # add mean of binary varable to binary summary
+    # add mean of binary variable to binary summary
     .binary_summary[[.column]] <- list(
       mean = mean(df[[.column]]),
       missing = get_n_missing(df, .column)
@@ -103,15 +136,27 @@ get_marginal_distributions <- function(
   .overall_summary <- data.frame(
     n_row = nrow(df),
     n_col = ncol(df),
-    variables = paste(names(df), collapse = ", ")
+    n_dataframes = n_dataframes,
+    variables = paste(names(df), collapse = ", "),
+    subject_identifier = subject_identifier
   )
+
+  if (n_dataframes > 1) {
+    .overall_summary <- .add_n_row_summaries(
+      original_df,
+      .overall_summary
+    )
+  }
+
+  .variable_map <- get_variable_map(original_df)
 
   # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
     continuous_variables = .continuous_summary,
-    summary = .overall_summary
+    summary = .overall_summary,
+    variable_map = .variable_map
   )
 
   # Add a class to the return to allow for S3 overrides
@@ -127,6 +172,118 @@ get_marginal_distributions <- function(
     .return
   )
 
+}
+
+.list_to_df <- function(
+  df,
+  subject_identifier
+) {
+  .subjects <- NULL
+  # Check if subject_identifier is set
+  if (subject_identifier == "") {
+    stop("Subject identifier must be set")
+  }
+  # Check if subject_identifier is a character
+  if (!is.character(subject_identifier)) {
+    stop("Subject identifier must be a character")
+  }
+
+  .dfs <- list()
+  if (!is.list(df)) {
+    df <- list(df)
+  }
+
+  keys <- names(df)
+  if (is.null(keys)) {
+    keys <- seq_len(length(df))
+  }
+
+  for (key in keys) {
+    .df <- df[[key]]
+    if (!subject_identifier %in% names(.df)) {
+      stop(
+        "Subject identifier must be in all df's"
+      )
+    }
+    if (is_long_format(.df, subject_identifier)) {
+      .df <- long_to_wide(
+        .df,
+        subject_identifier
+      )
+    }
+    # Sanity check that the subject identifier is a unique
+    if (length(unique(.df[[subject_identifier]])) != nrow(.df)) {
+      stop(
+        "Subject identifier must be unique in all df's"
+      )
+    }
+    .subjects <- c(
+      .subjects,
+      .df[[subject_identifier]]
+    )
+    .dfs[[key]] <- .df
+  }
+  return(
+    .join_df(
+      .dfs,
+      subject_identifier,
+      unique(.subjects)
+    )
+  )
+}
+
+.join_df <- function(
+  df,
+  subject_identifier,
+  unique_subjects
+) {
+  # loop through df's
+  dfs <- df
+  output_df <- as.data.frame(
+    list(unique_subjects),
+    col.names = subject_identifier
+  )
+  if (!is.list(df)) {
+    dfs <- list(dfs)
+  }
+  keys <- names(dfs)
+  if (is.null(keys)) {
+    keys <- seq_len(length(dfs))
+  }
+  prev_key <- 0
+  unmatched_cols <- c()
+  for (key in keys){
+    output_df <- dplyr::full_join(
+      output_df,
+      dfs[[key]],
+      by = subject_identifier,
+      suffix = c(
+        paste0(".df.", prev_key),
+        paste0(".df.", key)
+      )
+    )
+    prev_key <- key
+    for (unmatched_col in unmatched_cols) {
+      print(unmatched_col)
+      raw_unmatched_col <- gsub("\\.df\\..+", "", unmatched_col)
+      if (raw_unmatched_col %in% names(output_df)) {
+        names(output_df)[names(output_df) == raw_unmatched_col] <-
+          paste0(raw_unmatched_col, ".df.", key)
+      }
+    }
+    unmatched_cols <- c(
+      unmatched_cols,
+      names(output_df)[grepl("\\.df\\.", names(output_df))]
+    )
+  }
+  if (any(grepl("\\.df\\.", names(output_df)))) {
+    warning(
+      "Data frames contain columns with the same name,
+      but different values."
+    )
+  }
+  output_df <- output_df[!duplicated(output_df[[subject_identifier]]), ]
+  return(output_df)
 }
 
 get_variable_types <- function(df) {
@@ -178,4 +335,35 @@ get_variable_types <- function(df) {
     continuous_variables = .continuous_variables,
     binary_variables = .binary_variables
   ))
+}
+
+get_variable_map <- function(dfs) {
+  if (!is.list(dfs)) {
+    dfs <- list(dfs)
+  }
+  keys <- names(dfs)
+  variable_map <- list()
+  if (is.null(keys)) {
+    keys <- seq_along(dfs)
+  }
+  for (key in keys){
+    variable_map[[key]] <- names(dfs[[key]])
+  }
+  return(variable_map)
+}
+
+.add_n_row_summaries <- function(
+  dfs,
+  summary_df
+) {
+  keys <- names(dfs)
+  if (is.null(keys)) {
+    keys <- seq_along(dfs)
+  }
+  for (key in keys){
+    column_name <- paste0("n_row.df.", key)
+    n_row <- nrow(dfs[[key]])
+    summary_df[, column_name] <- n_row
+  }
+  return(summary_df)
 }

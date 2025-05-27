@@ -96,6 +96,15 @@ import_marginal_distributions <- function(
     "summary"
   )
 
+  .variable_map <- load_variables_file(
+    get_variables_path(
+      folder_path,
+      "",
+      "variable_map"
+    ),
+    "variable_map"
+  )
+
   # Validate the variables and throw an error if they
   # are invalid.
   if (! is_variables_valid(
@@ -170,19 +179,34 @@ import_marginal_distributions <- function(
     )
   }
 
-  .summary <- dplyr::select(
-    .summary_variables,
-    n_row, # nolint: object_name
-    n_col, # nolint: object_name
-    variables # nolint: object_name
+  # .summary <- dplyr::select(
+  #   .summary_variables,
+  #   n_row, # nolint: object_name
+  #   n_col, # nolint: object_name
+  #   variables, # nolint: object_name
+  #   subject_identifier # nolint: object_name
+  # )
+
+  .summary <- .summary_variables
+
+  .variable_map <- as.list(
+    .variable_map
   )
+  if (all(grepl("\\.\\.\\d", names(.variable_map)))) {
+    names(.variable_map) <- NULL
+  }
+  .variable_map_names <- names(.variable_map)
+  .variable_map <- lapply(.variable_map, na.omit)
+  .variable_map <- lapply(.variable_map, .remove_attributes)
+  names(.variable_map) <- .variable_map_names
 
   # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
     continuous_variables = .continuous_summary,
-    summary = .summary
+    summary = .summary,
+    variable_map = .variable_map
   )
 
   # Add a class to the return to allow for S3 overrides

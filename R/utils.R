@@ -54,6 +54,10 @@ get_variables_path <- function(
       "continuous_variables.csv",
     variable_type == "quantiles" && file_path == "" ~
       "continuous_quantiles.csv",
+    variable_type == "summary" && file_path == "" ~
+      "summary.csv",
+    variable_type == "variable_map" && file_path == "" ~
+      "variable_map.csv",
     file_path != "" ~ file_path,
     TRUE ~ ""
   )
@@ -161,7 +165,8 @@ get_n_missing <- function(
 .write_csv <- function(
   df,
   file_path,
-  variable_type
+  variable_type,
+  row_names = TRUE
 ) {
   # Produce a message to state what is being exported and where
   message(
@@ -172,7 +177,16 @@ get_n_missing <- function(
       file_path
     )
   )
-  utils::write.csv(df, file_path)
+  utils::write.csv(df, file_path, row.names = row_names)
+}
+
+.variable_map_to_df <- function(variable_map) {
+  # Convert the variable map to a data frame
+  df <- dplyr::bind_cols(
+    .fill_na(variable_map,
+             .get_max_length(variable_map)),
+  )
+  return(df)
 }
 
 # Function to check if marginal files exist
@@ -267,18 +281,78 @@ get_long_columns <- function(df, subject_identifier) {
 }
 
 # Function to convert a data frame from long to wide format
-long_to_wide <- function(df, subject_identifier) {
+long_to_wide <- function(df, subject_identifier, max_obs = 10) {
 
   long_columns <- get_long_columns(df, subject_identifier)
 
   wide_df <-
     df %>%
     dplyr::group_by(dplyr::pick({{subject_identifier}})) %>%
-    mutate(row = dplyr::row_number()) %>%
+    mutate(row = dplyr::row_number())
+
+  if (max(wide_df$row) > max_obs) {
+    warning(
+      paste0(
+        "The number of observations per subject exceeds ",
+        max_obs,
+        ". Only the first ",
+        max_obs,
+        " will be retained."
+      )
+    )
+    wide_df <- wide_df %>%
+      dplyr::filter(row <= max_obs)
+  }
+
+  wide_df <- wide_df %>%
     tidyr::pivot_wider(
       names_from = row,
-      names_sep = ".",
+      names_sep = ".obs.",
       values_from = tidyr::all_of(long_columns)
     )
   return(wide_df)
+}
+
+is_wide_format <- function(df) {
+  return(any(grepl(
+    "\\.obs\\.",
+    names(df)
+  )))
+}
+
+wide_to_long <- function(df) {
+
+  # Pivot the data frame to long format
+  long_df <- df %>%
+    tidyr::pivot_longer(
+      cols = tidyr::contains(".obs."),
+      names_to = c(".value", "obs"),
+      names_sep = ".obs."
+    )
+
+  return(long_df)
+}
+
+.get_max_length <- function(l) {
+  max_len <- 0
+  for (v in l) {
+    if(length(v) > max_len) {
+      max_len = length(v)
+    }
+  }
+  return(max_len)
+}
+
+.fill_na <- function(l, len) {
+  for (i in seq_len(length(l))) {
+    if (length(l[[i]]) < len) {
+      m <- len - length(l[[i]])
+      l[[i]] <- c(l[[i]], rep(NA, m))
+    }
+  }
+  return(l)
+}
+
+.remove_attributes <- function(x) {
+  attributes(x) <- list(); return(x)
 }

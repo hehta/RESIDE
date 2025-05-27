@@ -108,7 +108,13 @@ print.RESIDE <- function(
     "\nNumber of Columns: ",
     x[["summary"]][["n_col"]],
     "\nVariables: ",
-    x[["summary"]][["variables"]]
+    x[["summary"]][["variables"]],
+    "\nSubject Identifier: ",
+    x[["summary"]][["subject_identifier"]]
   )
+  if ("variable_map" %in% names(x)) {
+    cat("\nVariable Map:\n")
+    print(.variable_map_to_df(x[["variable_map"]]))
+  }
   invisible()
 }

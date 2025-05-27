@@ -69,6 +69,8 @@ get_continuous_summary <- function(
         na.rm = TRUE
       )
 
+    summary_df$sd[is.na(summary_df$sd)] <- 0.01
+
     # Get the number of rows with missing data
     summary_df$missing <- get_n_missing(column, variable)
     # Get the maximum number of decimal points

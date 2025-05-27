@@ -67,7 +67,7 @@ synthesise_data_no_cor <- function(
       approx(
         marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
         marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
-        xout = sim_df[[variable_name]], rule = 2
+        xout = sim_df[[variable_name]], rule = 2, ties = "ordered"
       )$y
     # Round to original decimal places
     sim_df[[variable_name]] <- round(
@@ -77,6 +77,14 @@ synthesise_data_no_cor <- function(
   }
   # Add missing values (MAR)
   sim_df <- add_missingness(
+    sim_df,
+    marginals
+  )
+  if (is_wide_format(sim_df)) {
+    sim_df <- wide_to_long(sim_df)
+    return(sim_df)
+  }
+  sim_df <- .get_original_dfs(
     sim_df,
     marginals
   )
@@ -200,6 +208,11 @@ define_categorical <- function(
       .labs <- c(.labs, .cat)
       # Add the probability to the probabilities
       .probs <- c(.probs, (categorical_summary[[.column]][[.cat]] / n_row))
+    }
+    # Need at least two categories
+    if (length(.labs) == 1) {
+      .labs <- c(.labs, "NA")
+      .probs <- c(.probs, 0)
     }
     # Add the definition to the definitions
     # Specifying a categorical distribution
@@ -556,4 +569,37 @@ check_probs <- function(probs) {
     probs <- jitter(probs)
   }
   return(probs)
+}
+
+.get_original_dfs <- function(
+  sim_df,
+  marginals
+) {
+  if (length(marginals$variable_map) < 2) {
+    return(sim_df)
+  }
+  dfs <- list()
+  keys <- names(marginals$variable_map)
+  if (is.null(keys)) {
+    keys <- seq_along(length(marginals$variable_map))
+  }
+  for (key in keys) {
+    df <- sim_df
+    names(df)[names(df) == "id"] <- marginals$summary$subject_identifier
+    cols.keep <- names(df)[names(df) %in% marginals$variable_map[[key]]]
+    regex <- paste0("\\.df\\.", key)
+    cols.non.unique <- names(df)[grepl(regex, names(df))]
+    cols.keep <- c(
+      cols.keep,
+      cols.non.unique
+    )
+    df <- df[, cols.keep]
+    names(df) <- gsub("\\.df\\..+", "", names(df))
+    column_order <- marginals$variable_map[[key]]
+    # column_order <-
+    #   column_order[! column_order == marginals$summary$subject_identifier]
+    df <- df[, column_order]
+    dfs[[key]] <- df
+  }
+  return(dfs)
 }
