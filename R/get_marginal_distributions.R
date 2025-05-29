@@ -45,23 +45,92 @@ get_marginal_distributions <- function(
   n_dataframes <- 1
 
   # Check if df is a list
+  #if (is.list(df)) {
+  #  df <- .list_to_df(
+  #    df,
+  #    subject_identifier
+  #  )
+  #  n_dataframes <- length(df)
+  #}
+
   if (is.list(df)) {
-    df <- .list_to_df(
-      df,
-      subject_identifier
-    )
-    n_dataframes <- length(df)
+    # If df is a list, join the data frames
+    if (any(lapply(df, is_long_format))) {
+        # summary
+
+    } else {
+      # If not long format, just join the data frames
+      df <- .join_df(
+        df,
+        subject_identifier,
+        unique(df[[subject_identifier]])
+      )
+    }
+  }
+
+  #.overall_summary <- data.frame(
+  #  n_row = nrow(df),
+  #  n_col = ncol(df),
+  #  n_dataframes = n_dataframes,
+  #  variables = paste(names(df), collapse = ", "),
+  #  subject_identifier = subject_identifier
+  #)
+#
+  #if (n_dataframes > 1) {
+  #  .overall_summary <- .add_n_row_summaries(
+  #    original_df,
+  #    .overall_summary
+  #  )
+  #}
+#
+  #.variable_map <- get_variable_map(original_df)
+#
+  ## Declare Return as a List
+  #.return <- list(
+  #  categorical_variables = .categorical_summary,
+  #  binary_variables = .binary_summary,
+  #  continuous_variables = .continuous_summary,
+  #  summary = .overall_summary,
+  #  variable_map = .variable_map
+  #)
+
+
+
+  # Add a class to the return to allow for S3 overrides
+  class(.return) <- "RESIDE"
+
+  # If print is TRUE print the marginal distributions
+  if (print) {
+    print(.return)
+  }
+
+  # Return the S3 Class
+  return(
+    .return
+  )
+
+}
+
+.prepare_df <- function(
+  df,
+  subject_identifier = "",
+  variables = c(),
+  retype = TRUE
+) {
+
+  # Check if subject identifier is set
+  if (subject_identifier != "" && !is.character(subject_identifier)) {
+    stop("Subject identifier must be a character")
   }
 
   # Check if variables is set
-  df <- as.data.frame(df)
-  if (length(variables > 1)) {
+  if (length(variables) > 0) {
     if (!is.character(variables)) {
       stop("Variables must be a vector of characters")
     }
     # Error is any variables are missing
     .missing_variables <- get_missing_variables(df, variables)
-    if (length(.missing_variables > 1)) {
+    if (length(.missing_variables) > 0) {
       stop(
         paste(
           "all variables must be in df missing:",
@@ -71,12 +140,13 @@ get_marginal_distributions <- function(
         )
       )
     }
-    # Subset based on variables
+    # Select only the variables in the data frame
     df <- df[variables]
   }
 
+  # Re-type the data frame
   if (retype) {
-    hablar::retype(df)
+    df <- dplyr::mutate_if(df, is.character, as.factor)
   }
 
   # Replace missing values for characters with "missing"
@@ -94,6 +164,17 @@ get_marginal_distributions <- function(
   # Ensure characters are factors
   df <- df %>% dplyr::mutate_if(is.character, factor)
 
+  # Remove subject identifier from df
+  if (subject_identifier %in% names(df)) {
+    df[[subject_identifier]] <- NULL
+  }
+  return(df)
+}
+
+.get_summaries <- function(
+  df,
+  subject_identifier = ""
+) {
   # Remove subject identifier from df
   if (subject_identifier %in% names(df)) {
     df[[subject_identifier]] <- NULL
@@ -136,42 +217,22 @@ get_marginal_distributions <- function(
   .overall_summary <- data.frame(
     n_row = nrow(df),
     n_col = ncol(df),
-    n_dataframes = n_dataframes,
     variables = paste(names(df), collapse = ", "),
     subject_identifier = subject_identifier
   )
 
-  if (n_dataframes > 1) {
-    .overall_summary <- .add_n_row_summaries(
-      original_df,
-      .overall_summary
-    )
-  }
-
-  .variable_map <- get_variable_map(original_df)
+  .variable_map <- get_variable_map(df)
 
   # Declare Return as a List
-  .return <- list(
-    categorical_variables = .categorical_summary,
-    binary_variables = .binary_summary,
-    continuous_variables = .continuous_summary,
-    summary = .overall_summary,
-    variable_map = .variable_map
-  )
-
-  # Add a class to the return to allow for S3 overrides
-  class(.return) <- "RESIDE"
-
-  # If print is TRUE print the marginal distributions
-  if (print) {
-    print(.return)
-  }
-
-  # Return the S3 Class
   return(
-    .return
+    list(
+      categorical_variables = .categorical_summary,
+      binary_variables = .binary_summary,
+      continuous_variables = .continuous_summary,
+      summary = .overall_summary,
+      variable_map = .variable_map
+    )
   )
-
 }
 
 .list_to_df <- function(
