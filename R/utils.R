@@ -247,7 +247,7 @@ is_long_format <- function(df, subject_identifier) {
     stop("Subject Identifier must be in data")
   }
   unique_ids <- unique(df[[subject_identifier]])
-  if (length(unique_ids) < nrow(df)) {
+  if (length(unique_ids) < nrow(dplyr::distinct(df))) {
     return(TRUE)
   }
   return(FALSE)

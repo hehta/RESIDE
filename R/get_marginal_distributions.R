@@ -40,61 +40,72 @@ get_marginal_distributions <- function(
   print = FALSE,
   retype = TRUE
 ) {
+  # Copy the original df
   original_df <- df
-  original_variables <- ""
-  n_dataframes <- 1
+  .return <- list()
 
-  # Check if df is a list
-  #if (is.list(df)) {
-  #  df <- .list_to_df(
-  #    df,
-  #    subject_identifier
-  #  )
-  #  n_dataframes <- length(df)
-  #}
-
+  # Handle lists of data frames
   if (is.list(df)) {
-    # If df is a list, join the data frames
-    if (any(lapply(df, is_long_format))) {
-        # summary
-
+    # Check if any of the data frames are long format
+    if (any(unlist(lapply(
+      df, is_long_format, subject_identifier = subject_identifier
+    )))) {
+      .return <- .get_long_summaries(
+        df,
+        subject_identifier
+      )
+      .return$summary <- get_
+      .return <- .add_n_row_summaries(
+        original_df,
+        .return$summary
+      )
+      .return$variable_map <- get_variable_map(original_df)
     } else {
       # If not long format, just join the data frames
-      df <- .join_df(
+      dfs <- lapply(
         df,
+        .prepare_df,
+        subject_identifier = subject_identifier,
+        variables = variables,
+        retype = retype
+      )
+      df <- .join_df(
+        dfs,
         subject_identifier,
         unique(df[[subject_identifier]])
       )
+      df <- .remove_subject_identifier(
+        df,
+        subject_identifier
+      )
+      .return <- .get_summaries(
+        df,
+        subject_identifier
+      )
     }
+    .return <- .add_n_row_summaries(
+      original_df,
+      .return$summary
+    )
+    .return$variable_map <- get_variable_map(original_df)
+  } else {
+    # If df is not a list, prepare the data frame
+    df <- .prepare_df(
+      df,
+      subject_identifier = subject_identifier,
+      variables = variables,
+      retype = retype
+    )
+    df <- .remove_subject_identifier(
+      df,
+      subject_identifier
+    )
+    # Get the summaries
+    .return <- .get_summaries(
+      df,
+      subject_identifier
+    )
   }
-
-  #.overall_summary <- data.frame(
-  #  n_row = nrow(df),
-  #  n_col = ncol(df),
-  #  n_dataframes = n_dataframes,
-  #  variables = paste(names(df), collapse = ", "),
-  #  subject_identifier = subject_identifier
-  #)
-#
-  #if (n_dataframes > 1) {
-  #  .overall_summary <- .add_n_row_summaries(
-  #    original_df,
-  #    .overall_summary
-  #  )
-  #}
-#
-  #.variable_map <- get_variable_map(original_df)
-#
-  ## Declare Return as a List
-  #.return <- list(
-  #  categorical_variables = .categorical_summary,
-  #  binary_variables = .binary_summary,
-  #  continuous_variables = .continuous_summary,
-  #  summary = .overall_summary,
-  #  variable_map = .variable_map
-  #)
-
-
 
   # Add a class to the return to allow for S3 overrides
   class(.return) <- "RESIDE"
@@ -164,6 +175,17 @@ get_marginal_distributions <- function(
   # Ensure characters are factors
   df <- df %>% dplyr::mutate_if(is.character, factor)
 
+  return(df)
+}
+
+.remove_subject_identifier <- function(
+  df,
+  subject_identifier = ""
+) {
+  # Check if subject identifier is set
+  if (subject_identifier != "" && !is.character(subject_identifier)) {
+    stop("Subject identifier must be a character")
+  }
   # Remove subject identifier from df
   if (subject_identifier %in% names(df)) {
     df[[subject_identifier]] <- NULL
@@ -173,7 +195,8 @@ get_marginal_distributions <- function(
 
 .get_summaries <- function(
   df,
-  subject_identifier = ""
+  subject_identifier = "",
+  long_key = ""
 ) {
   # Remove subject identifier from df
   if (subject_identifier %in% names(df)) {
@@ -191,7 +214,7 @@ get_marginal_distributions <- function(
   # Loop through binary variables
   for (.column in .binary_variables) {
     # add mean of binary variable to binary summary
-    .binary_summary[[.column]] <- list(
+    .binary_summary[[paste0(.column, long_key)]] <- list(
       mean = mean(df[[.column]]),
       missing = get_n_missing(df, .column)
     )
@@ -202,14 +225,14 @@ get_marginal_distributions <- function(
   # Loop through categorical variables
   for (.column in .categorical_variables) {
     # add (factor) summary to categorical summary
-    .categorical_summary[[.column]] <- summary(df[[.column]])
+    .categorical_summary[[paste0(.column, long_key)]] <- summary(df[[.column]])
   }
 
   # Forward declare continuous summary as empty list
   .continuous_summary <- list()
   # Loop through continuous variables
   for (.column in .continuous_variables) {
-    .continuous_summary[[.column]] <- get_continuous_summary(
+    .continuous_summary[[paste0(.column, long_key)]] <- get_continuous_summary(
       df[.column]
     )
   }
@@ -233,6 +256,93 @@ get_marginal_distributions <- function(
       variable_map = .variable_map
     )
   )
+}
+
+.get_long_summaries <- function(
+  df,
+  subject_identifier = ""
+) {
+  if (! is.list(df)) {
+    df <- list(df)
+  }
+  keys <- names(df)
+  if (is.null(keys)) {
+    keys <- seq_len(length(df))
+  }
+  .summaries <- list()
+  .wide_dfs <- list()
+  for (key in keys) {
+    .df <- df[[key]]
+    if (!subject_identifier %in% names(.df)) {
+      stop(
+        "Subject identifier must be in all df's"
+      )
+    }
+    .df <- .prepare_df(
+      .df,
+      subject_identifier = subject_identifier
+    )
+    long_columns <- get_long_columns(
+      .df,
+      subject_identifier
+    )
+    wide_columns <- setdiff(
+      names(.df),
+      long_columns
+    )
+    .wide_dfs[[key]] <- .df[wide_columns]
+    .summaries[[key]] <- .get_summaries(
+      .df[long_columns],
+      subject_identifier,
+      long_key = paste0(".df.", key)
+    )
+  }
+  .baseline_df <- .list_to_df(
+    .wide_dfs,
+    subject_identifier
+  )
+  .baseline_df <- .prepare_df(
+    .baseline_df
+  )
+  .baseline_df <- .remove_subject_identifier(
+    .baseline_df,
+    subject_identifier
+  )
+  .baseline_summaries <- .get_summaries(
+    .baseline_df
+  )
+  .return_summaries <- .baseline_summaries
+  for (.summary in .summaries) {
+    .return_summaries <- .join_summaries(
+      .return_summaries,
+      .summary
+    )
+  }
+  return(
+    .return_summaries
+  )
+
+}
+
+.join_summaries <- function(
+  summary_1,
+  summary_2
+) {
+  summary_names <- c(names(summary_1), names(summary_2))
+  summary_names <-
+    summary_names[
+      summary_names %in%
+      c("categorical_variables", "binary_variables", "continuous_variables")
+    ]
+  summary_names <-
+    unique(summary_names)
+  .summary <- list()
+  for (name in summary_names) {
+    .summary[[name]] <- c(
+      summary_1[[name]],
+      summary_2[[name]]
+    )
+  }
 }
 
 .list_to_df <- function(
@@ -273,15 +383,19 @@ get_marginal_distributions <- function(
       )
     }
     # Sanity check that the subject identifier is a unique
-    if (length(unique(.df[[subject_identifier]])) != nrow(.df)) {
+    if (length(unique(.df[[subject_identifier]])) != nrow(dplyr::distinct(.df))) {
       stop(
         "Subject identifier must be unique in all df's"
       )
     }
-    .subjects <- c(
-      .subjects,
-      .df[[subject_identifier]]
-    )
+    if (is.null(.subjects)) {
+      .subjects <- unique(.df[[subject_identifier]])
+    } else {
+      .subjects <- c(
+        .subjects,
+        unique(.df[[subject_identifier]])
+      )
+    }
     .dfs[[key]] <- .df
   }
   return(
@@ -411,6 +525,25 @@ get_variable_map <- function(dfs) {
     variable_map[[key]] <- names(dfs[[key]])
   }
   return(variable_map)
+}
+
+.get_long_overall_summary <- function(
+  dfs,
+  subject_identifier = ""
+) {
+  max_nrow <- 0
+  
+  for (.df in dfs) {
+
+  }
+  # Get the overall summary
+  .overall_summary <- data.frame(
+    n_row = nrow(df),
+    n_col = ncol(df),
+    variables = paste(names(df), collapse = ", "),
+    subject_identifier = subject_identifier
+  )
+  return(.overall_summary)
 }
 
 .add_n_row_summaries <- function(
