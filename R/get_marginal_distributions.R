@@ -54,8 +54,7 @@ get_marginal_distributions <- function(
         df,
         subject_identifier
       )
-      .return$summary <- get_
-      .return <- .add_n_row_summaries(
+      .return$summary <- .add_n_row_summaries(
         original_df,
         .return$summary
       )
@@ -83,7 +82,7 @@ get_marginal_distributions <- function(
         subject_identifier
       )
     }
-    .return <- .add_n_row_summaries(
+    .return$summary <- .add_n_row_summaries(
       original_df,
       .return$summary
     )
@@ -318,6 +317,12 @@ get_marginal_distributions <- function(
       .summary
     )
   }
+  .return_summaries$summary <- data.frame(
+    n_row = nrow(.baseline_df),
+    n_col = ncol(.baseline_df),
+    variables = paste(names(.baseline_df), collapse = ", "),
+    subject_identifier = subject_identifier
+  )
   return(
     .return_summaries
   )
@@ -560,4 +565,26 @@ get_variable_map <- function(dfs) {
     summary_df[, column_name] <- n_row
   }
   return(summary_df)
+}
+
+.get_variable_names  <- function(
+  summary_list
+) {
+  # Check if variable_type is valid
+  variable_types <- c("categorical", "binary", "continuous")
+
+  variable_types <- names(summary_list)[names(summary_list) %in% variable_types]
+  if (length(variable_types) == 0) {
+    stop("No valid variable types found in summary_list")
+  }
+  variable_names <- c()
+  for (variable_type in variable_types) {
+    if (variable_type %in% names(summary_list)) {
+      variable_names <- c(
+        variable_names,
+        names(summary_list[[variable_type]])
+      )
+    }
+  }
+  return(variable_names)
 }
