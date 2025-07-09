@@ -45,7 +45,7 @@ get_marginal_distributions <- function(
   .return <- list()
 
   # Handle lists of data frames
-  if (is.list(df)) {
+  if (is.list(df) && !is.data.frame(df)) {
     # Check if any of the data frames are long format
     if (any(unlist(lapply(
       df, is_long_format, subject_identifier = subject_identifier
@@ -231,8 +231,12 @@ get_marginal_distributions <- function(
   .continuous_summary <- list()
   # Loop through continuous variables
   for (.column in .continuous_variables) {
+    # Store the continuous variable in a temporary column
+    .tmp_column <- df[.column]
+    # Rename the temporary column to include the long key
+    names(.tmp_column) <- paste0(.column, long_key)
     .continuous_summary[[paste0(.column, long_key)]] <- get_continuous_summary(
-      df[.column]
+      .tmp_column
     )
   }
 
@@ -348,6 +352,7 @@ get_marginal_distributions <- function(
       summary_2[[name]]
     )
   }
+  return(.summary)
 }
 
 .list_to_df <- function(
