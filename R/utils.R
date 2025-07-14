@@ -356,3 +356,24 @@ wide_to_long <- function(df) {
 .remove_attributes <- function(x) {
   attributes(x) <- list(); return(x)
 }
+
+is_multi_table <- function(marginals) {
+  if("variable_map" %in% names(marginals)) {
+    if (length(marginals$variable_map) > 1) {
+      # If the variable map is greater than 1
+      # then it is a multi table
+      return(TRUE)
+    }
+  } 
+  return(FALSE)
+}
+
+is_multi_table_long <- function(marginals) {
+  if("summary" %in% names(marginals)) {
+    if (any(grepl("n_row.df.*", names(marginals[["summary"]])))) {
+      nrows <- marginals$summary[,grepl("n_row.df.*", names(marginals[["summary"]]))]
+      return(!apply(nrows, 1, function(row) all(row == row[1])))
+    }
+  } 
+  return(FALSE)
+}
