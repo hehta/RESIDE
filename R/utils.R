@@ -356,3 +356,38 @@ wide_to_long <- function(df) {
 .remove_attributes <- function(x) {
   attributes(x) <- list(); return(x)
 }
+
+.filter_marginals <- function(
+  marginals,
+  variables
+) {
+  new_marginals <- list()
+  for (variable in variables) {
+    if ("categorical_variables" %in% names(marginals)) {
+      if (variable %in% names(marginals$categorical_variables)) {
+        new_marginals$categorical_variables[[variable]] <-
+          marginals$categorical_variables[[variable]]
+      }
+    }
+    if ("binary_variables" %in% names(marginals)) {
+      if (variable %in% names(marginals$binary_variables)) {
+        new_marginals$binary_variables[[variable]] <-
+          marginals$binary_variables[[variable]]
+      }
+    }
+    if ("continuous_variables" %in% names(marginals)) {
+      if (variable %in% names(marginals$continuous_variables)) {
+        new_marginals$continuous_variables[[variable]] <-
+          marginals$continuous_variables[[variable]]
+      }
+    }
+  }
+  if ("summary" %in% names(marginals)) {
+    new_marginals$summary <- marginals$summary
+  }
+  if ("variable_map" %in% names(marginals)) {
+    new_marginals$variable_map <- marginals$variable_map
+  }
+  class(new_marginals) <- "RESIDE"
+  return(new_marginals)
+}
