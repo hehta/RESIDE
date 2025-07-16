@@ -144,6 +144,26 @@ synthesise_data_cor <- function(
   return(sim_df)
 }
 
+synthesise_baseline_data <- function(
+  marginals,
+  correlation_matrix = NULL
+) {
+  baseline_columns <- marginals[["summary"]][["variables"]]
+
+  baseline_columns <- strsplit(baseline_columns, ", ")[[1]]
+
+  baseline_marginals <- .filter_marginals(marginals, baseline_columns)
+
+  baseline_marginals[["variable_map"]] <- list(
+    baseline_columns
+  )
+
+  return(synthesise_data(
+    baseline_marginals,
+    correlation_matrix = correlation_matrix
+  ))
+}
+
 get_data_def <- function(
   marginals,
   use_correlations = FALSE
