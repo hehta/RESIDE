@@ -411,3 +411,57 @@ is_multi_table_long <- function(marginals) {
   class(new_marginals) <- "RESIDE"
   return(new_marginals)
 }
+
+get_n_col <- function(marginals){
+  n_col <- 0
+  variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
+  for (variable_type in variable_types) {
+    if (variable_type %in% names(marginals)) {
+      n_col <- n_col + length(marginals[[variable_type]])
+    }
+  }
+  return(n_col)
+}
+
+get_variables <- function(marginals) {
+  variables <- c()
+  variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
+  for (variable_type in variable_types) {
+    if (variable_type %in% names(marginals)) {
+      variables <- c(variables, names(marginals[[variable_type]]))
+    }
+  }
+  return(variables)
+}
+
+.filter_marginals_by_key <- function(
+  marginals,
+  key
+) {
+  new_marginals <- list()
+  variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
+  for (variable_type in variable_types) {
+    if (variable_type %in% names(marginals)) {
+      new_marginals[[variable_type]] <-
+        marginals[[variable_type]][grepl(key, names(marginals[[variable_type]]))]
+    }
+  }
+  
+  if ("summary" %in% names(marginals)) {
+    n_row <- new_marginals[["summary"]][[paste0("n_row", key)]]
+    n_col <- get_n_col(new_marginals)
+    variables <- get_variables(new_marginals)
+    subject_identifier <- marginals[["summary"]][["subject_identifier"]]
+    new_marginals$summary <- data.frame(
+      n_row = n_row,
+      n_col = n_col,
+      variables = paste(variables, collapse = ", "),
+      subject_identifier = subject_identifier
+    )
+  }
+  if ("variable_map" %in% names(marginals)) {
+    new_marginals$variable_map <- marginals$variable_map
+  }
+  class(new_marginals) <- "RESIDE"
+  return(new_marginals)
+}
