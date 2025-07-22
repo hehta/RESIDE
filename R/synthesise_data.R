@@ -36,11 +36,22 @@ synthesise_data <- function(
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")
   }
+  # Check if multi-table
+  if ("variable_map" %in% names(marginals)) {
+    # Check that the variable map is not empty
+    if (length(marginals$variable_map) > 1) {
+      stop("variable_map is empty, please check the marginals.")
+    }
+  }
   # @todo add covariance matrix for correlations
   if (!is.null(correlation_matrix)) {
-    synthesise_data_cor(marginals, correlation_matrix)
+    return(
+      synthesise_data_cor(marginals, correlation_matrix)
+    )
   } else {
-    synthesise_data_no_cor(marginals)
+    return(
+      synthesise_data_no_cor(marginals)
+    )
   }
 }
 
@@ -80,14 +91,20 @@ synthesise_data_no_cor <- function(
     sim_df,
     marginals
   )
-  if (is_wide_format(sim_df)) {
-    sim_df <- wide_to_long(sim_df)
-    return(sim_df)
+  # Reorder if necessary
+  # If there is only one variable map, select the columns
+  if ("variable_map" %in% names(marginals)) {
+    if (length(marginals$variable_map) == 1) {
+      column_names <- c("id", marginals$variable_map[[1]])
+      sim_df <- sim_df %>%
+        dplyr::select(dplyr::any_of(column_names))
+      # Otherwise select the columns from the summary
+    } else if ("variables" %in% names(marginals$summary)) {
+      column_names <- c("id", marginals$summary$variables)
+      sim_df <- sim_df %>%
+        dplyr::select(dplyr::any_of(column_names))
+    }
   }
-  sim_df <- .get_original_dfs(
-    sim_df,
-    marginals
-  )
   # Return the data frame
   return(sim_df)
 }
@@ -144,19 +161,73 @@ synthesise_data_cor <- function(
   return(sim_df)
 }
 
+synthesise_multi_long_data <- function(
+  marginals,
+  correlation_matrix = NULL
+) {
+  baseline_df <- synthesise_baseline_data(
+    marginals,
+    correlation_matrix = correlation_matrix
+  )
+  baseline_variables <- get_baseline_variables(
+    marginals
+  )
+  dfs <- list()
+
+  for (key in names(marginals[["variable_map"]])) {
+
+    print(key)
+
+    # Get the original variable names
+    synth_variables <- RESIDE:::get_variables(marginals)
+
+    synth_variables <- synth_variables[
+      grepl(paste0(".df.", key), synth_variables)
+    ]
+
+    # Get any baseline variables with the df key
+    bl_variables <- baseline_variables[
+      grepl(paste0(".df.", key), baseline_variables)
+    ]
+
+    # Remove these keyed variables
+    synth_variables <- setdiff(synth_variables, bl_variables)
+
+    # Remove the Subject Identifier
+    synth_variables <- setdiff(
+      synth_variables,
+      marginals$summary$subject_identifier
+    )
+
+    tmp_marginals <- .filter_marginals(
+      marginals,
+      synth_variables
+    )
+
+    tmp_marginals[["summary"]][["n_row"]] <-
+      marginals[["summary"]][[paste0("n_row.df.", key)]]
+
+    dfs[[key]] <- synthesise_data(tmp_marginals)
+
+  }
+
+}
+
+get_n_subjects <- function(
+  marginals
+) {
+  return(marginals$summary$n_row)
+}
+
 synthesise_baseline_data <- function(
   marginals,
   correlation_matrix = NULL
 ) {
-  baseline_columns <- marginals[["summary"]][["variables"]]
-
-  baseline_columns <- strsplit(baseline_columns, ", ")[[1]]
+  baseline_columns <- get_summary_variables(
+    marginals
+  )
 
   baseline_marginals <- .filter_marginals(marginals, baseline_columns)
-
-  baseline_marginals[["variable_map"]] <- list(
-    baseline_columns
-  )
 
   return(synthesise_data(
     baseline_marginals,

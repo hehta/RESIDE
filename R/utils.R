@@ -377,6 +377,8 @@ is_multi_table_long <- function(marginals) {
   } 
   return(FALSE)
 }
+
+
 .filter_marginals <- function(
   marginals,
   variables
@@ -403,10 +405,17 @@ is_multi_table_long <- function(marginals) {
     }
   }
   if ("summary" %in% names(marginals)) {
-    new_marginals$summary <- marginals$summary
+    new_marginals$summary <- data.frame(
+      n_row = marginals$summary$n_row,
+      n_col = length(variables),
+      variables = paste(variables, collapse = ", ")
+    )
+    if ("subject_identifier" %in% names(marginals$summary)) {
+      new_marginals$subject_identifier <- marginals$summary$subject_identifier
+    }
   }
   if ("variable_map" %in% names(marginals)) {
-    new_marginals$variable_map <- marginals$variable_map
+    new_marginals$variable_map <- list(variables)
   }
   class(new_marginals) <- "RESIDE"
   return(new_marginals)
@@ -434,21 +443,45 @@ get_variables <- function(marginals) {
   return(variables)
 }
 
+get_summary_variables <- function(marginals) {
+  if (!"summary" %in% names(marginals)) {
+    stop("Marginals do not contain a summary.")
+  }
+  if (!"variables" %in% names(marginals$summary)) {
+    stop("Marginals summary does not contain variables.")
+  }
+
+  variables <- marginals$summary$variables
+
+  variables <- strsplit(variables, ", ")[[1]]
+
+}
+
+# get_variables_by_key <- function(
+#   marginals,
+#   key
+# ) {
+#   filter_key <- paste0(".df.", key)
+#   variables <- get_variables(marginals)
+#   return(variables[grepl(filter_key, variables)])
+# }
+
 .filter_marginals_by_key <- function(
   marginals,
   key
 ) {
+  filter_key <- paste0(".df.", key)
   new_marginals <- list()
   variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
   for (variable_type in variable_types) {
     if (variable_type %in% names(marginals)) {
       new_marginals[[variable_type]] <-
-        marginals[[variable_type]][grepl(key, names(marginals[[variable_type]]))]
+        marginals[[variable_type]][grepl(filter_key, names(marginals[[variable_type]]))]
     }
   }
   
   if ("summary" %in% names(marginals)) {
-    n_row <- new_marginals[["summary"]][[paste0("n_row", key)]]
+    n_row <- marginals[["summary"]][[1, paste0("n_row", filter_key)]]
     n_col <- get_n_col(new_marginals)
     variables <- get_variables(new_marginals)
     subject_identifier <- marginals[["summary"]][["subject_identifier"]]
@@ -464,4 +497,20 @@ get_variables <- function(marginals) {
   }
   class(new_marginals) <- "RESIDE"
   return(new_marginals)
+}
+
+.filter_baseline_by_key <- function(
+  marginals,
+  baseline_df,
+  key
+) {
+  baseline_variables <- names(baseline_df)
+  baseline_key <-
+    baseline_variables[grepl(paste0(".df.", key), baseline_variables)]
+  vm_variables <- marginals$variable_map[[key]]
+  baseline_variables <- intersect(baseline_variables, vm_variables)
+  baseline_variables <- c("id", baseline_key, baseline_variables)
+  bl_df <- baseline_df %>%
+    dplyr::select(dplyr::any_of(baseline_variables))
+  return(bl_df)
 }
