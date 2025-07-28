@@ -38,7 +38,8 @@ import_marginal_distributions <- function(
   categorical_variables_file = "",
   continuous_variables_file = "",
   continuous_quantiles_file = "",
-  summary_file = "summary.csv"
+  summary_file = "summary.csv",
+  variable_map_file = ""
 ) {
   # Check the folder exists first
   if (! dir.exists(normalizePath(folder_path))) {
@@ -99,7 +100,7 @@ import_marginal_distributions <- function(
   .variable_map <- load_variables_file(
     get_variables_path(
       folder_path,
-      "",
+      variable_map_file,
       "variable_map"
     ),
     "variable_map"

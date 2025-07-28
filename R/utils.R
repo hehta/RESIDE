@@ -122,7 +122,8 @@ load_variables_file <- function(
       variable_type,
       "variables from",
       file_path,
-      "does the file exist?"
+      "does the file exist?",
+      e$message
     ))
   })
 }
@@ -443,6 +444,14 @@ get_variables <- function(marginals) {
   return(variables)
 }
 
+get_baseline_variables <- function(marginals) {
+
+  variables <- marginals$summary$variables
+
+  variables <- strsplit(variables, ", ")[[1]]
+
+}
+
 get_summary_variables <- function(marginals) {
   if (!"summary" %in% names(marginals)) {
     stop("Marginals do not contain a summary.")
@@ -513,4 +522,11 @@ get_summary_variables <- function(marginals) {
   bl_df <- baseline_df %>%
     dplyr::select(dplyr::any_of(baseline_variables))
   return(bl_df)
+}
+
+.replace_nas <- function(df) {
+  df <- df %>% dplyr::mutate_if(
+    is.character,
+    function(x) ifelse(x == "NA's", "", x)
+  )
 }

@@ -100,7 +100,10 @@ synthesise_data_no_cor <- function(
         dplyr::select(dplyr::any_of(column_names))
       # Otherwise select the columns from the summary
     } else if ("variables" %in% names(marginals$summary)) {
-      column_names <- c("id", marginals$summary$variables)
+      column_names <- get_summary_variables(
+        marginals
+      )
+      column_names <- c("id", column_names)
       sim_df <- sim_df %>%
         dplyr::select(dplyr::any_of(column_names))
     }
@@ -169,18 +172,25 @@ synthesise_multi_long_data <- function(
     marginals,
     correlation_matrix = correlation_matrix
   )
+
+  # Ensure the baseline id's are sequential
+  # This is important for the multi-table synthesis
+  baseline_df$id <- seq_len(nrow(baseline_df))
+
+  # Store the baseline variables
   baseline_variables <- get_baseline_variables(
     marginals
   )
+  # Forward declare a list to store the data frames
   dfs <- list()
 
+  # Iterate through the keys in the variable map
   for (key in names(marginals[["variable_map"]])) {
-
-    print(key)
 
     # Get the original variable names
     synth_variables <- RESIDE:::get_variables(marginals)
 
+    # Filter the variables to only those with the df key
     synth_variables <- synth_variables[
       grepl(paste0(".df.", key), synth_variables)
     ]
@@ -190,7 +200,7 @@ synthesise_multi_long_data <- function(
       grepl(paste0(".df.", key), baseline_variables)
     ]
 
-    # Remove these keyed variables
+    # Remove these keyed variables (to prevent duplication)
     synth_variables <- setdiff(synth_variables, bl_variables)
 
     # Remove the Subject Identifier
@@ -199,17 +209,53 @@ synthesise_multi_long_data <- function(
       marginals$summary$subject_identifier
     )
 
+    # Filter the marginals
     tmp_marginals <- .filter_marginals(
       marginals,
       synth_variables
     )
 
+    # Replace the n_row in the summary
     tmp_marginals[["summary"]][["n_row"]] <-
       marginals[["summary"]][[paste0("n_row.df.", key)]]
 
+    # Synthesise the data and store it in the list
     dfs[[key]] <- synthesise_data(tmp_marginals)
 
   }
+
+  n_subjects <- RESIDE:::get_n_subjects(marginals)
+
+  # Iterate through the data frames
+  # as we need to add the baseline data
+  for (key in names(dfs)) {
+    # store the data frame
+    df <- dfs[[key]]
+    # Filter the baseline data by the key
+    key_baseline <- .filter_baseline_by_key(
+      marginals,
+      baseline_df,
+      key
+    )
+    # Calculate the number of ids needed
+    # Using ceiling to ensure we have enough
+    id_len <- ceiling(nrow(df) / nrow(baseline_df))
+    # Repeat the ids to the length needed
+    ids <- rep(seq_len(nrow(baseline_df)), id_len)
+    # The length may be more than the number of rows in df
+    # so we sample the ids to match the number of rows in df
+    ids <- sample(ids, nrow(df))
+    # Replace the ids
+    df$id <- ids
+    # Join the baseline data to the data frame
+    tmp_df <- dplyr::inner_join(key_baseline, df, by = "id")
+    # Remove the key from the column names
+    names(tmp_df) <- gsub(paste0(".df.", key), "", names(tmp_df))
+    # add the df to the list
+    dfs[[key]] <- tmp_df
+  }
+  # Return the list of data frames
+  return(dfs)
 
 }
 
@@ -420,6 +466,9 @@ add_missingness <- function(
       .df[sample(nrow(.df), .variable_missingness), ][[continuous_variable]] <- NA # nolint line_length
     }
   }
+  .df <- .replace_nas(
+    .df
+  )
   # Return the new data frame
   return(.df)
 }

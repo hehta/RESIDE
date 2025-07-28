@@ -130,16 +130,19 @@ export_marginal_distributions <- function(
     "summary"
   )
   if ("variable_map" %in% names(marginals)) {
-    # Write the variable map file
-    .write_csv(
-      .variable_map_to_df(marginals[["variable_map"]]),
-      get_full_file_path(
-        folder_path,
-        "variable_map.csv"
-      ),
-      "variable_map",
-      row_names = FALSE
-    )
+    # Only write the variable map if is not empty
+    if (length(marginals[["variable_map"]]) > 0) {
+      # Write the variable map file
+      .write_csv(
+        .variable_map_to_df(marginals[["variable_map"]]),
+        get_full_file_path(
+          folder_path,
+          "variable_map.csv"
+        ),
+        "variable_map",
+        row_names = FALSE
+      )
+    }
   }
   invisible(NULL)
 }

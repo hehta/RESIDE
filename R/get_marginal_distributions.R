@@ -155,9 +155,9 @@ get_marginal_distributions <- function(
   }
 
   # Re-type the data frame
-  if (retype) {
-    df <- dplyr::mutate_if(df, is.character, as.factor)
-  }
+  # if (retype) {
+  #   df <- dplyr::mutate_if(df, is.character, as.factor)
+  # }
 
   # Replace missing values for characters with "missing"
   df <- df %>% dplyr::mutate_if(
