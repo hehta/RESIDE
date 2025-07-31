@@ -44,7 +44,7 @@ get_continuous_summary <- function(
       q$epsilon <- mye
       # Update the number of points
       pts <- nrow(q)
-      # Increase the epison value
+      # Increase the epsilon value
       mye <- mye + increment
       # Escape is maximum epsilon has been reached
       if (mye >= maxeps) break
@@ -91,6 +91,6 @@ get_continuous_summary <- function(
         "\nskipping"
       )
     )
-    return(NULL)
+    return(NULL) #nolint: return
   })
 }

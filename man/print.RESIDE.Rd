@@ -24,7 +24,7 @@ S3 Override for RESIDE Class
 print(
   marginal_distributions <- get_marginal_distributions(
     IST,
-    variables <- c(
+    variables = c(
       "SEX",
       "AGE",
       "ID14",

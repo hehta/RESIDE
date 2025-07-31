@@ -8,6 +8,7 @@
 #' @param variables (Optional) variable (columns) to select, Default: c()
 #' @param print Whether to print the marginal distributions
 #' to the console, Default: FALSE
+#' @param retype Whether to re-type the data frame, Default: TRUE
 #' @return A list of marginal distributions of an S3 RESIDE Class
 #' @details A function to generate marginal distributions from
 #' a given data frame, depending on the variable type the marginals
@@ -19,7 +20,7 @@
 #' @examples
 #' marginal_distributions <- get_marginal_distributions(
 #'   IST,
-#'   variables <- c(
+#'   variables = c(
 #'     "SEX",
 #'     "AGE",
 #'     "ID14",
@@ -58,7 +59,6 @@ get_marginal_distributions <- function(
         original_df,
         .return$summary
       )
-      .return$variable_map <- get_variable_map(original_df)
     } else {
       # If not long format, just join the data frames
       dfs <- lapply(
@@ -86,7 +86,6 @@ get_marginal_distributions <- function(
       original_df,
       .return$summary
     )
-    .return$variable_map <- get_variable_map(original_df)
   } else {
     # If df is not a list, prepare the data frame
     df <- .prepare_df(
@@ -129,7 +128,7 @@ get_marginal_distributions <- function(
 ) {
 
   # Check if subject identifier is set
-  if (subject_identifier != "" && !is.character(subject_identifier)) {
+  if (!is.character(subject_identifier)) {
     stop("Subject identifier must be a character")
   }
 
@@ -182,8 +181,11 @@ get_marginal_distributions <- function(
   subject_identifier = ""
 ) {
   # Check if subject identifier is set
-  if (subject_identifier != "" && !is.character(subject_identifier)) {
+  if (!is.character(subject_identifier)) {
     stop("Subject identifier must be a character")
+  }
+  if (subject_identifier == "") {
+    return(df)
   }
   # Remove subject identifier from df
   if (subject_identifier %in% names(df)) {
@@ -247,16 +249,13 @@ get_marginal_distributions <- function(
     subject_identifier = subject_identifier
   )
 
-  .variable_map <- get_variable_map(df)
-
   # Declare Return as a List
   return(
     list(
       categorical_variables = .categorical_summary,
       binary_variables = .binary_summary,
       continuous_variables = .continuous_summary,
-      summary = .overall_summary,
-      variable_map = .variable_map
+      summary = .overall_summary
     )
   )
 }
@@ -273,6 +272,7 @@ get_marginal_distributions <- function(
     keys <- seq_len(length(df))
   }
   .summaries <- list()
+  .df_summaries <- list()
   .wide_dfs <- list()
   for (key in keys) {
     .df <- df[[key]]
@@ -299,6 +299,8 @@ get_marginal_distributions <- function(
       subject_identifier,
       long_key = paste0(".df.", key)
     )
+    .df_summaries[paste0("variables.df.", key)] <-
+      paste(names(.df), collapse = ", ")
   }
   .baseline_df <- .list_to_df(
     .wide_dfs,
@@ -326,6 +328,10 @@ get_marginal_distributions <- function(
     n_col = ncol(.baseline_df),
     variables = paste(names(.baseline_df), collapse = ", "),
     subject_identifier = subject_identifier
+  )
+  .return_summaries$summary <- cbind(
+    .return_summaries$summary,
+    as.data.frame(.df_summaries)
   )
   return(
     .return_summaries
@@ -393,7 +399,9 @@ get_marginal_distributions <- function(
       )
     }
     # Sanity check that the subject identifier is a unique
-    if (length(unique(.df[[subject_identifier]])) != nrow(dplyr::distinct(.df))) {
+    if (
+      length(unique(.df[[subject_identifier]])) != nrow(dplyr::distinct(.df))
+    ) {
       stop(
         "Subject identifier must be unique in all df's"
       )
@@ -522,38 +530,20 @@ get_variable_types <- function(df) {
   ))
 }
 
-get_variable_map <- function(dfs) {
+generate_variables_list <- function(dfs) {
   if (!is.list(dfs)) {
     dfs <- list(dfs)
   }
   keys <- names(dfs)
-  variable_map <- list()
+  variables <- list()
   if (is.null(keys)) {
     keys <- seq_along(dfs)
   }
   for (key in keys){
-    variable_map[[key]] <- names(dfs[[key]])
+    variables[paste0("variable.df.", key)] <-
+      paste0(names(dfs[[key]]), collapse = ", ")
   }
-  return(variable_map)
-}
-
-.get_long_overall_summary <- function(
-  dfs,
-  subject_identifier = ""
-) {
-  max_nrow <- 0
-  
-  for (.df in dfs) {
-
-  }
-  # Get the overall summary
-  .overall_summary <- data.frame(
-    n_row = nrow(df),
-    n_col = ncol(df),
-    variables = paste(names(df), collapse = ", "),
-    subject_identifier = subject_identifier
-  )
-  return(.overall_summary)
+  return(as.data.frame(variables))
 }
 
 .add_n_row_summaries <- function(

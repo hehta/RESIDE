@@ -37,12 +37,7 @@ synthesise_data <- function(
     stop("object must be of class RESIDE")
   }
   # Check if multi-table
-  if ("variable_map" %in% names(marginals)) {
-    # Check that the variable map is not empty
-    if (length(marginals$variable_map) > 1) {
-      stop("variable_map is empty, please check the marginals.")
-    }
-  }
+  # todo: add multi-table synthesis
   # @todo add covariance matrix for correlations
   if (!is.null(correlation_matrix)) {
     return(
@@ -91,23 +86,6 @@ synthesise_data_no_cor <- function(
     sim_df,
     marginals
   )
-  # Reorder if necessary
-  # If there is only one variable map, select the columns
-  if ("variable_map" %in% names(marginals)) {
-    if (length(marginals$variable_map) == 1) {
-      column_names <- c("id", marginals$variable_map[[1]])
-      sim_df <- sim_df %>%
-        dplyr::select(dplyr::any_of(column_names))
-      # Otherwise select the columns from the summary
-    } else if ("variables" %in% names(marginals$summary)) {
-      column_names <- get_summary_variables(
-        marginals
-      )
-      column_names <- c("id", column_names)
-      sim_df <- sim_df %>%
-        dplyr::select(dplyr::any_of(column_names))
-    }
-  }
   # Return the data frame
   return(sim_df)
 }
@@ -178,17 +156,17 @@ synthesise_multi_long_data <- function(
   baseline_df$id <- seq_len(nrow(baseline_df))
 
   # Store the baseline variables
-  baseline_variables <- get_baseline_variables(
+  baseline_variables <- get_summary_variables(
     marginals
   )
   # Forward declare a list to store the data frames
   dfs <- list()
 
   # Iterate through the keys in the variable map
-  for (key in names(marginals[["variable_map"]])) {
+  for (key in .get_keys(marginals)) {
 
     # Get the original variable names
-    synth_variables <- RESIDE:::get_variables(marginals)
+    synth_variables <- get_variables(marginals)
 
     # Filter the variables to only those with the df key
     synth_variables <- synth_variables[
@@ -223,8 +201,6 @@ synthesise_multi_long_data <- function(
     dfs[[key]] <- synthesise_data(tmp_marginals)
 
   }
-
-  n_subjects <- RESIDE:::get_n_subjects(marginals)
 
   # Iterate through the data frames
   # as we need to add the baseline data
@@ -709,37 +685,4 @@ check_probs <- function(probs) {
     probs <- jitter(probs)
   }
   return(probs)
-}
-
-.get_original_dfs <- function(
-  sim_df,
-  marginals
-) {
-  if (length(marginals$variable_map) < 2) {
-    return(sim_df)
-  }
-  dfs <- list()
-  keys <- names(marginals$variable_map)
-  if (is.null(keys)) {
-    keys <- seq_along(length(marginals$variable_map))
-  }
-  for (key in keys) {
-    df <- sim_df
-    names(df)[names(df) == "id"] <- marginals$summary$subject_identifier
-    cols.keep <- names(df)[names(df) %in% marginals$variable_map[[key]]]
-    regex <- paste0("\\.df\\.", key)
-    cols.non.unique <- names(df)[grepl(regex, names(df))]
-    cols.keep <- c(
-      cols.keep,
-      cols.non.unique
-    )
-    df <- df[, cols.keep]
-    names(df) <- gsub("\\.df\\..+", "", names(df))
-    column_order <- marginals$variable_map[[key]]
-    # column_order <-
-    #   column_order[! column_order == marginals$summary$subject_identifier]
-    df <- df[, column_order]
-    dfs[[key]] <- df
-  }
-  return(dfs)
 }

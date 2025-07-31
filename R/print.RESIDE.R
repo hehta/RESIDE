@@ -8,7 +8,7 @@
 #' print(
 #'   marginal_distributions <- get_marginal_distributions(
 #'     IST,
-#'     variables <- c(
+#'     variables = c(
 #'       "SEX",
 #'       "AGE",
 #'       "ID14",
@@ -112,9 +112,6 @@ print.RESIDE <- function(
     "\nSubject Identifier: ",
     x[["summary"]][["subject_identifier"]]
   )
-  if ("variable_map" %in% names(x)) {
-    cat("\nVariable Map:\n")
-    print(.variable_map_to_df(x[["variable_map"]]))
-  }
+
   invisible()
 }

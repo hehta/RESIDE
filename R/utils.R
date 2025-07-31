@@ -56,8 +56,6 @@ get_variables_path <- function(
       "continuous_quantiles.csv",
     variable_type == "summary" && file_path == "" ~
       "summary.csv",
-    variable_type == "variable_map" && file_path == "" ~
-      "variable_map.csv",
     file_path != "" ~ file_path,
     TRUE ~ ""
   )
@@ -179,15 +177,6 @@ get_n_missing <- function(
     )
   )
   utils::write.csv(df, file_path, row.names = row_names)
-}
-
-.variable_map_to_df <- function(variable_map) {
-  # Convert the variable map to a data frame
-  df <- dplyr::bind_cols(
-    .fill_na(variable_map,
-             .get_max_length(variable_map)),
-  )
-  return(df)
 }
 
 # Function to check if marginal files exist
@@ -359,23 +348,20 @@ wide_to_long <- function(df) {
 }
 
 is_multi_table <- function(marginals) {
-  if("variable_map" %in% names(marginals)) {
-    if (length(marginals$variable_map) > 1) {
-      # If the variable map is greater than 1
-      # then it is a multi table
-      return(TRUE)
-    }
-  } 
-  return(FALSE)
+  if (any(grepl("variables.df.", names(marginals$summary)))) {
+    return(TRUE)
+  }
+  return(FALSE) #nolint: return
 }
 
 is_multi_table_long <- function(marginals) {
-  if("summary" %in% names(marginals)) {
-    if (any(grepl("n_row.df.*", names(marginals[["summary"]])))) {
-      nrows <- marginals$summary[,grepl("n_row.df.*", names(marginals[["summary"]]))]
-      return(!apply(nrows, 1, function(row) all(row == row[1])))
+  if (is_multi_table(marginals)) {
+    nrows <- marginals$summary[grepl("n_row.df.", names(marginals$summary))]
+    u_nrows <- unique(as.numeric(nrows))
+    if (length(u_nrows) > 1) {
+      return(TRUE)
     }
-  } 
+  }
   return(FALSE)
 }
 
@@ -415,16 +401,14 @@ is_multi_table_long <- function(marginals) {
       new_marginals$subject_identifier <- marginals$summary$subject_identifier
     }
   }
-  if ("variable_map" %in% names(marginals)) {
-    new_marginals$variable_map <- list(variables)
-  }
   class(new_marginals) <- "RESIDE"
   return(new_marginals)
 }
 
 get_n_col <- function(marginals){
   n_col <- 0
-  variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
+  variable_types <-
+    c("categorical_variables", "binary_variables", "continuous_variables")
   for (variable_type in variable_types) {
     if (variable_type %in% names(marginals)) {
       n_col <- n_col + length(marginals[[variable_type]])
@@ -435,21 +419,14 @@ get_n_col <- function(marginals){
 
 get_variables <- function(marginals) {
   variables <- c()
-  variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
+  variable_types <-
+    c("categorical_variables", "binary_variables", "continuous_variables")
   for (variable_type in variable_types) {
     if (variable_type %in% names(marginals)) {
       variables <- c(variables, names(marginals[[variable_type]]))
     }
   }
   return(variables)
-}
-
-get_baseline_variables <- function(marginals) {
-
-  variables <- marginals$summary$variables
-
-  variables <- strsplit(variables, ", ")[[1]]
-
 }
 
 get_summary_variables <- function(marginals) {
@@ -462,8 +439,22 @@ get_summary_variables <- function(marginals) {
 
   variables <- marginals$summary$variables
 
-  variables <- strsplit(variables, ", ")[[1]]
+  variables <- .split_variables(variables)
 
+}
+
+.get_keys <- function(marginals) {
+  .keys <-
+    names(marginals$summary)[grepl("n_row.df.", names(marginals$summary))]
+  .keys <- gsub("n_row.df.", "", .keys)
+  return(.keys) #nolint: return
+}
+
+.split_variables <- function(variables) {
+  # Split the variables by comma and trim whitespace
+  variables <- strsplit(variables, ",")[[1]]
+  variables <- trimws(variables)
+  return(variables) # nolint: return
 }
 
 # get_variables_by_key <- function(
@@ -501,9 +492,6 @@ get_summary_variables <- function(marginals) {
       subject_identifier = subject_identifier
     )
   }
-  if ("variable_map" %in% names(marginals)) {
-    new_marginals$variable_map <- marginals$variable_map
-  }
   class(new_marginals) <- "RESIDE"
   return(new_marginals)
 }
@@ -516,7 +504,8 @@ get_summary_variables <- function(marginals) {
   baseline_variables <- names(baseline_df)
   baseline_key <-
     baseline_variables[grepl(paste0(".df.", key), baseline_variables)]
-  vm_variables <- marginals$variable_map[[key]]
+  vm_variables <-
+    .split_variables(marginals[["summary"]][[paste0("variables.df.", key)]])
   baseline_variables <- intersect(baseline_variables, vm_variables)
   baseline_variables <- c("id", baseline_key, baseline_variables)
   bl_df <- baseline_df %>%

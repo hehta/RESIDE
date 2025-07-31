@@ -38,8 +38,7 @@ import_marginal_distributions <- function(
   categorical_variables_file = "",
   continuous_variables_file = "",
   continuous_quantiles_file = "",
-  summary_file = "summary.csv",
-  variable_map_file = ""
+  summary_file = "summary.csv"
 ) {
   # Check the folder exists first
   if (! dir.exists(normalizePath(folder_path))) {
@@ -95,15 +94,6 @@ import_marginal_distributions <- function(
       "summary"
     ),
     "summary"
-  )
-
-  .variable_map <- load_variables_file(
-    get_variables_path(
-      folder_path,
-      variable_map_file,
-      "variable_map"
-    ),
-    "variable_map"
   )
 
   # Validate the variables and throw an error if they
@@ -190,24 +180,19 @@ import_marginal_distributions <- function(
 
   .summary <- .summary_variables
 
-  .variable_map <- as.list(
-    .variable_map
-  )
-  if (all(grepl("\\.\\.\\d", names(.variable_map)))) {
-    names(.variable_map) <- NULL
+  if ("subject_identifier" %in% names(.summary)) {
+    if (is.na(.summary$subject_identifier)) {
+      # If the subject identifier is empty, replace it with an empty string
+      .summary$subject_identifier <- ""
+    }
   }
-  .variable_map_names <- names(.variable_map)
-  .variable_map <- lapply(.variable_map, na.omit)
-  .variable_map <- lapply(.variable_map, .remove_attributes)
-  names(.variable_map) <- .variable_map_names
 
   # Declare Return as a List
   .return <- list(
     categorical_variables = .categorical_summary,
     binary_variables = .binary_summary,
     continuous_variables = .continuous_summary,
-    summary = .summary,
-    variable_map = .variable_map
+    summary = .summary
   )
 
   # Add a class to the return to allow for S3 overrides
