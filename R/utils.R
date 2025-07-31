@@ -17,7 +17,7 @@ get_missing_variables <- function(
     }
   }
   # Return the missing variables vector
-  return(.missing_variables)
+  return(.missing_variables) #nolint: return
 }
 
 # Joins a folder and file path normalising the folder path
@@ -28,7 +28,7 @@ get_full_file_path <- function(
 ) {
   # Return a file path joining the folder path with the file path
   # Using normalize path to get an absolute path
-  return(
+  return( #nolint: return
     file.path(
       normalizePath(folder_path),
       file_path
@@ -90,7 +90,7 @@ get_variables_path <- function(
     )
   }
   # If the file exists return the path
-  return(.full_file_path)
+  return(.full_file_path) #nolint: return
 }
 
 load_variables_file <- function(
@@ -140,7 +140,7 @@ max_decimal_places <- function(x) {
     }
   )
   # Return the maximum number of decimal places
-  return(max(dps))
+  return(max(dps)) #nolint: return
 }
 
 # Returns the number of missing values from a given column
@@ -150,7 +150,7 @@ get_n_missing <- function(
   column
 ) {
   # Return the number of rows with NAs
-  return(
+  return( #nolint: return
     nrow( # Number of Rows with just NA
       as.data.frame( # Ensure it's a df as sub-setting a single column
         df[is.na(df[column]), ]
@@ -201,7 +201,7 @@ marginal_files_exist <- function(folder_path) {
     }
   }
   # Return the vector
-  return(.files_exist)
+  return(.files_exist) #nolint: return
 }
 
 # Function to attempt to remove marginal files
@@ -240,7 +240,7 @@ is_long_format <- function(df, subject_identifier) {
   if (length(unique_ids) < nrow(dplyr::distinct(df))) {
     return(TRUE)
   }
-  return(FALSE)
+  return(FALSE) #nolint: return
 }
 
 # Function to get the long (format) columns from a data frame
@@ -267,7 +267,7 @@ get_long_columns <- function(df, subject_identifier) {
       }
     }
   }
-  return(long_columns)
+  return(long_columns) #nolint: return
 }
 
 # Function to convert a data frame from long to wide format
@@ -303,50 +303,6 @@ long_to_wide <- function(df, subject_identifier, max_obs = 10) {
   return(wide_df)
 }
 
-is_wide_format <- function(df) {
-  return(any(grepl(
-    "\\.obs\\.",
-    names(df)
-  )))
-}
-
-wide_to_long <- function(df) {
-
-  # Pivot the data frame to long format
-  long_df <- df %>%
-    tidyr::pivot_longer(
-      cols = tidyr::contains(".obs."),
-      names_to = c(".value", "obs"),
-      names_sep = ".obs."
-    )
-
-  return(long_df)
-}
-
-.get_max_length <- function(l) {
-  max_len <- 0
-  for (v in l) {
-    if(length(v) > max_len) {
-      max_len = length(v)
-    }
-  }
-  return(max_len)
-}
-
-.fill_na <- function(l, len) {
-  for (i in seq_len(length(l))) {
-    if (length(l[[i]]) < len) {
-      m <- len - length(l[[i]])
-      l[[i]] <- c(l[[i]], rep(NA, m))
-    }
-  }
-  return(l)
-}
-
-.remove_attributes <- function(x) {
-  attributes(x) <- list(); return(x)
-}
-
 is_multi_table <- function(marginals) {
   if (any(grepl("variables.df.", names(marginals$summary)))) {
     return(TRUE)
@@ -362,7 +318,7 @@ is_multi_table_long <- function(marginals) {
       return(TRUE)
     }
   }
-  return(FALSE)
+  return(FALSE) #nolint: return
 }
 
 
@@ -402,10 +358,10 @@ is_multi_table_long <- function(marginals) {
     }
   }
   class(new_marginals) <- "RESIDE"
-  return(new_marginals)
+  return(new_marginals) #nolint: return
 }
 
-get_n_col <- function(marginals){
+get_n_col <- function(marginals) {
   n_col <- 0
   variable_types <-
     c("categorical_variables", "binary_variables", "continuous_variables")
@@ -414,7 +370,7 @@ get_n_col <- function(marginals){
       n_col <- n_col + length(marginals[[variable_type]])
     }
   }
-  return(n_col)
+  return(n_col) #nolint: return
 }
 
 get_variables <- function(marginals) {
@@ -426,7 +382,7 @@ get_variables <- function(marginals) {
       variables <- c(variables, names(marginals[[variable_type]]))
     }
   }
-  return(variables)
+  return(variables) #nolint: return
 }
 
 get_summary_variables <- function(marginals) {
@@ -457,45 +413,6 @@ get_summary_variables <- function(marginals) {
   return(variables) # nolint: return
 }
 
-# get_variables_by_key <- function(
-#   marginals,
-#   key
-# ) {
-#   filter_key <- paste0(".df.", key)
-#   variables <- get_variables(marginals)
-#   return(variables[grepl(filter_key, variables)])
-# }
-
-.filter_marginals_by_key <- function(
-  marginals,
-  key
-) {
-  filter_key <- paste0(".df.", key)
-  new_marginals <- list()
-  variable_types <- c("categorical_variables", "binary_variables", "continuous_variables")
-  for (variable_type in variable_types) {
-    if (variable_type %in% names(marginals)) {
-      new_marginals[[variable_type]] <-
-        marginals[[variable_type]][grepl(filter_key, names(marginals[[variable_type]]))]
-    }
-  }
-  
-  if ("summary" %in% names(marginals)) {
-    n_row <- marginals[["summary"]][[1, paste0("n_row", filter_key)]]
-    n_col <- get_n_col(new_marginals)
-    variables <- get_variables(new_marginals)
-    subject_identifier <- marginals[["summary"]][["subject_identifier"]]
-    new_marginals$summary <- data.frame(
-      n_row = n_row,
-      n_col = n_col,
-      variables = paste(variables, collapse = ", "),
-      subject_identifier = subject_identifier
-    )
-  }
-  class(new_marginals) <- "RESIDE"
-  return(new_marginals)
-}
-
 .filter_baseline_by_key <- function(
   marginals,
   baseline_df,
@@ -510,7 +427,7 @@ get_summary_variables <- function(marginals) {
   baseline_variables <- c("id", baseline_key, baseline_variables)
   bl_df <- baseline_df %>%
     dplyr::select(dplyr::any_of(baseline_variables))
-  return(bl_df)
+  return(bl_df) #nolint: return
 }
 
 .replace_nas <- function(df) {

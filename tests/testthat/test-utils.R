@@ -115,6 +115,9 @@ testthat::test_that("is_long_format works", {
   testthat::expect_true(
     is_long_format(pharmaversesdtm::ae, "USUBJID")
   )
+  testthat::expect_error(
+    is_long_format(pharmaversesdtm::dm, "nonexistent"),
+  )
 })
 
 testthat::test_that("get_long_columns works", {
@@ -152,8 +155,99 @@ testthat::test_that("get_long_columns works", {
 testthat::test_that("long_to_wide works", {
   subject_identifier <- "USUBJID"
   unique_subjects <- unique(pharmaversesdtm::ae[[subject_identifier]])
+  testthat::expect_warning(
+    testthat::expect_equal(
+      nrow(long_to_wide(pharmaversesdtm::ae, subject_identifier)),
+      length(unique_subjects)
+    )
+  )
+})
+
+testthat::test_that("is_multi_table works", {
+  testthat::expect_false(
+    is_multi_table(marginal_distributions)
+  )
+  testthat::expect_true(
+    is_multi_table(longitudinal_marginals)
+  )
+})
+
+testthat::test_that("is_multi_table_long works", {
+  testthat::expect_false(
+    is_multi_table_long(marginal_distributions)
+  )
+  testthat::expect_true(
+    is_multi_table_long(longitudinal_marginals)
+  )
+})
+
+testthat::test_that(".filter_marginals_works", {
+  variables <- c("AGEU", "SEX", "RACE")
+  filtered_marginals <- .filter_marginals(
+    longitudinal_marginals,
+    variables
+  )
   testthat::expect_equal(
-    nrow(long_to_wide(pharmaversesdtm::ae, subject_identifier)),
-    length(unique_subjects)
+    filtered_marginals$summary$variables,
+    paste0(variables, collapse = ", ")
+  )
+  testthat::expect_equal(
+    filtered_marginals$summary$n_col,
+    length(variables)
+  )
+  variables <- c("SEX", "AGE", "ID14")
+  filtered_marginals <- .filter_marginals(
+    marginal_distributions,
+    variables
+  )
+  testthat::expect_equal(
+    filtered_marginals$summary$variables,
+    paste0(variables, collapse = ", ")
+  )
+  testthat::expect_equal(
+    filtered_marginals$summary$n_col,
+    length(variables)
+  )
+})
+
+testthat::test_that("get_ncol works", {
+  n_col <- get_n_col(marginal_distributions)
+  testthat::expect_equal(
+    n_col,
+    marginal_distributions$summary$n_col
+  )
+})
+
+testthat::test_that("get_variables works", {
+  variables <- get_variables(marginal_distributions)
+  testthat::expect_setequal(
+    variables,
+    .split_variables(marginal_distributions$summary$variables)
+  )
+})
+
+testthat::test_that("get_summary_variables works", {
+  summary_variables <- get_summary_variables(marginal_distributions)
+  testthat::expect_setequal(
+    summary_variables,
+    .split_variables(marginal_distributions$summary$variables)
+  )
+  no_summary_marginals <- marginal_distributions
+  no_summary_marginals$summary$variables <- NULL
+  testthat::expect_error(
+    get_summary_variables(no_summary_marginals),
+    regexp = "^Marginals summary does not contain variables\\.$"
+  )
+  no_summary_marginals$summary <- NULL
+  testthat::expect_error(
+    get_summary_variables(no_summary_marginals),
+    regexp = "^Marginals do not contain a summary\\.$"
+  )
+})
+
+testthat::test_that(".get_keys works", {
+  testthat::expect_setequal(
+    .get_keys(longitudinal_marginals),
+    names(dfs)
   )
 })

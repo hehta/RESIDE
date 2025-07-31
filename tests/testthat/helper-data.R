@@ -32,6 +32,19 @@ marginal_distributions <- get_marginal_distributions(
   )
 )
 
+dfs <- list(
+  ds = pharmaversesdtm::dm,
+  cm = pharmaversesdtm::cm,
+  ae = pharmaversesdtm::ae
+)
+
+longitudinal_marginals <- suppressWarnings(
+  get_marginal_distributions(
+    dfs,
+    subject_identifier = "USUBJID"
+  )
+)
+
 # Quck and dirty random string function
 random_string <- function() {
   return(
