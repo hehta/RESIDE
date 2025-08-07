@@ -448,10 +448,30 @@ get_summary_variables <- function(marginals) {
   return(0) #nolint: return
 }
 
-.is_date <- function(col) {
+.is_date <- function(col, threshold = 0.2) {
   dates <- as.Date(col, optional = TRUE)
-  if (!all(is.na(dates)) && length(na.omit(dates)) > length(dates) * 0.2) {
+  if (
+    !all(is.na(dates)) && length(na.omit(dates)) > length(dates) * threshold
+  ) {
     return(TRUE)
   }
   return(FALSE) #nolint: return
+}
+
+.as_numeric_date <- Vectorize(function(x) {
+  epoch <- as.Date("1970-01-01")
+  difftime(as.Date(x, optional = TRUE), epoch, units = "days")
+}, USE.NAMES = FALSE
+)
+
+
+.convert_date_columns <- function(df, threshold = 0.2) {
+  # Convert columns to date if they are in date format
+  for (col in names(df)) {
+    if (.is_date(df[[col]])) {
+      df[[col]] <- .as_numeric_date(df[[col]])
+      names(df)[names(df) == col] <- paste0(col, ".nm.date")
+    }
+  }
+  return(df) #nolint: return
 }
