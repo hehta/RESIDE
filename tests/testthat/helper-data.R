@@ -33,7 +33,7 @@ marginal_distributions <- get_marginal_distributions(
 )
 
 dfs <- list(
-  ds = pharmaversesdtm::dm,
+  dm = pharmaversesdtm::dm,
   cm = pharmaversesdtm::cm,
   ae = pharmaversesdtm::ae
 )
