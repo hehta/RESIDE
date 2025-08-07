@@ -251,3 +251,29 @@ testthat::test_that(".get_keys works", {
     names(dfs)
   )
 })
+
+testthat::test_that(".get_largest_n_row works", {
+  testthat::expect_equal(
+    .get_largest_n_row(longitudinal_marginals),
+    max(sapply(dfs, nrow))
+  )
+  testthat::expect_equal(
+    .get_largest_n_row(marginal_distributions),
+    nrow(IST)
+  )
+})
+
+testthat::test_that(".is_date works", {
+  testthat::expect_true(
+    .is_date(dfs$ae$AEDTC)
+  )
+  testthat::expect_true(
+    .is_date(dfs$dm$RFPENDTC)
+  )
+  testthat::expect_false(
+    .is_date(dfs$dm$STUDYID)
+  )
+  testthat::expect_false(
+    .is_date(c("2020-01-01", "01", "02", "03", "05"))
+  )
+})

@@ -45,7 +45,7 @@ longitudinal_marginals <- suppressWarnings(
   )
 )
 
-# Quck and dirty random string function
+# Quick and dirty random string function
 random_string <- function() {
   return(
     runif(1, 1000000000000, 9999999999999) %>% round %>% as.character

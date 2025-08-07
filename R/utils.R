@@ -304,6 +304,7 @@ long_to_wide <- function(df, subject_identifier, max_obs = 10) {
 }
 
 is_multi_table <- function(marginals) {
+  # if the summary contains a data frame with variables
   if (any(grepl("variables.df.", names(marginals$summary)))) {
     return(TRUE)
   }
@@ -435,4 +436,22 @@ get_summary_variables <- function(marginals) {
     is.character,
     function(x) ifelse(x == "NA's", "", x)
   )
+}
+
+.get_largest_n_row <- function(marginals) {
+  # Get the largest n_row from the summary
+  if ("summary" %in% names(marginals)) {
+    n_rows <-
+      marginals$summary[grepl("n_row", names(marginals$summary))]
+    return(max(n_rows, na.rm = TRUE)) #nolint: return
+  }
+  return(0) #nolint: return
+}
+
+.is_date <- function(col) {
+  dates <- as.Date(col, optional = TRUE)
+  if (!all(is.na(dates)) && length(na.omit(dates)) > length(dates) * 0.2) {
+    return(TRUE)
+  }
+  return(FALSE) #nolint: return
 }

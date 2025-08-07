@@ -235,6 +235,17 @@ synthesise_multi_long_data <- function(
 
 }
 
+synthesise_multi_long_cor <- function(
+  marginals,
+  correlation_matrix = NULL
+) {
+  # Check the correlation matrix is provided
+  if (is.null(correlation_matrix)) {
+    stop("Correlation matrix must be provided for multi-table synthesis.")
+  }
+  
+}
+
 get_n_subjects <- function(
   marginals
 ) {
@@ -412,7 +423,7 @@ add_missingness <- function(
   simulated_data,
   marginals
 ) {
-  # Remove purposly added 'missing' factors
+  # Remove purposely added 'missing' factors
   .df <- simulated_data %>%
     dplyr::mutate(
       dplyr::across(
@@ -487,7 +498,7 @@ export_empty_cor_matrix <- function(
   create_folder = TRUE
 ) {
   # Check folder path
-  if (missing(folder_path)){
+  if (missing(folder_path)) {
     stop("A folder path must be provided.")
   }
   # Check class
