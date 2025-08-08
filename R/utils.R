@@ -449,6 +449,9 @@ get_summary_variables <- function(marginals) {
 }
 
 .is_date <- function(col, threshold = 0.2) {
+  if (!is.character(col)) {
+    return(FALSE) #nolint: return
+  }
   dates <- as.Date(col, optional = TRUE)
   if (
     !all(is.na(dates)) && length(na.omit(dates)) > length(dates) * threshold
@@ -463,6 +466,17 @@ get_summary_variables <- function(marginals) {
   difftime(as.Date(x, optional = TRUE), epoch, units = "days")
 }, USE.NAMES = FALSE
 )
+
+.back_transform_dates <- function(df) {
+  # Convert numeric dates back to Date format
+  for (col in names(df)) {
+    if (grepl("\\.nm\\.date$", col)) {
+      df[[col]] <- as.Date(df[[col]], origin = "1970-01-01")
+      names(df)[names(df) == col] <- gsub("\\.nm\\.date$", "", col)
+    }
+  }
+  return(df) #nolint: return
+}
 
 
 .convert_date_columns <- function(df, threshold = 0.2) {

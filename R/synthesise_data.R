@@ -86,6 +86,9 @@ synthesise_data_no_cor <- function(
     sim_df,
     marginals
   )
+
+  sim_df <- .back_transform_dates(sim_df)
+
   # Return the data frame
   return(sim_df)
 }
@@ -134,11 +137,15 @@ synthesise_data_cor <- function(
     sim_df,
     marginals
   )
+
   # Reorder dataframe
   column_names <- c("id", get_data_def(marginals)[["varname"]])
   sim_df <- sim_df %>%
     dplyr::select(dplyr::any_of(column_names))
   # Return the data frame
+
+  sim_df <- .back_transform_dates(sim_df)
+
   return(sim_df)
 }
 
@@ -227,6 +234,7 @@ synthesise_multi_long_data <- function(
     tmp_df <- dplyr::inner_join(key_baseline, df, by = "id")
     # Remove the key from the column names
     names(tmp_df) <- gsub(paste0(".df.", key), "", names(tmp_df))
+
     # add the df to the list
     dfs[[key]] <- tmp_df
   }
