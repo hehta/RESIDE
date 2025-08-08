@@ -36,18 +36,36 @@ synthesise_data <- function(
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")
   }
-  # Check if multi-table
-  # todo: add multi-table synthesis
-  # @todo add covariance matrix for correlations
-  if (!is.null(correlation_matrix)) {
-    return(
-      synthesise_data_cor(marginals, correlation_matrix)
-    )
+  sim_df <- NULL
+  # If there is no correlation matrix
+  # then synthesise the data without correlations
+  if (is.null(correlation_matrix)) {
+    if (is_multi_table_long(marginals)) {
+      sim_df <- synthesise_multi_long_data(
+        marginals
+      )
+    } else {
+      sim_df <- synthesise_data_no_cor(
+        marginals
+      )
+    }
+    # If there is a correlation matrix
+    # then synthesise the data with correlations
   } else {
-    return(
-      synthesise_data_no_cor(marginals)
-    )
+    if (is_multi_table_long(marginals)) {
+      # @todo add covariance matrix for correlations
+      stop(
+        "Multi-table long data synthesis with \
+        correlations is not yet implemented."
+      )
+    } else {
+      sim_df <- synthesise_data_cor(
+        marginals,
+        correlation_matrix
+      )
+    }
   }
+  return(sim_df)
 }
 
 #' @rdname synthesise_data
@@ -56,7 +74,8 @@ synthesize_data <- synthesise_data
 
 # Internal function to synthesise data without correlations
 synthesise_data_no_cor <- function(
-  marginals
+  marginals,
+  date_transform = TRUE
 ) {
   # Predefine dataDefinition
   data_def <- get_data_def(marginals, FALSE)
@@ -87,7 +106,9 @@ synthesise_data_no_cor <- function(
     marginals
   )
 
-  sim_df <- .back_transform_dates(sim_df)
+  if (date_transform) {
+    sim_df <- .back_transform_dates(sim_df)
+  }
 
   # Return the data frame
   return(sim_df)
@@ -96,7 +117,8 @@ synthesise_data_no_cor <- function(
 # Internal function to synthesise data with correlations
 synthesise_data_cor <- function(
   marginals,
-  correlation_matrix
+  correlation_matrix,
+  date_transform = TRUE
 ) {
   data_def <- get_data_def(marginals, TRUE)
 
@@ -144,18 +166,19 @@ synthesise_data_cor <- function(
     dplyr::select(dplyr::any_of(column_names))
   # Return the data frame
 
-  sim_df <- .back_transform_dates(sim_df)
+  if (date_transform) {
+    sim_df <- .back_transform_dates(sim_df)
+  }
 
   return(sim_df)
 }
 
 synthesise_multi_long_data <- function(
   marginals,
-  correlation_matrix = NULL
+  date_transform = TRUE
 ) {
   baseline_df <- synthesise_baseline_data(
-    marginals,
-    correlation_matrix = correlation_matrix
+    marginals
   )
 
   # Ensure the baseline id's are sequential
@@ -235,6 +258,10 @@ synthesise_multi_long_data <- function(
     # Remove the key from the column names
     names(tmp_df) <- gsub(paste0(".df.", key), "", names(tmp_df))
 
+    if (date_transform) {
+      tmp_df <- .back_transform_dates(tmp_df)
+    }
+
     # add the df to the list
     dfs[[key]] <- tmp_df
   }
@@ -261,8 +288,7 @@ get_n_subjects <- function(
 }
 
 synthesise_baseline_data <- function(
-  marginals,
-  correlation_matrix = NULL
+  marginals
 ) {
   baseline_columns <- get_summary_variables(
     marginals
@@ -270,9 +296,9 @@ synthesise_baseline_data <- function(
 
   baseline_marginals <- .filter_marginals(marginals, baseline_columns)
 
-  return(synthesise_data(
+  return(synthesise_data_no_cor(
     baseline_marginals,
-    correlation_matrix = correlation_matrix
+    date_transform = FALSE
   ))
 }
 
