@@ -272,15 +272,18 @@ get_long_columns <- function(df, subject_identifier) {
 
 # Function to convert a data frame from long to wide format
 long_to_wide <- function(df, subject_identifier, max_obs = 10) {
-
+  # get any columns where the number of rows is greater than subject ids
   long_columns <- get_long_columns(df, subject_identifier)
 
+  # Calculated the number of rows for each subject
   wide_df <-
     df %>%
     dplyr::group_by(dplyr::pick({{subject_identifier}})) %>%
     mutate(row = dplyr::row_number())
 
+  # Check if the number of rows exceeds the maximum observations
   if (max(wide_df$row) > max_obs) {
+    # if so, issue a warning
     warning(
       paste0(
         "The number of observations per subject exceeds ",
@@ -290,6 +293,7 @@ long_to_wide <- function(df, subject_identifier, max_obs = 10) {
         " will be retained."
       )
     )
+    # filter out rows past the maximum observations
     wide_df <- wide_df %>%
       dplyr::filter(row <= max_obs)
   }
@@ -304,7 +308,7 @@ long_to_wide <- function(df, subject_identifier, max_obs = 10) {
 }
 
 is_multi_table <- function(marginals) {
-  # if the summary contains a data frame with variables
+  # if the summary contains any variables.df
   if (any(grepl("variables.df.", names(marginals$summary)))) {
     return(TRUE)
   }
@@ -312,13 +316,19 @@ is_multi_table <- function(marginals) {
 }
 
 is_multi_table_long <- function(marginals) {
+  # is it a multi table
   if (is_multi_table(marginals)) {
+    # get all the nrows from the summary
     nrows <- marginals$summary[grepl("n_row.df.", names(marginals$summary))]
+    # select unique nrows
     u_nrows <- unique(as.numeric(nrows))
+    # if the number of unique nrows is greater than 1
     if (length(u_nrows) > 1) {
+      # data is in long format
       return(TRUE)
     }
   }
+  # otherwise data is not multi table long
   return(FALSE) #nolint: return
 }
 
@@ -363,21 +373,35 @@ is_multi_table_long <- function(marginals) {
 }
 
 get_n_col <- function(marginals) {
+  # forward declare n_col
   n_col <- 0
+  # variable types to check
   variable_types <-
-    c("categorical_variables", "binary_variables", "continuous_variables")
+    get_default_variable_types()
+  # loop through variable types
   for (variable_type in variable_types) {
+    # only count if the variable type is present
     if (variable_type %in% names(marginals)) {
+      # add the number of columns for this variable type
       n_col <- n_col + length(marginals[[variable_type]])
     }
   }
+  # Explicitly return the number of columns
   return(n_col) #nolint: return
 }
 
+get_default_variable_types <- function() {
+  return(c( #nolint: return
+    "categorical_variables",
+    "binary_variables",
+    "continuous_variables"
+  ))
+}
+
 get_variables <- function(marginals) {
+  # forward declare variables
   variables <- c()
-  variable_types <-
-    c("categorical_variables", "binary_variables", "continuous_variables")
+  variable_types <- get_default_variable_types()
   for (variable_type in variable_types) {
     if (variable_type %in% names(marginals)) {
       variables <- c(variables, names(marginals[[variable_type]]))

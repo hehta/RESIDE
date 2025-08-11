@@ -347,7 +347,7 @@ get_marginal_distributions <- function(
   summary_names <-
     summary_names[
       summary_names %in%
-      c("categorical_variables", "binary_variables", "continuous_variables")
+      get_default_variable_types()
     ]
   summary_names <-
     unique(summary_names)
@@ -475,7 +475,7 @@ get_marginal_distributions <- function(
     )
   }
   output_df <- output_df[!duplicated(output_df[[subject_identifier]]), ]
-  return(output_df)
+  return(output_df) #nolint: return
 }
 
 get_variable_types <- function(df) {
