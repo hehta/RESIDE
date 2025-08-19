@@ -71,7 +71,7 @@ get_marginal_distributions <- function(
       df <- .join_df(
         dfs,
         subject_identifier,
-        unique(df[[subject_identifier]])
+        unique(dfs[[1]][[subject_identifier]])
       )
       df <- .remove_subject_identifier(
         df,
