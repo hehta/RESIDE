@@ -361,6 +361,18 @@ get_marginal_distributions <- function(
   return(.summary)
 }
 
+.add_variable_summaries <- function(
+  dfs
+
+) {
+
+  for (.df in dfs) {
+    if (!is.data.frame(.df)) {
+      stop("All elements of dfs must be data frames")
+    }
+  }
+}
+
 .list_to_df <- function(
   df,
   subject_identifier
