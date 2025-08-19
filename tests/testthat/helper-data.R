@@ -20,6 +20,24 @@ summary_df <- read.csv(
 
 empty_df <- data.frame()
 
+ist_id <- IST
+ist_id$id <- 1:nrow(IST)
+ist_1 <- ist_id[,c(
+  "id",
+  "SEX",
+  "AGE",
+  "ID14",
+  "RSBP",
+  "RATRIAL",
+  "SET14D")]
+ist_2 <- ist_id[,c(
+  "id",
+  "HOSPNUM",
+  "RDELAY",
+  "RCONSC",
+  "DSIDEX"
+)]
+
 marginal_distributions <- get_marginal_distributions(
   IST,
   variables = c(

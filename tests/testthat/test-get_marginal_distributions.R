@@ -28,4 +28,51 @@ testthat::test_that("Test get_marginal_distributions works as it should", {
     get_marginal_distributions(data.frame(test = 1, other = TRUE)),
     regexp = "^.*Unknown Variable type for column other$"
   )
+  # Test unnamed list
+  marginals_list_unnamed <- get_marginal_distributions(
+    list(
+      pharmaversesdtm::dm,
+      pharmaversesdtm::cm,
+      pharmaversesdtm::ae
+    ),
+    subject_identifier = "USUBJID"
+  )
+  testthat::expect_true(
+    all(
+      "n_row.df.1" %in% names(marginals_list_unnamed$summary),
+      "n_row.df.2" %in% names(marginals_list_unnamed$summary),
+      "n_row.df.3" %in% names(marginals_list_unnamed$summary),
+      "variables.df.1" %in% names(marginals_list_unnamed$summary),
+      "variables.df.2" %in% names(marginals_list_unnamed$summary),
+      "variables.df.3" %in% names(marginals_list_unnamed$summary)
+    )
+  )
+  # Test named list
+  testthat::expect_true(
+    all(
+      "n_row.df.dm" %in% names(longitudinal_marginals$summary),
+      "n_row.df.cm" %in% names(longitudinal_marginals$summary),
+      "n_row.df.ae" %in% names(longitudinal_marginals$summary),
+      "variables.df.dm" %in% names(longitudinal_marginals$summary),
+      "variables.df.cm" %in% names(longitudinal_marginals$summary),
+      "variables.df.ae" %in% names(longitudinal_marginals$summary)
+    )
+  )
+
+  # Test non long list
+  marginal_list_non_long <- get_marginal_distributions(
+    list(
+      ist_1,
+      ist_2
+    ),
+    subject_identifier = "id"
+  )
+  testthat::expect_true(
+    all(
+      "n_row.df.1" %in% names(marginal_list_non_long$summary),
+      "n_row.df.2" %in% names(marginal_list_non_long$summary),
+      "variables.df.1" %in% names(marginal_list_non_long$summary),
+      "variables.df.2" %in% names(marginal_list_non_long$summary)
+    )
+  )
 })

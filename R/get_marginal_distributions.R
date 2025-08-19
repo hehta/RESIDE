@@ -86,6 +86,10 @@ get_marginal_distributions <- function(
       original_df,
       .return$summary
     )
+    .return$summary <- .add_variable_summaries(
+      original_df,
+      .return$summary
+    )
   } else {
     # If df is not a list, prepare the data frame
     df <- .prepare_df(
@@ -272,7 +276,6 @@ get_marginal_distributions <- function(
     keys <- seq_len(length(df))
   }
   .summaries <- list()
-  .df_summaries <- list()
   .wide_dfs <- list()
   for (key in keys) {
     .df <- df[[key]]
@@ -299,8 +302,6 @@ get_marginal_distributions <- function(
       subject_identifier,
       long_key = paste0(".df.", key)
     )
-    .df_summaries[paste0("variables.df.", key)] <-
-      paste(names(.df), collapse = ", ")
   }
   .baseline_df <- .list_to_df(
     .wide_dfs,
@@ -329,10 +330,6 @@ get_marginal_distributions <- function(
     variables = paste(names(.baseline_df), collapse = ", "),
     subject_identifier = subject_identifier
   )
-  .return_summaries$summary <- cbind(
-    .return_summaries$summary,
-    as.data.frame(.df_summaries)
-  )
   return(
     .return_summaries
   )
@@ -358,19 +355,24 @@ get_marginal_distributions <- function(
       summary_2[[name]]
     )
   }
-  return(.summary)
+  return(.summary) #nolint: return
 }
 
 .add_variable_summaries <- function(
-  dfs
-
+  dfs,
+  .summary = data.frame()
 ) {
-
-  for (.df in dfs) {
-    if (!is.data.frame(.df)) {
-      stop("All elements of dfs must be data frames")
-    }
+  keys <- names(dfs)
+  if (is.null(keys)) {
+    keys <- seq_len(length(dfs))
   }
+
+  for (key in keys) {
+    .df <- dfs[[key]]
+    .summary[,paste0("variables.df.", key)] <-
+      paste(names(.df), collapse = ", ")
+  }
+  return(.summary) #nolint: return
 }
 
 .list_to_df <- function(
@@ -428,7 +430,7 @@ get_marginal_distributions <- function(
     }
     .dfs[[key]] <- .df
   }
-  return(
+  return( #nolint: return
     .join_df(
       .dfs,
       subject_identifier,
@@ -534,7 +536,7 @@ get_variable_types <- function(df) {
       )
     }
   }
-  return(list(
+  return(list( #nolint: return
     categorical_variables = .categorical_variables,
     continuous_variables = .continuous_variables,
     binary_variables = .binary_variables
@@ -554,7 +556,7 @@ generate_variables_list <- function(dfs) {
     variables[paste0("variable.df.", key)] <-
       paste0(names(dfs[[key]]), collapse = ", ")
   }
-  return(as.data.frame(variables))
+  return(as.data.frame(variables)) #nolint: return
 }
 
 .add_n_row_summaries <- function(
@@ -570,27 +572,27 @@ generate_variables_list <- function(dfs) {
     n_row <- nrow(dfs[[key]])
     summary_df[, column_name] <- n_row
   }
-  return(summary_df)
+  return(summary_df) #nolint: return
 }
 
-.get_variable_names  <- function(
-  summary_list
-) {
-  # Check if variable_type is valid
-  variable_types <- c("categorical", "binary", "continuous")
-
-  variable_types <- names(summary_list)[names(summary_list) %in% variable_types]
-  if (length(variable_types) == 0) {
-    stop("No valid variable types found in summary_list")
-  }
-  variable_names <- c()
-  for (variable_type in variable_types) {
-    if (variable_type %in% names(summary_list)) {
-      variable_names <- c(
-        variable_names,
-        names(summary_list[[variable_type]])
-      )
-    }
-  }
-  return(variable_names)
-}
+# .get_variable_names  <- function(
+#   summary_list
+# ) {
+#   # Check if variable_type is valid
+#   variable_types <- c("categorical", "binary", "continuous")
+# 
+#   variable_types <- names(summary_list)[names(summary_list) %in% variable_types]
+#   if (length(variable_types) == 0) {
+#     stop("No valid variable types found in summary_list")
+#   }
+#   variable_names <- c()
+#   for (variable_type in variable_types) {
+#     if (variable_type %in% names(summary_list)) {
+#       variable_names <- c(
+#         variable_names,
+#         names(summary_list[[variable_type]])
+#       )
+#     }
+#   }
+#   return(variable_names) #nolint: return
+# }
