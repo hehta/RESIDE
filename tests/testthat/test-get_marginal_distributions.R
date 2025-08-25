@@ -76,3 +76,56 @@ testthat::test_that("Test get_marginal_distributions works as it should", {
     )
   )
 })
+
+testthat::test_that(".prepare_df works", {
+  # Test non character variables
+  testthat::expect_error(
+    .prepare_df(
+      IST,
+      variables = 1
+    ),
+    regexp = "^.*Variables must be a vector of characters.*$"
+  )
+  # Test missing variables
+  testthat::expect_error(
+    .prepare_df()(
+      IST,
+      variables = "notavariable"
+    ),
+    regexp = "^.*all variables must be in df missing: notavariable.*$"
+  )
+  # test subject identifier not character
+  testthat::expect_error(
+    .prepare_df()(
+      IST,
+      subject_identifier = TRUE
+    ),
+    regexp = "^.*Subject identifier must be a character.*$"
+  )
+})
+
+testthat::test_that(".remove_subject_identifier works", {
+  # Test subject identifier not character
+  testthat::expect_error(
+    .remove_subject_identifier(
+      IST,
+      subject_identifier = TRUE
+    ),
+    regexp = "^.*Subject identifier must be a character.*$"
+  )
+  # Test subject identifier not in df
+  testthat::expect_error(
+    .remove_subject_identifier(
+      IST,
+      subject_identifier = "notavariable"
+    ),
+    regexp = "^.*Subject identifier not in df: notavariable.*$"
+  )
+  test_df <- .remove_subject_identifier(
+    pharmaversesdtm::dm,
+    subject_identifier = "USUBJID"
+  )
+  testthat::expect_false(
+    "USUBJID" %in% names(test_df)
+  )
+})
