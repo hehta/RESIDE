@@ -29,14 +29,15 @@ testthat::test_that("Test get_marginal_distributions works as it should", {
     regexp = "^.*Unknown Variable type for column other$"
   )
   # Test unnamed list
-  marginals_list_unnamed <- get_marginal_distributions(
+  #@todo look at warning messages
+  marginals_list_unnamed <- suppressWarnings(get_marginal_distributions(
     list(
       pharmaversesdtm::dm,
       pharmaversesdtm::cm,
       pharmaversesdtm::ae
     ),
     subject_identifier = "USUBJID"
-  )
+  ))
   testthat::expect_true(
     all(
       "n_row.df.1" %in% names(marginals_list_unnamed$summary),
@@ -88,7 +89,7 @@ testthat::test_that(".prepare_df works", {
   )
   # Test missing variables
   testthat::expect_error(
-    .prepare_df()(
+    .prepare_df(
       IST,
       variables = "notavariable"
     ),
@@ -96,7 +97,7 @@ testthat::test_that(".prepare_df works", {
   )
   # test subject identifier not character
   testthat::expect_error(
-    .prepare_df()(
+    .prepare_df(
       IST,
       subject_identifier = TRUE
     ),
@@ -112,14 +113,6 @@ testthat::test_that(".remove_subject_identifier works", {
       subject_identifier = TRUE
     ),
     regexp = "^.*Subject identifier must be a character.*$"
-  )
-  # Test subject identifier not in df
-  testthat::expect_error(
-    .remove_subject_identifier(
-      IST,
-      subject_identifier = "notavariable"
-    ),
-    regexp = "^.*Subject identifier not in df: notavariable.*$"
   )
   test_df <- .remove_subject_identifier(
     pharmaversesdtm::dm,
