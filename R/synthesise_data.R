@@ -44,6 +44,12 @@ synthesise_data <- function(
       sim_df <- synthesise_multi_long_data(
         marginals
       )
+      # Multi table (not long) data
+    } else if (is_multi_table(marginals)) {
+      sim_df <- synthesise_multi_data(
+        marginals
+      )
+      # Single table data
     } else {
       sim_df <- synthesise_data_no_cor(
         marginals
@@ -172,6 +178,8 @@ synthesise_data_cor <- function(
 
   return(sim_df)
 }
+
+synthesise_multi_data <- synthesise_multi_long_data
 
 synthesise_multi_long_data <- function(
   marginals,
