@@ -616,6 +616,35 @@ import_cor_matrix <- function(
   return(.cor_matrix)
 }
 
+generate_correlation_matrix <- function(
+  marginals,
+  correlations
+) {
+  # Get the data definition, to get all the variable names,
+  # including the dummy variables
+  data_def <- get_data_def(marginals, TRUE)
+  # Generate an empty correlation matrix with a default correlation of 0
+  cor_matrix <- simstudy::genCorMat(nrow(data_def), rho = 0)
+  # Set the column names
+  colnames(cor_matrix) <- data_def[["varname"]]
+  # Set the row names
+  rownames(cor_matrix) <- data_def[["varname"]]
+  # Loop through the correlations
+  for (cor in correlations) {
+    # Check that the variables are in the correlation matrix
+    if (!(cor$x %in% colnames(cor_matrix))) {
+      stop(paste0("Variable ", cor$x, " not found in correlation matrix."))
+    }
+    if (!(cor$y %in% colnames(cor_matrix))) {
+      stop(paste0("Variable ", cor$y, " not found in correlation matrix."))
+    }
+    # Add the correlation to the matrix
+    cor_matrix[cor$x, cor$y] <- cor$rho
+    cor_matrix[cor$y, cor$x] <- cor$rho
+  }
+  return(cor_matrix)
+}
+
 # With correlations it is possible that the dummy variables for a single
 # category do not add up to one, we will fix that here
 fix_factors <- function(
@@ -738,4 +767,32 @@ check_probs <- function(probs) {
     probs <- jitter(probs)
   }
   return(probs)
+}
+
+#'
+#' @title Create a correlation object
+#' @description A helper function to create a correlation object
+#' @param x The name of the first variable
+#' @param y The name of the second variable
+#' @param rho The correlation between the two variables
+#' @return A list containing the correlation information
+#' @details This function is a helper function to create a correlation
+#' object that can be used to specify correlations between variables
+#' when synthesising data using the \code{\link{synthesise_data}} function.
+#' @examples
+#'  correlation("age", "bmi", 0.5)
+#' @rdname correlation
+#' @export
+correlation <- function(
+  x,
+  y,
+  rho
+) {
+  return(
+    list(
+      x = x,
+      y = y,
+      rho = rho
+    )
+  )
 }
