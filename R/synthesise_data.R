@@ -179,8 +179,6 @@ synthesise_data_cor <- function(
   return(sim_df)
 }
 
-synthesise_multi_data <- synthesise_multi_long_data
-
 synthesise_multi_long_data <- function(
   marginals,
   date_transform = TRUE
@@ -277,6 +275,8 @@ synthesise_multi_long_data <- function(
   return(dfs)
 
 }
+
+synthesise_multi_data <- synthesise_multi_long_data
 
 synthesise_multi_long_cor <- function(
   marginals,
