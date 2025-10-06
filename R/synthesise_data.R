@@ -286,7 +286,20 @@ synthesise_multi_long_cor <- function(
   if (is.null(correlation_matrix)) {
     stop("Correlation matrix must be provided for multi-table synthesis.")
   }
-  
+  # Edit the marginal summary to synthesise a single table
+  single_marginals <- marginals
+  # Set the n_row to the maximum n_row of the data frames
+  single_marginals$summary <- data.frame(
+    n_row = get_max_n_row(marginals)
+  )
+  no_cat_marginals <- single_marginals
+  no_cat_marginals$categorical_variables <- NULL
+  no_cat_marginals <- single_marginals
+  for (variable_type in get_default_variable_types()) {
+    if (variable_type != "categorical_variables") {
+      no_cat_marginals[[variable_type]] <- NULL
+    }
+  }
 }
 
 get_n_subjects <- function(
@@ -308,6 +321,20 @@ synthesise_baseline_data <- function(
     baseline_marginals,
     date_transform = FALSE
   ))
+}
+
+get_max_n_row <- function(
+  marginals
+) {
+  # Set the initial n_rows to the main n_row
+  n_rows <- c(marginals$summary$n_row)
+  for (key in .get_keys(marginals)) {
+    n_rows <- c(
+      n_rows,
+      marginals$summary[[paste0("n_row.df.", key)]]
+    )
+  }
+  return(max(n_rows))
 }
 
 get_data_def <- function(
