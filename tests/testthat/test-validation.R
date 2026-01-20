@@ -178,3 +178,29 @@ testthat::test_that("is_variables_valid works", {
   )
 
 })
+
+testthat::test_that("check_cor_variables works", {
+  # Test correct variables
+  testthat::expect_true(
+    check_cor_variables(
+      c("sex", "race"),
+      longitudinal_marginals
+    )
+  )
+  # Test variable not found
+  testthat::expect_error(
+    check_cor_variables(
+      c("unknown_variable"),
+      longitudinal_marginals
+    ),
+    regexp = "^Error the following variables were not found: unknown_variable$"
+  )
+  # Test variable ambiguous
+  testthat::expect_error(
+    check_cor_variables(
+      c("studyid"),
+      longitudinal_marginals
+    ),
+    regexp = "^More than one variable found with name: studyid please be more specific, options are:STUDYID.df.dm, STUDYID.df.cm, STUDYID.df.ae$"
+  )
+})

@@ -19,3 +19,8 @@ utils::globalVariables(c(
   "continuous_quantiles.csv",
   "summary.csv"
 )
+
+multi_keys <- c(
+  ".df.*",
+  ".nm.date*"
+)

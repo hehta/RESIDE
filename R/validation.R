@@ -102,3 +102,47 @@ get_required_variables <- function(
     )
   )
 }
+
+check_cor_variables <- function(
+  variables,
+  marginals
+) {
+  # Get all the names in the marginals
+  full_names <- RESIDE:::get_variables(marginals)
+  # Convert the names to lower case
+  col_names <- tolower(full_names)
+
+  # remove the keys
+  for (key in multi_keys) {
+    col_names <- gsub(key, "", col_names)
+  }
+
+  # Convert the variables to lowercase
+  variables <- tolower(variables)
+
+  # Get the matches between the column names and variabls
+  matches <- col_names %in% variables
+  # Get the matches between the variables and columns
+  reverse_matches <- variables %in% col_names
+  # Check all variables are in the marginals
+  if (!all(reverse_matches)) {
+    stop(
+      paste0("Error the following variables were not found: ",
+             paste0(variables[reverse_matches], collapse = ", "))
+    )
+  }
+  # Check there are no variables that need a df key that don't have one.
+  for (variable in variables) {
+    v_matches <- col_names %in% variable
+    if (length(v_matches) > 1) {
+      if (!variable %in% tolower(full_names))
+        stop(
+          paste0("More than one variable found with name: ",
+                 variable,
+                 " please be more specific, options are: ",
+                 paste0(full_names[v_matches], collapse = ", "))
+        )
+    }
+  }
+  return(TRUE)
+}
