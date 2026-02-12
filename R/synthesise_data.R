@@ -201,7 +201,7 @@ synthesise_multi_long_data <- function(
   # Iterate through the keys in the variable map
   for (key in .get_keys(marginals)) {
 
-    # Get the original variable names
+    # Get the original variable names scope for conflict
     synth_variables <- get_variables(marginals)
 
     # Filter the variables to only those with the df key

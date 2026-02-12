@@ -201,6 +201,6 @@ testthat::test_that("check_cor_variables works", {
       c("studyid"),
       longitudinal_marginals
     ),
-    regexp = "^More than one variable found with name: studyid please be more specific, options are:STUDYID.df.dm, STUDYID.df.cm, STUDYID.df.ae$"
+    regexp = "^More than one variable found with name: studyid please be more specific, options are: STUDYID.df.dm, STUDYID.df.cm, STUDYID.df.ae$"
   )
 })

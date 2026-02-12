@@ -108,7 +108,7 @@ check_cor_variables <- function(
   marginals
 ) {
   # Get all the names in the marginals
-  full_names <- RESIDE:::get_variables(marginals)
+  full_names <- get_variables(marginals)
   # Convert the names to lower case
   col_names <- tolower(full_names)
 
@@ -120,7 +120,7 @@ check_cor_variables <- function(
   # Convert the variables to lowercase
   variables <- tolower(variables)
 
-  # Get the matches between the column names and variabls
+  # Get the matches between the column names and variables
   matches <- col_names %in% variables
   # Get the matches between the variables and columns
   reverse_matches <- variables %in% col_names
@@ -128,7 +128,7 @@ check_cor_variables <- function(
   if (!all(reverse_matches)) {
     stop(
       paste0("Error the following variables were not found: ",
-             paste0(variables[reverse_matches], collapse = ", "))
+             paste0(variables[!reverse_matches], collapse = ", "))
     )
   }
   # Check there are no variables that need a df key that don't have one.
