@@ -6,7 +6,6 @@ is_variables_valid <- function(
   binary_variables,
   categorical_variables,
   continuous_variables,
-  quantile_variables,
   summary_variables
 ) {
   # Check all of the variables
@@ -24,10 +23,6 @@ is_variables_valid <- function(
       "continuous"
     ),
     is_variable_valid(
-      quantile_variables,
-      "quantile"
-    ),
-    is_variable_valid(
       summary_variables,
       "summary"
     )
@@ -36,14 +31,15 @@ is_variables_valid <- function(
     return(FALSE)
   }
   # Check the quantile names against the continuous variables
-  if (!all(
-    continuous_variables$variable %in% levels(
-      as.factor(quantile_variables$variable)
-    )
+  if (!is_data_frames_valid(
+    binary_variables,
+    categorical_variables,
+    continuous_variables,
+    summary_variables
   )) {
     # Produce a helpful message
     message(
-      "Continuous variables do not match quantiles"
+      "Date Frame names are missing from on or more files"
     )
     # Return FALSE
     return(FALSE)
@@ -93,14 +89,45 @@ get_required_variables <- function(
       variable_type == "categorical" ~
         list(c("category", "n", "variable")),
       variable_type == "continuous" ~
-        list(c("variable", "mean", "sd", "missing", "max_dp")),
-      variable_type == "quantile" ~
-        list(c("variable", "orig_q", "tform_q", "epsilon")),
+        list(c(
+          "variable",
+          "orig_q",
+          "tform_q",
+          "epsilon",
+          "is_date",
+          "missing",
+          "max_dp"
+        )),
       variable_type == "summary" ~
         list(c("n_row", "n_col", "variables")),
       .default = list(c("ERROR", "UNKNOWN VARIABLE"))
     )
   )
+}
+
+is_data_frames_valid <- function(
+  binary_variables,
+  categorical_variables,
+  continuous_variables,
+  summary_variables
+) {
+  variable_dfs <- list(
+    binary_variables,
+    categorical_variables,
+    continuous_variables,
+    summary_variables
+  )
+  n_variable_types <- lapply(
+    variable_dfs,
+    function(x) ifelse(nrow(x) > 0, 1L, 0L)
+  )
+  n_variable_types <- do.call(sum, n_variable_types)
+  n_dfs <- lapply(
+    variable_dfs,
+    function(x) ifelse("data_frame" %in% names(x), 1L, 0L)
+  )
+  n_dfs <- do.call(sum, n_dfs)
+  n_dfs == n_variable_types
 }
 
 check_cor_variables <- function(

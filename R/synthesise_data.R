@@ -30,46 +30,36 @@
 synthesise_data <- function(
   marginals,
   correlation_matrix = NULL,
+  correlations = NULL,
   ...
 ) {
   # Check class
   if (!methods::is(marginals, "RESIDE")) {
     stop("object must be of class RESIDE")
   }
+  if (!is.null(correlation_matrix) && !is.null(correlations)) {
+    stop("Only one of correlation_matrix or correlations can be supplied.")
+  }
   sim_df <- NULL
   # If there is no correlation matrix
   # then synthesise the data without correlations
-  if (is.null(correlation_matrix)) {
-    if (is_multi_table_long(marginals)) {
-      sim_df <- synthesise_multi_long_data(
-        marginals
-      )
-      # Multi table (not long) data
-    } else if (is_multi_table(marginals)) {
-      sim_df <- synthesise_multi_data(
-        marginals
-      )
-      # Single table data
-    } else {
+  if (is.null(correlation_matrix)  && is.null(correlations)) {
+    # If there is a correlations, synthesise the data without correlations
+    if (is_single_table(marginals)) {
       sim_df <- synthesise_data_no_cor(
-        marginals
-      )
-    }
-    # If there is a correlation matrix
-    # then synthesise the data with correlations
-  } else {
-    if (is_multi_table_long(marginals)) {
-      # @todo add covariance matrix for correlations
-      stop(
-        "Multi-table long data synthesis with \
-        correlations is not yet implemented."
+        marginals[names(marginals %in% "overall_summary" == FALSE)]
       )
     } else {
-      sim_df <- synthesise_data_cor(
+      sim_df <- synthesise_data_multi_no_cor(marginals)
+      sim_df <- replace_common_fields(
         marginals,
-        correlation_matrix
+        sim_df
       )
     }
+  } else if (!is.null(correlations)) {
+
+  } else if (!is.null(correlation_matrix)) {
+
   }
   return(sim_df)
 }
@@ -80,41 +70,46 @@ synthesize_data <- synthesise_data
 
 # Internal function to synthesise data without correlations
 synthesise_data_no_cor <- function(
-  marginals,
+  sub_marginals,
   date_transform = TRUE
 ) {
   # Predefine dataDefinition
-  data_def <- get_data_def(marginals, FALSE)
+  data_def <- get_data_def(sub_marginals, FALSE)
 
   # Synthesise the data
   sim_df <- simstudy::genData(
-    marginals$summary$n_row,
+    sub_marginals$summary$n_row,
     data_def
   )
 
   # Back transform continuous variables
-  for (variable_name in names(marginals$continuous_variables)) {
+  for (variable_name in names(sub_marginals$continuous_variables)) {
     sim_df[[variable_name]] <-
       approx(
-        marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
-        marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
+        sub_marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
+        sub_marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
         xout = sim_df[[variable_name]], rule = 2, ties = "ordered"
       )$y
     # Round to original decimal places
     sim_df[[variable_name]] <- round(
       sim_df[[variable_name]],
-      marginals$continuous_variables[[variable_name]]$summary$max_dp
+      sub_marginals$continuous_variables[[variable_name]]$summary$max_dp
     )
   }
   # Add missing values (MAR)
   sim_df <- add_missingness(
     sim_df,
-    marginals
+    sub_marginals
   )
 
   if (date_transform) {
-    sim_df <- .back_transform_dates(sim_df)
+    sim_df <- .back_transform_dates(sub_marginals, sim_df)
   }
+
+  sim_df <- reindex_df(
+    sub_marginals,
+    sim_df
+  )
 
   # Return the data frame
   return(sim_df)
@@ -122,15 +117,15 @@ synthesise_data_no_cor <- function(
 
 # Internal function to synthesise data with correlations
 synthesise_data_cor <- function(
-  marginals,
+  sub_marginals,
   correlation_matrix,
   date_transform = TRUE
 ) {
-  data_def <- get_data_def(marginals, TRUE)
+  data_def <- get_data_def(sub_marginals, TRUE)
 
   # Synthesise the data
   sim_df <- simstudy::genCorFlex(
-    marginals$summary$n_row,
+    sub_marginals$summary$n_row,
     data_def,
     corMatrix = correlation_matrix
   )
@@ -138,244 +133,199 @@ synthesise_data_cor <- function(
   # Replace dummy categories where rows add up to more than 1
   sim_df <- fix_factors(
     sim_df,
-    marginals
+    sub_marginals
   )
 
   sim_df <- restore_factors(
     sim_df,
-    marginals$categorical_variables
+    sub_marginals$categorical_variables
   )
 
   # Back transform continuous variables
-  for (variable_name in names(marginals$continuous_variables)) {
+  for (variable_name in names(sub_marginals$continuous_variables)) {
     sim_df[[variable_name]] <-
       approx(
-        marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
-        marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
+        sub_marginals$continuous_variables[[variable_name]]$quantiles$tform_q,
+        sub_marginals$continuous_variables[[variable_name]]$quantiles$orig_q,
         xout = sim_df[[variable_name]], rule = 2
       )$y
     # Round to original decimal places
     sim_df[[variable_name]] <- round(
       sim_df[[variable_name]],
-      marginals$continuous_variables[[variable_name]]$summary$max_dp
+      sub_marginals$continuous_variables[[variable_name]]$summary$max_dp
     )
   }
   # Add missing values (MAR)
   sim_df <- add_missingness(
     sim_df,
-    marginals
+    sub_marginals
   )
 
   # Reorder dataframe
-  column_names <- c("id", get_data_def(marginals)[["varname"]])
+  column_names <- c("id", get_data_def(sub_marginals)[["varname"]])
   sim_df <- sim_df %>%
     dplyr::select(dplyr::any_of(column_names))
   # Return the data frame
 
   if (date_transform) {
-    sim_df <- .back_transform_dates(sim_df)
+    sim_df <- .back_transform_dates(sub_marginals, sim_df)
   }
+
+  sim_df <- reindex_df(
+    sub_marginals,
+    sim_df
+  )
 
   return(sim_df)
 }
 
-synthesise_multi_long_data <- function(
-  marginals,
-  date_transform = TRUE
-) {
-  baseline_df <- synthesise_baseline_data(
-    marginals
-  )
-
-  # Ensure the baseline id's are sequential
-  # This is important for the multi-table synthesis
-  baseline_df$id <- seq_len(nrow(baseline_df))
-
-  # Store the baseline variables
-  baseline_variables <- get_summary_variables(
-    marginals
-  )
-  # Forward declare a list to store the data frames
-  dfs <- list()
-
-  # Iterate through the keys in the variable map
-  for (key in .get_keys(marginals)) {
-
-    # Get the original variable names scope for conflict
-    synth_variables <- get_variables(marginals)
-
-    # Filter the variables to only those with the df key
-    synth_variables <- synth_variables[
-      grepl(paste0(".df.", key), synth_variables)
-    ]
-
-    # Get any baseline variables with the df key
-    bl_variables <- baseline_variables[
-      grepl(paste0(".df.", key), baseline_variables)
-    ]
-
-    # Remove these keyed variables (to prevent duplication)
-    synth_variables <- setdiff(synth_variables, bl_variables)
-
-    # Remove the Subject Identifier
-    synth_variables <- setdiff(
-      synth_variables,
-      marginals$summary$subject_identifier
-    )
-
-    # Filter the marginals
-    tmp_marginals <- .filter_marginals(
-      marginals,
-      synth_variables
-    )
-
-    # Replace the n_row in the summary
-    tmp_marginals[["summary"]][["n_row"]] <-
-      marginals[["summary"]][[paste0("n_row.df.", key)]]
-
-    # Synthesise the data and store it in the list
-    dfs[[key]] <- synthesise_data(tmp_marginals)
-
+synthesise_data_multi_no_cor <- function(marginals) {
+  # Forward declare list of data frames to be returned
+  sim_dfs <- list()
+  marginals <- add_n_subjects(marginals)
+  df_names <- get_df_names_or_key(marginals)
+  for (df in df_names) {
+    .sim_df <- synthesise_data_no_cor(marginals[[df]])
+    sim_dfs[[df]] <- .sim_df
   }
 
-  # Iterate through the data frames
-  # as we need to add the baseline data
-  for (key in names(dfs)) {
-    # store the data frame
-    df <- dfs[[key]]
-    # Filter the baseline data by the key
-    key_baseline <- .filter_baseline_by_key(
-      marginals,
-      baseline_df,
-      key
-    )
-    # Calculate the number of ids needed
-    # Using ceiling to ensure we have enough
-    id_len <- ceiling(nrow(df) / nrow(baseline_df))
-    # Repeat the ids to the length needed
-    ids <- rep(seq_len(nrow(baseline_df)), id_len)
-    # The length may be more than the number of rows in df
-    # so we sample the ids to match the number of rows in df
-    ids <- sample(ids, nrow(df))
-    # Replace the ids
-    df$id <- ids
-    # Join the baseline data to the data frame
-    tmp_df <- dplyr::inner_join(key_baseline, df, by = "id")
-    # Remove the key from the column names
-    names(tmp_df) <- gsub(paste0(".df.", key), "", names(tmp_df))
-
-    if (date_transform) {
-      tmp_df <- .back_transform_dates(tmp_df)
-    }
-
-    # add the df to the list
-    dfs[[key]] <- tmp_df
-  }
-  # Return the list of data frames
-  return(dfs)
-
+  return(sim_dfs)
 }
 
-synthesise_multi_data <- synthesise_multi_long_data
-
-synthesise_multi_long_cor <- function(
-  marginals,
-  correlation_matrix = NULL
-) {
-  # Check the correlation matrix is provided
-  if (is.null(correlation_matrix)) {
-    stop("Correlation matrix must be provided for multi-table synthesis.")
-  }
-  # Edit the marginal summary to synthesise a single table
-  single_marginals <- marginals
-  # Set the n_row to the maximum n_row of the data frames
-  single_marginals$summary <- data.frame(
-    n_row = get_max_n_row(marginals)
+synthesise_data_multi_cor <- function(marginals) {
+  # Forward declare list of data frames to be returned
+  sim_dfs <- list()
+  marginals <- add_n_subjects(marginals)
+  common_fields <- .split_variables(
+    marginals$overall_summary$common_columns
   )
-  no_cat_marginals <- single_marginals
-  no_cat_marginals$categorical_variables <- NULL
-  no_cat_marginals <- single_marginals
-  for (variable_type in get_default_variable_types()) {
-    if (variable_type != "categorical_variables") {
-      no_cat_marginals[[variable_type]] <- NULL
+  
+
+  return(sim_dfs)
+}
+
+synthesise_common_fields <- function(
+  marginals
+) {
+  common_fields <- .split_variables(
+    marginals$overall_summary$common_columns
+  )
+  common_marginals <- RESIDE:::.filter_marginals(
+    marginals,
+    common_fields,
+    TRUE
+  )
+  common_dfs <- RESIDE:::synthesise_data_multi_no_cor(common_marginals)
+
+  n_subjects <- marginals$overall_summary$n_subjects
+
+  common_cols <- list()
+  for (col in common_fields) {
+    for (df in common_dfs) {
+      if (!col %in% names(df)) {
+        next
+      }
+      if (col %in% names(common_cols)) {
+        if (nrow(df) > length(common_cols[[col]])) {
+          common_cols[[col]] <- df[[col]]
+        }
+      } else {
+        common_cols[[col]] <- df[[col]]
+      }
     }
   }
-}
 
-get_n_subjects <- function(
-  marginals
-) {
-  return(marginals$summary$n_row)
-}
-
-synthesise_baseline_data <- function(
-  marginals
-) {
-  baseline_columns <- get_summary_variables(
-    marginals
-  )
-
-  baseline_marginals <- .filter_marginals(marginals, baseline_columns)
-
-  return(synthesise_data_no_cor(
-    baseline_marginals,
-    date_transform = FALSE
-  ))
-}
-
-get_max_n_row <- function(
-  marginals
-) {
-  # Set the initial n_rows to the main n_row
-  n_rows <- c(marginals$summary$n_row)
-  for (key in .get_keys(marginals)) {
-    n_rows <- c(
-      n_rows,
-      marginals$summary[[paste0("n_row.df.", key)]]
-    )
+  for (col in names(common_cols)) {
+    common_cols[[col]] <- sample(common_cols[[col]], n_subjects, replace = TRUE)
   }
-  return(max(n_rows))
+  common_df <- as.data.frame(do.call(cbind, common_cols))
+  common_df[[common_marginals$overall_summary$subject_identifier]] <-
+    seq_len(nrow(common_df))
+  common_df
+}
+
+replace_common_fields <- function(
+  marginals,
+  sim_dfs
+) {
+  common_df <- synthesise_common_fields(marginals)
+  subject_identifier <- marginals$overall_summary$subject_identifier
+  for (i in seq_along(sim_dfs)) {
+    df <- sim_dfs[[i]]
+    if (length(intersect(names(df), names(common_df))) > 1) {
+      common_cols <- intersect(names(df), names(common_df))
+      tmp_common_df <- common_df[, common_cols]
+      tmp_df <- dplyr::select(
+        df,
+        -dplyr::all_of(common_cols[common_cols != subject_identifier])
+      )
+      tmp_df <- dplyr::left_join(
+        tmp_df,
+        tmp_common_df,
+        by = subject_identifier
+      )
+      tmp_df <- tmp_df[, names(df)]
+      sim_dfs[[i]] <- tmp_df
+    }
+  }
+  sim_dfs
+}
+
+add_n_subjects <- function(
+  marginals
+) {
+  if (!"n_subjects" %in% names(marginals$overall_summary)) {
+    return(marginals)
+  }
+  df_names <- get_df_names_or_key(marginals)
+  for (df in df_names) {
+    if (df == "overall_summary") {
+      next
+    }
+    marginals[[df]]$summary$n_subjects <- marginals$overall_summary$n_subjects
+  }
+  marginals
 }
 
 get_data_def <- function(
-  marginals,
+  sub_marginals,
   use_correlations = FALSE
 ) {
   # Predefine dataDefinition
   data_def <- NULL
 
   # If there are categorical variables
-  if ("categorical_variables" %in% names(marginals)) {
+  if ("categorical_variables" %in% names(sub_marginals)) {
     # Define categorical variables dependant on correlations
     if (use_correlations) {
       data_def <- define_categorical_binary(
-        marginals$categorical_variables,
-        marginals$summary$n_row,
+        sub_marginals$categorical_variables,
+        sub_marginals$summary$n_row,
         data_def
       )
     } else {
       data_def <- define_categorical(
-        marginals$categorical_variables,
-        marginals$summary$n_row,
+        sub_marginals$categorical_variables,
+        sub_marginals$summary$n_row,
         data_def
       )
     }
   }
 
   # If there are binary variables
-  if ("binary_variables" %in% names(marginals)) {
+  if ("binary_variables" %in% names(sub_marginals)) {
     # Define binary variables
     data_def <- define_binary(
-      marginals$binary_variables,
+      sub_marginals$binary_variables,
       data_def
     )
   }
 
   # If there are continuous variables
-  if ("continuous_variables" %in% names(marginals)) {
+  if ("continuous_variables" %in% names(sub_marginals)) {
     # Define continuous variables
     data_def <- define_continuous(
-      marginals$continuous_variables,
+      sub_marginals$continuous_variables,
       data_def
     )
   }
@@ -481,8 +431,8 @@ define_continuous <- function(
       .data_def,
       varname = .column,
       dist = "normal",
-      formula = continuous_summary[[.column]][["summary"]][["mean"]],
-      variance = continuous_summary[[.column]][["summary"]][["sd"]]
+      formula = 0,
+      variance = 1
     )
   }
   return(.data_def)
@@ -490,7 +440,7 @@ define_continuous <- function(
 
 add_missingness <- function(
   simulated_data,
-  marginals
+  sub_marginals
 ) {
   # Remove purposely added 'missing' factors
   .df <- simulated_data %>%
@@ -500,10 +450,10 @@ add_missingness <- function(
       )
     )
   # Loop through the binary variables
-  for (binary_variable in names(marginals$binary_variables)) {
+  for (binary_variable in names(sub_marginals$binary_variables)) {
     # Get the number of NAs
     .variable_missingness <-
-      marginals$binary_variables[[binary_variable]][["missing"]]
+      sub_marginals$binary_variables[[binary_variable]][["missing"]]
     # Only add NAs if there are any to add
     if (.variable_missingness > 0) {
       # Select a random set of rows given the number of NAs and replace
@@ -512,10 +462,10 @@ add_missingness <- function(
     }
   }
   # Loop through the continuous variables
-  for (continuous_variable in names(marginals$continuous_variables)) {
+  for (continuous_variable in names(sub_marginals$continuous_variables)) {
     # Only add NAs if there are any to add
     .variable_missingness <-
-      marginals$continuous_variables[[continuous_variable]][["summary"]][["missing"]] # nolint line_length
+      sub_marginals$continuous_variables[[continuous_variable]][["summary"]][["missing"]] # nolint line_length
     if (.variable_missingness > 0) {
       # Select a random set of rows given the number of NAs and replace
       # the variable of those rows with NAs
@@ -676,12 +626,12 @@ generate_correlation_matrix <- function(
 # category do not add up to one, we will fix that here
 fix_factors <- function(
   simulated_data,
-  marginals
+  sub_marginals
 ) {
   # Get the categorical summary from the marginals
-  categorical_summary <- marginals$categorical_variables
+  categorical_summary <- sub_marginals$categorical_variables
   # Extract the number for rows from the marginals
-  n_row <- marginals$summary$n_row
+  n_row <- sub_marginals$summary$n_row
   # Loop through the columns
   for (.column in names(categorical_summary)){
     # Forward declare category names
@@ -796,6 +746,34 @@ check_probs <- function(probs) {
   return(probs)
 }
 
+
+reindex_df <- function(
+  sub_marginals,
+  sim_df
+) {
+  n_row <- n_ids <- sub_marginals$summary$n_row
+  if ("n_subjects" %in% names(sub_marginals$summary)) {
+    n_ids <- sub_marginals$summary$n_subjects
+  }
+  if (n_ids != nrow(sim_df)) {
+    id_len <- ceiling(nrow(sim_df) / n_ids)
+    # Repeat the ids to the length needed
+    ids <- rep(seq_len(n_ids), id_len)
+    # The length may be more than the number of rows in df
+    # so we sample the ids to match the number of rows in df
+    ids <- sample(ids, n_row)
+    ids <- ids[order(ids)]
+    sim_df$id <- ids
+  } else {
+    sim_df$id <- seq_len(n_row)
+  }
+  if (sub_marginals$summary$subject_identifier != "") {
+    names(sim_df)[names(sim_df) == "id"] <-
+      sub_marginals$summary$subject_identifier
+  }
+  sim_df
+}
+
 #'
 #' @title Create a correlation object
 #' @description A helper function to create a correlation object
@@ -822,4 +800,14 @@ correlation <- function(
       rho = rho
     )
   )
+}
+
+get_correlation_names <- function(
+  correlations
+) {
+  correlation_names <- c()
+  for (cor in correlations) {
+    correlation_names <- c(correlation_names, cor$x, cor$y)
+  }
+  return(unique(correlation_names))
 }

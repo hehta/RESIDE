@@ -3,21 +3,31 @@
 ##################################################################
 # Returns a list of missing variables from a data frame.
 get_missing_variables <- function(
-  df,
+  dfs,
   variables
 ) {
   # Set up a vector for missing variables
   .missing_variables <- c()
+  # Get all the columns from the data frame(s)
+  all_variables <- get_all_columns(df)
   # Loop through the variables
   for (variable in variables) {
     # If the variable is not in the columns of the data frame
-    if (!variable %in% names(df)) {
+    if (!variable %in% all_variables) {
       # Add the variable to the missing variables vector
       .missing_variables <- c(.missing_variables, variable)
     }
   }
   # Return the missing variables vector
   return(.missing_variables) #nolint: return
+}
+
+filter_variables <- function(
+  dfs,
+  variables
+) {
+  .dfs <- lapply(dfs, function(df) {df[names(df) %in% variables]})
+  .dfs
 }
 
 # Joins a folder and file path normalising the folder path
@@ -231,111 +241,10 @@ remove_marginal_files <- function(folder_path) {
   }
 }
 
-# Function to determine if a data frame is in long format
-is_long_format <- function(df, subject_identifier) {
-  if (! subject_identifier %in% names(df)) {
-    stop("Subject Identifier must be in data")
-  }
-  unique_ids <- unique(df[[subject_identifier]])
-  if (length(unique_ids) < nrow(dplyr::distinct(df))) {
-    return(TRUE)
-  }
-  return(FALSE) #nolint: return
-}
-
-# Function to get the long (format) columns from a data frame
-get_long_columns <- function(df, subject_identifier) {
-  # Forward declare long columns
-  long_columns <- c()
-
-  # Get unique subjects
-  unique_subjects <- unique(df[[subject_identifier]])
-
-  # Loop through subjects
-  for (subject in unique_subjects) {
-    # Loop through columns
-    for (col in names(df)){
-      # Ignore any existing long columns
-      if (!col %in% long_columns) {
-        # Get the rows for the subject
-        subject_rows <- df[df[[subject_identifier]] == subject, ]
-        # Check if the column has different values for any row
-        if (length(unique(subject_rows[[col]])) > 1) {
-          # Add the column to the long columns list
-          long_columns <- c(col, long_columns)
-        }
-      }
-    }
-  }
-  return(long_columns) #nolint: return
-}
-
-# Function to convert a data frame from long to wide format
-long_to_wide <- function(df, subject_identifier, max_obs = 10) {
-  # get any columns where the number of rows is greater than subject ids
-  long_columns <- get_long_columns(df, subject_identifier)
-
-  # Calculated the number of rows for each subject
-  wide_df <-
-    df %>%
-    dplyr::group_by(dplyr::pick({{subject_identifier}})) %>%
-    mutate(row = dplyr::row_number())
-
-  # Check if the number of rows exceeds the maximum observations
-  if (max(wide_df$row) > max_obs) {
-    # if so, issue a warning
-    warning(
-      paste0(
-        "The number of observations per subject exceeds ",
-        max_obs,
-        ". Only the first ",
-        max_obs,
-        " will be retained."
-      )
-    )
-    # filter out rows past the maximum observations
-    wide_df <- wide_df %>%
-      dplyr::filter(row <= max_obs)
-  }
-
-  wide_df <- wide_df %>%
-    tidyr::pivot_wider(
-      names_from = row,
-      names_sep = ".obs.",
-      values_from = tidyr::all_of(long_columns)
-    )
-  return(wide_df)
-}
-
-is_multi_table <- function(marginals) {
-  # if the summary contains any variables.df
-  if (any(grepl("variables.df.", names(marginals$summary)))) {
-    return(TRUE)
-  }
-  return(FALSE) #nolint: return
-}
-
-is_multi_table_long <- function(marginals) {
-  # is it a multi table
-  if (is_multi_table(marginals)) {
-    # get all the nrows from the summary
-    nrows <- marginals$summary[grepl("n_row.df.", names(marginals$summary))]
-    # select unique nrows
-    u_nrows <- unique(as.numeric(nrows))
-    # if the number of unique nrows is greater than 1
-    if (length(u_nrows) > 1) {
-      # data is in long format
-      return(TRUE)
-    }
-  }
-  # otherwise data is not multi table long
-  return(FALSE) #nolint: return
-}
-
-
-.filter_marginals <- function(
+.filter_sub_marginals <- function(
   marginals,
-  variables
+  variables,
+  keep_subject_identifier = TRUE
 ) {
   new_marginals <- list()
   for (variable in variables) {
@@ -365,11 +274,73 @@ is_multi_table_long <- function(marginals) {
       variables = paste(variables, collapse = ", ")
     )
     if ("subject_identifier" %in% names(marginals$summary)) {
-      new_marginals$subject_identifier <- marginals$summary$subject_identifier
+      new_marginals$summary$subject_identifier <- ifelse(
+        keep_subject_identifier,
+        marginals$summary$subject_identifier,
+        ""
+      )
+    }
+    if ("data_frame" %in% names(marginals$summary)) {
+      new_marginals$summary$data_frame <- marginals$summary$data_frame
     }
   }
-  class(new_marginals) <- "RESIDE"
   return(new_marginals) #nolint: return
+}
+
+.filter_marginals <- function(
+  marginals,
+  variables,
+  keep_subject_identifier = TRUE
+) {
+  marginals_copy <- marginals
+  if ("overall_summary" %in% names(marginals)) {
+    marginals_copy[["overall_summary"]] <- NULL
+  }
+  # Filter the marginals to only include the specified variables
+  marginals_copy <- lapply(marginals_copy,
+    .filter_sub_marginals,
+    variables,
+    keep_subject_identifier
+  )
+  data_frame_names <- get_df_names_or_key(marginals_copy)
+  marginals_copy$overall_summary <- data.frame(
+    n_data_frames = length(data_frame_names),
+    data_frame_names = paste(data_frame_names, collapse = ", "),
+    subject_identifier = ifelse(
+      "subject_identifier" %in% names(marginals$overall_summary)
+      && keep_subject_identifier,
+      marginals$overall_summary$subject_identifier,
+      ""
+    ),
+    n_subjects = ifelse(
+      "n_subjects" %in% names(marginals$overall_summary),
+      marginals$overall_summary$n_subjects,
+      0
+    ),
+    common_columns = ifelse(
+      "common_columns" %in% names(marginals$overall_summary),
+      marginals$overall_summary$common_columns,
+      ""
+    )
+  )
+  # Return the filtered marginals
+  return(marginals_copy) #nolint: return
+}
+
+.filter_common_marginals <- function(
+  marginals,
+  keep_subject_identifier = TRUE
+) {
+  # Get the common columns from the marginals
+  common_columns <- get_common_columns(marginals, "subject_identifier")
+  # Filter the marginals to only include the common columns
+  common_marginals <- .filter_marginals(
+    marginals,
+    common_columns,
+    keep_subject_identifier
+  )
+  # Return the filtered marginals
+  return(common_marginals) #nolint: return
 }
 
 get_n_col <- function(marginals) {
@@ -398,37 +369,28 @@ get_default_variable_types <- function() {
   ))
 }
 
-get_variables <- function(marginals) {
+get_submarginal_variables <- function(sub_marginals) {
   # forward declare variables
   variables <- c()
   variable_types <- get_default_variable_types()
   for (variable_type in variable_types) {
-    if (variable_type %in% names(marginals)) {
-      variables <- c(variables, names(marginals[[variable_type]]))
+    if (variable_type %in% names(sub_marginals)) {
+      variables <- c(variables, names(sub_marginals[[variable_type]]))
     }
   }
   return(variables) #nolint: return
 }
 
-get_summary_variables <- function(marginals) {
-  if (!"summary" %in% names(marginals)) {
-    stop("Marginals do not contain a summary.")
+get_variables <- function(marginals) {
+  # forward declare variables
+  variables <- c()
+  df_names <- get_df_names_or_key(marginals)
+  # Get variables from each sub-marginal
+  for (df_name in df_names) {
+    variables <-
+      c(variables, get_submarginal_variables(marginals[[df_name]]))
   }
-  if (!"variables" %in% names(marginals$summary)) {
-    stop("Marginals summary does not contain variables.")
-  }
-
-  variables <- marginals$summary$variables
-
-  variables <- .split_variables(variables)
-
-}
-
-.get_keys <- function(marginals) {
-  .keys <-
-    names(marginals$summary)[grepl("n_row.df.", names(marginals$summary))]
-  .keys <- gsub("n_row.df.", "", .keys)
-  return(.keys) #nolint: return
+  return(unique(variables)) #nolint: return
 }
 
 .split_variables <- function(variables) {
@@ -436,23 +398,6 @@ get_summary_variables <- function(marginals) {
   variables <- strsplit(variables, ",")[[1]]
   variables <- trimws(variables)
   return(variables) # nolint: return
-}
-
-.filter_baseline_by_key <- function(
-  marginals,
-  baseline_df,
-  key
-) {
-  baseline_variables <- names(baseline_df)
-  baseline_key <-
-    baseline_variables[grepl(paste0(".df.", key), baseline_variables)]
-  vm_variables <-
-    .split_variables(marginals[["summary"]][[paste0("variables.df.", key)]])
-  baseline_variables <- intersect(baseline_variables, vm_variables)
-  baseline_variables <- c("id", baseline_key, baseline_variables)
-  bl_df <- baseline_df %>%
-    dplyr::select(dplyr::any_of(baseline_variables))
-  return(bl_df) #nolint: return
 }
 
 .replace_nas <- function(df) {
@@ -478,7 +423,8 @@ get_summary_variables <- function(marginals) {
   }
   dates <- as.Date(col, optional = TRUE)
   if (
-    !all(is.na(dates)) && length(na.omit(dates)) > length(dates) * threshold
+    !all(is.na(dates)) &&
+      length(na.omit(dates)) > length(na.omit(dates)) * threshold
   ) {
     return(TRUE)
   }
@@ -491,25 +437,173 @@ get_summary_variables <- function(marginals) {
 }, USE.NAMES = FALSE
 )
 
-.back_transform_dates <- function(df) {
-  # Convert numeric dates back to Date format
-  for (col in names(df)) {
-    if (grepl("\\.nm\\.date$", col)) {
-      df[[col]] <- as.Date(df[[col]], origin = "1970-01-01")
-      names(df)[names(df) == col] <- gsub("\\.nm\\.date$", "", col)
+get_dates_from_sub_marginals <- function(sub_marginals) {
+  dates <- c()
+  if ("continuous_variables" %in% names(sub_marginals)) {
+    for (variable_name in names(sub_marginals$continuous_variables)) {
+      variable <- sub_marginals$continuous_variables[[variable_name]]
+      if ("is_date" %in% names(variable[["summary"]])) {
+        if (variable$summary$is_date) {
+          dates <- c(dates, variable_name)
+        }
+      }
     }
   }
-  return(df) #nolint: return
+  return(dates) #nolint: return
+}
+
+.back_transform_dates <- function(sub_marginals, sim_df) {
+  # Convert numeric dates back to Date format
+  date_variables <- get_dates_from_sub_marginals(sub_marginals)
+  for (col in names(sim_df)) {
+    if (col  %in% date_variables) {
+      sim_df[[col]] <- as.Date(sim_df[[col]], origin = "1970-01-01")
+    }
+  }
+  return(sim_df) #nolint: return
 }
 
 
 .convert_date_columns <- function(df, threshold = 0.2) {
+  is_date <- c()
   # Convert columns to date if they are in date format
   for (col in names(df)) {
     if (.is_date(df[[col]])) {
       df[[col]] <- .as_numeric_date(df[[col]])
-      names(df)[names(df) == col] <- paste0(col, ".nm.date")
+      is_date <- c(is_date, TRUE)
+    } else {
+      is_date <- c(is_date, FALSE)
     }
   }
+  df <- set_col_attr(df, is_date)
   return(df) #nolint: return
+}
+
+get_df_names_or_key <- function(marginals) {
+  df_names <- names(marginals[names(marginals) %in% "overall_summary" == FALSE])
+  if (any(df_names == "") || is.null(df_names)) {
+    df_names <- seq_along(marginals)
+    if ("overall_summary" %in% names(marginals)) {
+      df_names <- df_names[
+        df_names != which(names(marginals) == "overall_summary")
+      ]
+    }
+  }
+  return(df_names) #nolint: return
+}
+
+get_common_subjects <- function(dfs, subject_identifier) {
+  subjects <- lapply(dfs, function (x){
+    unique(x[[subject_identifier]])
+  })
+  common_subjects <- Reduce(intersect, subjects)
+  return(common_subjects) #nolint: return
+}
+
+get_n_unique_subjects <- function(dfs, subject_identifier) {
+  subjects <- lapply(dfs, function(x) {
+    unique(x[[subject_identifier]])
+  })
+  n_subjects <- length(unique(unlist(subjects)))
+  return(n_subjects) #nolint: return
+}
+
+get_all_columns <- function(dfs) {
+  all_columns <- c()
+  for (df in dfs)  {
+    all_columns <- c(
+      all_columns,
+      names(df)
+    )
+  }
+  return(all_columns) #nolint: return
+}
+
+get_common_columns <- function(dfs, subject_identifier) {
+  # Get all the column names
+  all_columns <- get_all_columns(dfs)
+  # Get all the columns with duplicated names
+  dup_col_names <- all_columns[duplicated(all_columns)]
+
+  # Forward declare vector for matched columns
+  matched_cols <- c()
+
+  # Iterate through the column matches
+  for (col in dup_col_names) {
+    # Ignore the subject identifier
+    if (col == subject_identifier) {
+      # Do nothing
+    } else {
+      # Add the dataframes to a list if it contains a duplicate column name
+      col_matches <- lapply(dfs, function(x) {
+        if (col %in% names(x)) {
+          return (x) #nolint: return
+        } else {
+          return (NULL) #nolint: return
+        }
+      })
+      # Remove any Null values from previous steps
+      col_matches[sapply(col_matches, is.null)] <- NULL
+      # Get the common subjects
+      common_subjects <- get_common_subjects(col_matches, subject_identifier)
+      # Use an lapply to get
+      col_matches <- lapply(col_matches, function(x) {
+        rtn <- x[x[[subject_identifier]] %in% common_subjects,]
+        rtn <- rtn[!duplicated(rtn[[subject_identifier]]),]
+        rtn <- rtn[order(rtn[[subject_identifier]]),]
+        rtn <- rtn[[col]]
+      })
+      eq_cols <- lapply(col_matches, function (x) x == col_matches[[1]])
+      eq_cols <- lapply(eq_cols, all)
+      if (all(unlist(eq_cols))) {
+        matched_cols <- c(matched_cols, col)
+      }
+    }
+  }
+  matched_cols <- unique(matched_cols)
+  return(matched_cols) #nolint: return
+}
+
+# Subsetter
+get_dates <- function(
+  df,
+  is_date
+) {
+  df[sapply(df, function(x) attr(x, "is_date") == is_date)]
+}
+
+# Gets attributes as vector
+get_col_attr <- function(df) sapply(df, attr, "is_date")
+
+# Sets attributes to columns from a single vector
+set_col_attr <- function(
+  df,
+  attrs
+) {
+  as.data.frame(mapply(function(col, is_date) {
+    attr(col, "is_date") <- is_date
+    col
+  }, df, attrs, SIMPLIFY = FALSE))
+}
+
+get_all_types <- function(marginals) {
+  # Forward declare vector for marginal types
+  marginal_types <- c()
+  # Store only the marginal names, not the overall summary, for cleaner code
+  df_names <- get_df_names_or_key(marginals)
+  # Loop through the marginals and get the types of marginals
+  for (i in seq_along(df_names)) {
+    marginal_types <- c(marginal_types, names(marginals[[i]]))
+  }
+  marginal_types <- unique(marginal_types)
+  marginal_types <-
+    marginal_types[marginal_types %in% get_default_variable_types()]
+  return(marginal_types) #nolint: return
+}
+
+is_single_table <- function(marginals) {
+  # Extract the marginal names, excluding the overall summary if it exists,
+  # to check if there is only one table done on two lines for readbility.
+  df_names <- get_df_names_or_key(marginals)
+  return(length(df_names) == 1)
 }

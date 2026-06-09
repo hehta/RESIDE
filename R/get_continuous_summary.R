@@ -61,15 +61,21 @@ get_continuous_summary <- function(
       epsilon
     )
     # Summarise the transformed quantiles
-    summary_df <- quantile_df[paste0(variable, "_t")] %>%
-      dplyr::summarise_all(
-        .funs = list(
-          mean = mean, sd = sd
-        ),
-        na.rm = TRUE
-      )
+    #summary_df <- quantile_df[paste0(variable, "_t")] %>%
+    #  dplyr::summarise_all(
+    #    .funs = list(
+    #      mean = mean, sd = sd
+    #    ),
+    #    na.rm = TRUE
+    #  )
 
-    summary_df$sd[is.na(summary_df$sd)] <- 0.01
+    #summary_df$sd[is.na(summary_df$sd)] <- 0.01
+
+    is_date <- all(get_col_attr(column))
+
+    summary_df <- data.frame(
+      is_date = ifelse(is.null(is_date), FALSE, is_date)
+    )
 
     # Get the number of rows with missing data
     summary_df$missing <- get_n_missing(column, variable)

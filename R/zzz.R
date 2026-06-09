@@ -8,7 +8,10 @@ utils::globalVariables(c(
   "n_row",
   "n_col",
   "variables",
-  "max_dp"
+  "max_dp",
+  "is_date",
+  "common_columns",
+  "n_subjects"
 ))
 
 # Global filenames

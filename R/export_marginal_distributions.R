@@ -30,7 +30,7 @@ export_marginal_distributions <- function(
   force = FALSE
 ) {
   # Check folder path
-  if (missing(folder_path)){
+  if (missing(folder_path)) {
     stop("A folder path must be provided.")
   }
   # Check class
@@ -67,68 +67,129 @@ export_marginal_distributions <- function(
   } else {
     remove_marginal_files(folder_path)
   }
-  # Check there are categorical variables
-  if ("categorical_variables" %in% names(marginals)) {
-    # Generate the absolute os appropriate file path
-    .file_path <- get_full_file_path(
-      folder_path,
-      "categorical_variables.csv"
-    )
-    # Convert the marginals to a data frame
-    .categorical_df <- categorical_to_df(marginals$categorical_variables)
-    # Write the file if there are any rows
-    if (nrow(.categorical_df) > 0) {
-      .write_csv(.categorical_df, .file_path, "categorical")
+  # Forward declaration vectors for each type of marginal distribution
+  categorical_dfs <- list()
+  binary_dfs <- list()
+  continuous_quantile_dfs <- list()
+  summary_dfs <- list()
+  # Make a copy of the marginals
+  marginals_copy <- marginals
+  # Remove overall summary if it exists (it is not a marginal distribution)
+  if ("overall_summary" %in% names(marginals)) {
+    marginals_copy[["overall_summary"]] <- NULL
+  }
+  df_names <- get_df_names_or_key(marginals_copy)
+  for (i in df_names) {
+    df_marginals <- marginals_copy[[i]]
+
+    if ("categorical_variables" %in% names(df_marginals)) {
+      # Convert the marginals to a data frame
+      if (length(df_marginals$categorical_variables) > 0) {
+        .categorical_df <- categorical_to_df(df_marginals$categorical_variables)
+        .categorical_df[["data_frame"]] <- i
+        categorical_dfs <- append(categorical_dfs, list(.categorical_df))
+      }
+    }
+
+    # Check there are categorical variables
+    if ("binary_variables" %in% names(df_marginals)) {
+      if (length(df_marginals$binary_variables) > 0) {
+        .binary_df <- binary_to_df(marginals$binary_variables)
+        .binary_df[["data_frame"]] <- i
+        binary_dfs <- append(binary_dfs, list(.binary_df))
+      }
+    }
+
+    if ("continuous_variables" %in% names(df_marginals)) {
+      if (length(df_marginals$continuous_variables) > 0) {
+        # Convert the marginals to a data frame
+        .continuous_df <- continuous_to_df(df_marginals$continuous_variables)
+
+        # Convert the quantiles to a data frame
+        .quantiles_df <- quantiles_to_df(df_marginals$continuous_variables)
+        .quantiles_df[["data_frame"]] <- i
+
+        .quantiles_df[["is_date"]] <- .continuous_df$is_date[match(
+          .quantiles_df$variable,
+          .continuous_df$variable
+        )]
+
+        .quantiles_df[["missing"]] <- .continuous_df$missing[match(
+          .quantiles_df$variable,
+          .continuous_df$variable
+        )]
+
+        .quantiles_df[["max_dp"]] <- .continuous_df$max_dp[match(
+          .quantiles_df$variable,
+          .continuous_df$variable
+        )]
+
+        # Add to vector
+        continuous_quantile_dfs <- append(
+          continuous_quantile_dfs,
+          list(.quantiles_df)
+        )
+      }
+    }
+
+    if ("summary" %in% names(df_marginals)) {
+      .summary_df <- df_marginals$summary
+
+      # Add to vector if there are any rows
+      if (nrow(.summary_df) > 0) {
+        .summary_df[["data_frame"]] <- i
+        summary_dfs <- append(summary_dfs, list(.summary_df))
+      }
     }
   }
 
-  # Check there are categorical variables
-  if ("binary_variables" %in% names(marginals)) {
-    # Generate the absolute os appropriate file path
-    .file_path <- get_full_file_path(
-      folder_path,
-      "binary_variables.csv"
+  if (length(categorical_dfs) > 0) {
+    categorical_df <- do.call(rbind, categorical_dfs)
+    .write_csv(
+      categorical_df,
+      file.path(folder_path, "categorical_variables.csv"),
+      "Categorical variables"
     )
-    .binary_df <- binary_to_df(marginals$binary_variables)
-    # Write the file if there are any rows
-    if (nrow(.binary_df) > 0) {
-      .write_csv(.binary_df, .file_path, "binary")
-    }
   }
 
-  if ("continuous_variables" %in% names(marginals)) {
-    # Generate the absolute os appropriate file path for marginals
-    .file_path <- get_full_file_path(
-      folder_path,
-      "continuous_variables.csv"
+  if (length(binary_dfs) > 0) {
+    binary_df <- do.call(rbind, binary_dfs)
+    .write_csv(
+      binary_df,
+      file.path(folder_path, "binary_variables.csv"),
+      "Binary variables"
     )
-    # Convert the marginals to a data frame
-    .continuous_df <- continuous_to_df(marginals$continuous_variables)
-    # Write the file if there are any rows
-    if (nrow(.continuous_df) > 0) {
-      .write_csv(.continuous_df, .file_path, "continuous")
-    }
-    # Convert the quantiles to a data frame
-    .quantiles_df <- quantiles_to_df(marginals$continuous_variables)
-    # Generate the absolute os appropriate file path for quantiles
-    .file_path <- get_full_file_path(
-      folder_path,
-      "continuous_quantiles.csv"
-    )
-    # Write the file if there are any rows
-    if (nrow(.quantiles_df) > 0) {
-      .write_csv(.quantiles_df, .file_path, "quantiles")
-    }
   }
-  # Write the summary file (needed for the number of rows)
-  .write_csv(
-    marginals[["summary"]],
-    get_full_file_path(
-      folder_path,
-      "summary.csv"
-    ),
-    "summary",
-    row_names = FALSE
-  )
+
+  if (length(continuous_quantile_dfs) > 0) {
+    continuous_quantiles_df <- do.call(rbind, continuous_quantile_dfs)
+    .write_csv(
+      continuous_quantiles_df,
+      file.path(folder_path,
+        "continuous_variables.csv"
+      ),
+      "Continuous variables"
+    )
+  }
+
+  if (length(summary_dfs) > 0) {
+    summary_df <- do.call(rbind, summary_dfs)
+    summary_df$common_columns <- ifelse(
+      "overall_summary" %in% names(marginals),
+      marginals$overall_summary$common_columns,
+      ""
+    )
+    summary_df$n_subjects <- ifelse(
+      "overall_summary" %in% names(marginals),
+      marginals$overall_summary$n_subjects,
+      ""
+    )
+    .write_csv(
+      summary_df,
+      file.path(folder_path, "summary.csv"),
+      "Summary",
+      row_names = FALSE
+    )
+  }
   invisible(NULL)
 }
