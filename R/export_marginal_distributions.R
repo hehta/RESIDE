@@ -94,7 +94,7 @@ export_marginal_distributions <- function(
     # Check there are categorical variables
     if ("binary_variables" %in% names(df_marginals)) {
       if (length(df_marginals$binary_variables) > 0) {
-        .binary_df <- binary_to_df(marginals$binary_variables)
+        .binary_df <- binary_to_df(df_marginals$binary_variables)
         .binary_df[["data_frame"]] <- i
         binary_dfs <- append(binary_dfs, list(.binary_df))
       }

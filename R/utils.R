@@ -1,7 +1,13 @@
 ##################################################################
 ##                       Helper Functions                       ##
 ##################################################################
-# Returns a list of missing variables from a data frame.
+#' @title Get Missing Variables
+#' @description Returns a list of missing variables from a list of data frames
+#' @param dfs A list of data frames
+#' @param variables A vector of variable names
+#' @return A vector of missing variable names
+#' @details This function checks if each variable in the input vector is present in any of the data frames.
+#' @keywords internal
 get_missing_variables <- function(
   dfs,
   variables
@@ -9,7 +15,7 @@ get_missing_variables <- function(
   # Set up a vector for missing variables
   .missing_variables <- c()
   # Get all the columns from the data frame(s)
-  all_variables <- get_all_columns(df)
+  all_variables <- get_all_columns(dfs)
   # Loop through the variables
   for (variable in variables) {
     # If the variable is not in the columns of the data frame
@@ -22,6 +28,13 @@ get_missing_variables <- function(
   return(.missing_variables) #nolint: return
 }
 
+#' @title Filter Variables
+#' @description Filters a list of data frames to only include specified variables
+#' @param dfs A list of data frames
+#' @param variables A vector of variable names
+#' @return A list of data frames with only the specified variables
+#' @details This function filters each data frame in the input list to only include the specified variables.
+#' @keywords internal
 filter_variables <- function(
   dfs,
   variables
@@ -267,11 +280,12 @@ remove_marginal_files <- function(folder_path) {
       }
     }
   }
+  new_variables <- get_submarginal_variables(new_marginals)
   if ("summary" %in% names(marginals)) {
     new_marginals$summary <- data.frame(
       n_row = marginals$summary$n_row,
       n_col = length(variables),
-      variables = paste(variables, collapse = ", ")
+      variables = paste(new_variables, collapse = ", ")
     )
     if ("subject_identifier" %in% names(marginals$summary)) {
       new_marginals$summary$subject_identifier <- ifelse(
@@ -280,9 +294,10 @@ remove_marginal_files <- function(folder_path) {
         ""
       )
     }
-    if ("data_frame" %in% names(marginals$summary)) {
-      new_marginals$summary$data_frame <- marginals$summary$data_frame
-    }
+    # Dataframe name moved to 
+    # if ("data_frame" %in% names(marginals$summary)) {
+    #   new_marginals$summary$data_frame <- marginals$summary$data_frame
+    # }
   }
   return(new_marginals) #nolint: return
 }
@@ -323,43 +338,36 @@ remove_marginal_files <- function(folder_path) {
       ""
     )
   )
+  if (marginals_copy$overall_summary$common_columns != "") {
+    common_columns <-
+      marginals_copy$overall_summary$common_columns
+    common_columns <- .split_variables(common_columns)
+    new_variables <- get_variables(marginals_copy)
+    new_common_columns <- intersect(common_columns, new_variables)
+    marginals_copy$overall_summary$common_columns <-
+      paste(new_common_columns, collapse = ", ")
+  }
+
   # Return the filtered marginals
   return(marginals_copy) #nolint: return
 }
 
-.filter_common_marginals <- function(
-  marginals,
-  keep_subject_identifier = TRUE
-) {
-  # Get the common columns from the marginals
-  common_columns <- get_common_columns(marginals, "subject_identifier")
-  # Filter the marginals to only include the common columns
-  common_marginals <- .filter_marginals(
-    marginals,
-    common_columns,
-    keep_subject_identifier
-  )
-  # Return the filtered marginals
-  return(common_marginals) #nolint: return
-}
-
-get_n_col <- function(marginals) {
-  # forward declare n_col
-  n_col <- 0
-  # variable types to check
-  variable_types <-
-    get_default_variable_types()
-  # loop through variable types
-  for (variable_type in variable_types) {
-    # only count if the variable type is present
-    if (variable_type %in% names(marginals)) {
-      # add the number of columns for this variable type
-      n_col <- n_col + length(marginals[[variable_type]])
-    }
-  }
-  # Explicitly return the number of columns
-  return(n_col) #nolint: return
-}
+# @ todo verify if this function is still needed
+# .filter_common_marginals <- function(
+#   marginals,
+#   keep_subject_identifier = TRUE
+# ) {
+#   # Get the common columns from the marginals
+#   common_columns <- get_common_columns(marginals, "subject_identifier")
+#   # Filter the marginals to only include the common columns
+#   common_marginals <- .filter_marginals(
+#     marginals,
+#     common_columns,
+#     keep_subject_identifier
+#   )
+#   # Return the filtered marginals
+#   return(common_marginals) #nolint: return
+# }
 
 get_default_variable_types <- function() {
   return(c( #nolint: return
@@ -381,7 +389,7 @@ get_submarginal_variables <- function(sub_marginals) {
   return(variables) #nolint: return
 }
 
-get_variables <- function(marginals) {
+get_variables <- function(marginals, unique = TRUE) {
   # forward declare variables
   variables <- c()
   df_names <- get_df_names_or_key(marginals)
@@ -390,7 +398,10 @@ get_variables <- function(marginals) {
     variables <-
       c(variables, get_submarginal_variables(marginals[[df_name]]))
   }
-  return(unique(variables)) #nolint: return
+  if (unique) {
+    variables <- unique(variables)
+  }
+  return(variables) #nolint: return
 }
 
 .split_variables <- function(variables) {
@@ -400,21 +411,24 @@ get_variables <- function(marginals) {
   return(variables) # nolint: return
 }
 
+.get_common_fields <- function(marginals) {
+  # Get the common fields from the marginals
+  common_fields <- c()
+  if ("overall_summary" %in% names(marginals)) {
+    if ("common_columns" %in% names(marginals$overall_summary)) {
+      common_fields <- .split_variables(
+        marginals$overall_summary$common_columns
+      )
+    }
+  }
+  return(common_fields) #nolint: return
+}
+
 .replace_nas <- function(df) {
   df <- df %>% dplyr::mutate_if(
     is.character,
     function(x) ifelse(x == "NA's", "", x)
   )
-}
-
-.get_largest_n_row <- function(marginals) {
-  # Get the largest n_row from the summary
-  if ("summary" %in% names(marginals)) {
-    n_rows <-
-      marginals$summary[grepl("n_row", names(marginals$summary))]
-    return(max(n_rows, na.rm = TRUE)) #nolint: return
-  }
-  return(0) #nolint: return
 }
 
 .is_date <- function(col, threshold = 0.2) {
@@ -424,7 +438,7 @@ get_variables <- function(marginals) {
   dates <- as.Date(col, optional = TRUE)
   if (
     !all(is.na(dates)) &&
-      length(na.omit(dates)) > length(na.omit(dates)) * threshold
+      length(na.omit(dates)) > length(na.omit(col)) * threshold
   ) {
     return(TRUE)
   }
@@ -606,4 +620,14 @@ is_single_table <- function(marginals) {
   # to check if there is only one table done on two lines for readbility.
   df_names <- get_df_names_or_key(marginals)
   return(length(df_names) == 1)
+}
+
+.get_variables_by_df_name <- function(marginals) {
+  variables_by_df_name <- list()
+  df_names <- get_df_names_or_key(marginals)
+  for (df_name in df_names) {
+    variables_by_df_name[[df_name]] <-
+      get_submarginal_variables(marginals[[df_name]])
+  }
+  return(variables_by_df_name) #nolint: return
 }

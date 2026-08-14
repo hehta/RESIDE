@@ -1,2 +1,2 @@
-"","n_row","n_col","variables"
-"1",19435,7,"SEX, AGE, ID14, RSBP, RATRIAL, SET14D, DSIDED"
+"n_row","n_col","variables","subject_identifier","n_subjects","data_frame","common_columns"
+19435,6,"SEX, AGE, RATRIAL, RSBP, SET14D, ID14","",19435,1,""

@@ -60,14 +60,14 @@ get_continuous_summary <- function(
       tform_q,
       epsilon
     )
-    # Summarise the transformed quantiles
-    #summary_df <- quantile_df[paste0(variable, "_t")] %>%
-    #  dplyr::summarise_all(
-    #    .funs = list(
-    #      mean = mean, sd = sd
-    #    ),
-    #    na.rm = TRUE
-    #  )
+    # Summarise the original column for better transparency
+    summary_df <- na.omit(column) %>%
+      dplyr::summarise_all(
+        .funs = list(
+          mean = mean, sd = sd
+        ),
+        na.rm = TRUE
+      )
 
     #summary_df$sd[is.na(summary_df$sd)] <- 0.01
 

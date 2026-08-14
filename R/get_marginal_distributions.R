@@ -1,3 +1,4 @@
+# @todo: Allow filtering of variables from specific data frames, currently it only filters from all data frames
 #' @title Generate Marginal Distributions for a given data frame
 #' @description Generate Marginal Distributions from a given
 #' data frame with options to specify which variables to use.
@@ -41,12 +42,21 @@ get_marginal_distributions <- function(
   print = FALSE,
   retype = TRUE
 ) {
-  # Copy the data fram to avoid confusion
+  # Copy the data frame to avoid confusion
   .df <- df
-  .return <- list() # creae empty list to store the return value
+  .return <- list() # create empty list to store the return value
   # Use a list of data frames if a single data frame is provided
   if (is.data.frame(.df)) {
     .df <- list(.df)
+  }
+  if (length(variables) > 0) {
+    # Add the subject identifier to the variables if it is not empty
+    .variables <- variables
+    if (subject_identifier != "") {
+      .variables <- c(.variables, subject_identifier)
+    }
+    # Filter the data frame(s) to only include the specified variables
+    .df <- filter_variables(.df, .variables)
   }
   # Get the names of the data frames
   df_names <- get_df_names_or_key(.df)

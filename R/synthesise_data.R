@@ -192,69 +192,75 @@ synthesise_data_multi_no_cor <- function(marginals) {
   return(sim_dfs)
 }
 
-synthesise_data_multi_cor <- function(marginals) {
+synthesise_data_multi_cor <- function(marginals, correlations) {
+  validate_correlations(marginals, correlations)
   # Forward declare list of data frames to be returned
   sim_dfs <- list()
   marginals <- add_n_subjects(marginals)
-  common_fields <- .split_variables(
-    marginals$overall_summary$common_columns
-  )
+  common_fields <- .get_common_fields(marginals)
+  correlation_names <- get_correlation_names(correlations)
+
   
 
   return(sim_dfs)
 }
 
-synthesise_common_fields <- function(
-  marginals
+synthesise_filtered_fields <- function(
+  marginals,
+  fields
 ) {
-  common_fields <- .split_variables(
-    marginals$overall_summary$common_columns
-  )
-  common_marginals <- RESIDE:::.filter_marginals(
+  filtered_marginals <- RESIDE:::.filter_marginals(
     marginals,
-    common_fields,
+    fields,
     TRUE
   )
-  common_dfs <- RESIDE:::synthesise_data_multi_no_cor(common_marginals)
+  common_dfs <- RESIDE:::synthesise_data_multi_no_cor(filtered_marginals)
 
   n_subjects <- marginals$overall_summary$n_subjects
 
-  common_cols <- list()
-  for (col in common_fields) {
+  cols <- list()
+  for (col in fields) {
     for (df in common_dfs) {
       if (!col %in% names(df)) {
         next
       }
-      if (col %in% names(common_cols)) {
-        if (nrow(df) > length(common_cols[[col]])) {
-          common_cols[[col]] <- df[[col]]
+      if (col %in% names(cols)) {
+        if (nrow(df) > length(cols[[col]])) {
+          cols[[col]] <- df[[col]]
         }
       } else {
-        common_cols[[col]] <- df[[col]]
+        cols[[col]] <- df[[col]]
       }
     }
   }
 
-  for (col in names(common_cols)) {
-    common_cols[[col]] <- sample(common_cols[[col]], n_subjects, replace = TRUE)
+  for (col in names(cols)) {
+    cols[[col]] <- sample(cols[[col]], n_subjects, replace = TRUE)
   }
-  common_df <- as.data.frame(do.call(cbind, common_cols))
-  common_df[[common_marginals$overall_summary$subject_identifier]] <-
-    seq_len(nrow(common_df))
-  common_df
+  df <- as.data.frame(do.call(cbind, cols))
+  df[[filtered_marginals$overall_summary$subject_identifier]] <-
+    seq_len(nrow(df))
+  df
 }
 
-replace_common_fields <- function(
-  marginals,
-  sim_dfs
+synthesise_common_fields <- function(
+  marginals
 ) {
-  common_df <- synthesise_common_fields(marginals)
+  common_fields <- .get_common_fields(marginals)
+  synthesise_filtered_fields(marginals, common_fields)
+}
+
+replace_fields <- function(
+  marginals,
+  sim_dfs,
+  replacement_df
+) {
   subject_identifier <- marginals$overall_summary$subject_identifier
   for (i in seq_along(sim_dfs)) {
     df <- sim_dfs[[i]]
-    if (length(intersect(names(df), names(common_df))) > 1) {
-      common_cols <- intersect(names(df), names(common_df))
-      tmp_common_df <- common_df[, common_cols]
+    if (length(intersect(names(df), names(replacement_df))) > 1) {
+      common_cols <- intersect(names(df), names(replacement_df))
+      tmp_common_df <- replacement_df[, common_cols]
       tmp_df <- dplyr::select(
         df,
         -dplyr::all_of(common_cols[common_cols != subject_identifier])
@@ -269,6 +275,14 @@ replace_common_fields <- function(
     }
   }
   sim_dfs
+}
+
+replace_common_fields <- function(
+  marginals,
+  sim_dfs
+){
+  replacement_df <- synthesise_common_fields(marginals)
+  replace_fields(marginals, sim_dfs, replacement_df)
 }
 
 add_n_subjects <- function(
@@ -772,42 +786,4 @@ reindex_df <- function(
       sub_marginals$summary$subject_identifier
   }
   sim_df
-}
-
-#'
-#' @title Create a correlation object
-#' @description A helper function to create a correlation object
-#' @param x The name of the first variable
-#' @param y The name of the second variable
-#' @param rho The correlation between the two variables
-#' @return A list containing the correlation information
-#' @details This function is a helper function to create a correlation
-#' object that can be used to specify correlations between variables
-#' when synthesising data using the \code{\link{synthesise_data}} function.
-#' @examples
-#'  correlation("age", "bmi", 0.5)
-#' @rdname correlation
-#' @export
-correlation <- function(
-  x,
-  y,
-  rho
-) {
-  return(
-    list(
-      x = x,
-      y = y,
-      rho = rho
-    )
-  )
-}
-
-get_correlation_names <- function(
-  correlations
-) {
-  correlation_names <- c()
-  for (cor in correlations) {
-    correlation_names <- c(correlation_names, cor$x, cor$y)
-  }
-  return(unique(correlation_names))
 }

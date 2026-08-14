@@ -10,9 +10,9 @@ continuous_df <- read.csv(
   testthat::test_path("testdata", "continuous_variables.csv")
 )
 
-quantile_df <- read.csv(
-  testthat::test_path("testdata", "continuous_quantiles.csv")
-)
+# quantile_df <- read.csv(
+#   testthat::test_path("testdata", "continuous_quantiles.csv")
+# )
 
 summary_df <- read.csv(
   testthat::test_path("testdata", "summary.csv")
@@ -56,7 +56,7 @@ dfs <- list(
   ae = pharmaversesdtm::ae
 )
 
-longitudinal_marginals <- suppressWarnings(
+multitable_marginals <- suppressWarnings(
   get_marginal_distributions(
     dfs,
     subject_identifier = "USUBJID"
