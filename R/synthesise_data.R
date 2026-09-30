@@ -114,6 +114,12 @@ synthesise_data_no_cor <- function(
     data_def
   )
 
+  # Convert the internal category names back to the original categories
+  sim_df <- decode_categories(
+    sim_df,
+    sub_marginals$categorical_variables
+  )
+
   # Back transform continuous variables
   sim_df <- back_transform_continuous(
     sim_df,
@@ -205,11 +211,23 @@ synthesise_data_cor <- function(
 synthesise_data_multi_no_cor <- function(marginals) {
   # Forward declare list of data frames to be returned
   sim_dfs <- list()
+  # The number of subjects of each data frame is needed before
+  # it is overwritten with the overall number of subjects
+  original_marginals <- marginals
   marginals <- add_n_subjects(marginals)
+  n_subjects <- get_overall_n_subjects(marginals)
   df_names <- get_df_names_or_key(marginals)
   for (df in df_names) {
-    .sim_df <- synthesise_data_no_cor(marginals[[df]])
-    sim_dfs[[df]] <- .sim_df
+    sub_marginals <- marginals[[df]]
+    n_df_subjects <- get_df_n_subjects(original_marginals[[df]], n_subjects)
+    sub_marginals$summary$n_subjects <- n_df_subjects
+    .sim_df <- synthesise_data_no_cor(sub_marginals)
+    sim_dfs[[df]] <- sample_subjects(
+      .sim_df,
+      get_id_name(sub_marginals),
+      n_subjects,
+      n_df_subjects
+    )
   }
 
   return(sim_dfs)
@@ -264,13 +282,11 @@ synthesise_data_multi_cor <- function(marginals, correlations) {
       sub_marginals,
       setdiff(variables, correlated_variables)
     )
-    n_df_subjects <- get_sub_n_subjects(original_marginals[[df]])
+    n_df_subjects <- get_df_n_subjects(original_marginals[[df]], n_subjects)
     non_correlated_marginals$summary$n_subjects <- n_df_subjects
     .sim_df <- synthesise_data_no_cor(non_correlated_marginals)
     id_name <- get_id_name(sub_marginals)
-    # Sample the subjects of this data frame from all the subjects
-    subject_ids <- sample(n_subjects, n_df_subjects)
-    .sim_df[[id_name]] <- subject_ids[.sim_df[[id_name]]]
+    .sim_df <- sample_subjects(.sim_df, id_name, n_subjects, n_df_subjects)
     # Join the correlated variables by subject
     if (length(df_correlated) > 0) {
       .correlated_df <- correlated_df[
@@ -473,6 +489,34 @@ get_sub_n_subjects <- function(
   return(sub_marginals$summary$n_row)
 }
 
+# The number of subjects of a data frame, which can not be more than
+# the overall number of subjects
+get_df_n_subjects <- function(
+  sub_marginals,
+  n_subjects
+) {
+  n_df_subjects <- sub_marginals$summary$n_subjects
+  if (is.null(n_df_subjects) || n_df_subjects > n_subjects) {
+    return(n_subjects)
+  }
+  return(n_df_subjects)
+}
+
+# Sample the subjects of a data frame from all the subjects, so the
+# subjects are shared between data frames, ordering the rows by subject
+sample_subjects <- function(
+  sim_df,
+  id_name,
+  n_subjects,
+  n_df_subjects
+) {
+  subject_ids <- sample(n_subjects, n_df_subjects)
+  sim_df[[id_name]] <- subject_ids[sim_df[[id_name]]]
+  sim_df <- sim_df[order(sim_df[[id_name]]), ]
+  rownames(sim_df) <- NULL
+  return(sim_df)
+}
+
 # The name of the id column, the subject identifier if there is one
 get_id_name <- function(
   sub_marginals
@@ -484,6 +528,21 @@ get_id_name <- function(
     return(sub_marginals$summary$subject_identifier)
   }
   return("id")
+}
+
+# Convert the internal category names (c1, c2, ...) back to the original
+# categories, internal names are used as simstudy removes whitespace
+decode_categories <- function(
+  sim_df,
+  categorical_summary
+) {
+  for (.column in names(categorical_summary)) {
+    categories <- names(categorical_summary[[.column]])
+    sim_df[[.column]] <- categories[
+      match(sim_df[[.column]], paste0("c", seq_along(categories)))
+    ]
+  }
+  return(sim_df)
 }
 
 # Get the correlated categories of each variable, from the factor names
@@ -685,8 +744,9 @@ define_categorical <- function(
     .probs <- c()
     # Loop through the categories
     for (.cat in names(categorical_summary[[.column]])) {
-      # Add the category to the categories
-      .labs <- c(.labs, .cat)
+      # Add the category to the categories, using internal names as
+      # simstudy removes whitespace from categories (see decode_categories)
+      .labs <- c(.labs, paste0("c", length(.labs) + 1))
       # Add the probability to the probabilities
       .probs <- c(.probs, (categorical_summary[[.column]][[.cat]] / n_row))
     }

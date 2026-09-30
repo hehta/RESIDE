@@ -357,3 +357,55 @@ testthat::test_that("restore_factors works", {
   expect_equal(names(restored), "COLOUR")
   expect_equal(restored$COLOUR, c("red", "green", "green"))
 })
+
+testthat::test_that("synthesise_data keeps whitespace in categories", {
+  set.seed(1234)
+  sim_dfs <- synthesise_data(multitable_marginals)
+  # Expect the categories to match the marginals, including spaces
+  arm_categories <- names(multitable_marginals$dm$categorical_variables$ARM)
+  expect_true(all(sim_dfs$dm$ARM %in% arm_categories))
+  expect_true(any(grepl(" ", sim_dfs$dm$ARM, fixed = TRUE)))
+  # Expect the same for correlated variables
+  sim_dfs <- synthesise_data(
+    multitable_marginals,
+    correlations = list(
+      correlation(
+        "ARM",
+        "AGE",
+        0.3,
+        factor_name.x = "Xanomeline High Dose"
+      )
+    )
+  )
+  expect_true(all(sim_dfs$dm$ARM %in% arm_categories))
+  expect_true(any(sim_dfs$dm$ARM == "Xanomeline High Dose"))
+})
+
+testthat::test_that("synthesise_data works with multiple tables", {
+  set.seed(1234)
+  sim_dfs <- synthesise_data(multitable_marginals)
+  expect_equal(names(sim_dfs), c("dm", "cm", "ae"))
+  for (df_name in names(sim_dfs)) {
+    sub_marginals <- multitable_marginals[[df_name]]
+    # Expect the rows and columns of each table
+    expect_equal(nrow(sim_dfs[[df_name]]), sub_marginals$summary$n_row)
+    expect_equal(
+      names(sim_dfs[[df_name]]),
+      c("USUBJID", get_submarginal_variables(sub_marginals))
+    )
+    # Expect the number of subjects of each table
+    expect_equal(
+      length(unique(sim_dfs[[df_name]]$USUBJID)),
+      sub_marginals$summary$n_subjects,
+      tolerance = 0.1
+    )
+    # Expect the subjects to be shared across tables
+    expect_true(
+      all(sim_dfs[[df_name]]$USUBJID %in% seq_len(
+        multitable_marginals$overall_summary$n_subjects
+      ))
+    )
+    # Expect the rows to be ordered by subject
+    expect_false(is.unsorted(sim_dfs[[df_name]]$USUBJID))
+  }
+})

@@ -51,8 +51,11 @@ This function will import the marginal distributions from the csv files provided
 ### `synthesise_data()`
 This function will synthesise data based on the imported marginal distributions. See the documentation on [synthesising data](https://hehta.github.io/RESIDE/articles/synthesising_data.html) for further information.
 
-# Worked Example Using the Internation Stroke Trial
+# Worked Example Using the International Stroke Trial
 A worked example using the International Stroke Trial is available in the [documentation](https://hehta.github.io/RESIDE/articles/worked_example.html).
+
+# Worked Example Using Multiple Tables
+A worked example using multiple related tables, the Demographics and Adverse Events SDTM domains from the pharmaversesdtm package, is available in the [documentation](https://hehta.github.io/RESIDE/articles/pharmaverse_example.html).
 
 # Funding
 This work was supported by the UKRI Strength in Places Fund (SIPF) Competition, project number 107140.  The project title is SIPF The Living Laboratory driving economic growth in Glasgow through real world implementation of precision medicine.
