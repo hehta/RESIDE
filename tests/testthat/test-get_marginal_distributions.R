@@ -1,4 +1,5 @@
 testthat::test_that("Test get_marginal_distributions works as it should", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   # Test non character variables
   testthat::expect_error(
     get_marginal_distributions(

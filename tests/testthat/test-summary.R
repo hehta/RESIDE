@@ -33,6 +33,7 @@ testthat::test_that("summary works", {
 })
 
 testthat::test_that("summary works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   marginal_summary <- summary(multitable_marginals)
   # Expect the overall summary
   expect_equal(marginal_summary$overall$n_data_frames, 3)
@@ -110,6 +111,7 @@ testthat::test_that("print.summary works", {
 })
 
 testthat::test_that("print.summary works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   output <- capture.output(print(summary(multitable_marginals)))
   # Expect the overall summary
   expect_true(

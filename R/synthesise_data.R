@@ -22,17 +22,18 @@
 #' It is not possible to entirely maintain the marginal distributions
 #' when specifying correlations.
 #' @examples
-#' \dontrun{
-#'    marginals <- import_marginal_distributions()
-#'    df <- synthesise_data(marginals)
-#'    df_cor <- synthesise_data(
-#'      marginals,
-#'      correlations = list(
-#'        correlation("AGE", "RSBP", 0.3),
-#'        correlation("SEX", "AGE", -0.2, factor_name.x = "M")
-#'      )
-#'    )
-#' }
+#' marginals <- get_marginal_distributions(
+#'   IST,
+#'   variables = c("SEX", "AGE", "RSBP", "RATRIAL")
+#' )
+#' df <- synthesise_data(marginals)
+#' df_cor <- synthesise_data(
+#'   marginals,
+#'   correlations = list(
+#'     correlation("AGE", "RSBP", 0.3),
+#'     correlation("SEX", "AGE", -0.2, factor_name.x = "M")
+#'   )
+#' )
 #' @seealso
 #'  \code{\link{correlation}}
 #' @rdname synthesise_data

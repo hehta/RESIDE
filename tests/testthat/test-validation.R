@@ -150,6 +150,7 @@ testthat::test_that("check_factor_exists works", {
 })
 
 testthat::test_that("check_factor_exists works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   # Expect TRUE when factor exists in one of the tables
   expect_true(
     check_factor_exists(
@@ -202,6 +203,7 @@ testthat::test_that("check_factor_exists works with multiple tables", {
 })
 
 testthat::test_that("validate_df_name works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   # Expect no error when variable exists in the specified table
   expect_no_error(
     validate_df_name(
@@ -328,6 +330,7 @@ testthat::test_that("check_factor_correlations works", {
 })
 
 testthat::test_that("check_factor_correlations works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   # Expect no error when the factor exists in one of the tables
   expect_no_error(
     check_factor_correlations(
@@ -453,6 +456,7 @@ testthat::test_that("validate_correlations works", {
 })
 
 testthat::test_that("validate_correlations works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   # Expect no error when variables are unique to a table
   expect_no_error(
     validate_correlations(

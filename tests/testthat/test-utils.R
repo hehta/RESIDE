@@ -1,4 +1,5 @@
 testthat::test_that("get_missing_variables works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   testthat::expect_equal(
     length(get_missing_variables(list(ist_id), "AGE")),
     0
@@ -159,6 +160,7 @@ testthat::test_that("remove_marginal_files works", {
 })
 
 testthat::test_that(".filter_sub_marginals_works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   variables <- c("SEX", "AGE", "ID14")
   filtered_marginals <- .filter_sub_marginals(
     marginal_distributions[[1]],
@@ -226,6 +228,7 @@ testthat::test_that(".filter_sub_marginals_works", {
 })
 
 testthat::test_that(".filter_marginals works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   filter_variables <- c("SEX", "AGEU")
   filtered_marginals <- .filter_marginals(
     multitable_marginals,
@@ -307,6 +310,7 @@ testthat::test_that("get_variables works", {
 })
 
 testthat::test_that(".is_date works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   testthat::expect_true(
     .is_date(dfs$ae$AEDTC)
   )
@@ -322,6 +326,7 @@ testthat::test_that(".is_date works", {
 })
 
 testthat::test_that(".get_common_fields works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   common_columns <- .get_common_fields(multitable_marginals)
   testthat::expect_setequal(
     common_columns,
@@ -347,6 +352,7 @@ testthat::test_that(".replace_nas works", {
 })
 
 testthat::test_that("get_dates_from_sub_marginals works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   ae_dates <- get_dates_from_sub_marginals(multitable_marginals[["ae"]])
   testthat::expect_true(
     all(
@@ -368,6 +374,7 @@ testthat::test_that("get_dates_from_sub_marginals works", {
 })
 
 testthat::test_that("is_single_table_works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   testthat::expect_true(
     is_single_table(marginal_distributions)
   )
@@ -377,6 +384,7 @@ testthat::test_that("is_single_table_works", {
 })
 
 testthat::test_that("get_variables_by_df_name works", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   variables <- .get_variables_by_df_name(multitable_marginals)
   testthat::expect_true(
     all(

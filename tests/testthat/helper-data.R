@@ -46,18 +46,22 @@ marginal_distributions <- get_marginal_distributions(
   )
 )
 
-dfs <- list(
-  dm = pharmaversesdtm::dm,
-  cm = pharmaversesdtm::cm,
-  ae = pharmaversesdtm::ae
-)
-
-multitable_marginals <- suppressWarnings(
-  get_marginal_distributions(
-    dfs,
-    subject_identifier = "USUBJID"
+# pharmaversesdtm is only suggested, tests using the multiple table
+# data should call skip_if_not_installed("pharmaversesdtm")
+if (requireNamespace("pharmaversesdtm", quietly = TRUE)) {
+  dfs <- list(
+    dm = pharmaversesdtm::dm,
+    cm = pharmaversesdtm::cm,
+    ae = pharmaversesdtm::ae
   )
-)
+
+  multitable_marginals <- suppressWarnings(
+    get_marginal_distributions(
+      dfs,
+      subject_identifier = "USUBJID"
+    )
+  )
+}
 
 # Quick and dirty random string function
 random_string <- function() {

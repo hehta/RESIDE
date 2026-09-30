@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  # pharmaversesdtm is suggested, only evaluate if it is installed
+  eval = requireNamespace("pharmaversesdtm", quietly = TRUE)
 )
 ```
 

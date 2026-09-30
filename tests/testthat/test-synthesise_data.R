@@ -157,6 +157,7 @@ testthat::test_that("synthesise_data errors with invalid correlations", {
 })
 
 testthat::test_that("synthesise_data works with correlations and multiple tables", { #nolint: line_length_linter
+  testthat::skip_if_not_installed("pharmaversesdtm")
   set.seed(1234)
   sim_dfs <- synthesise_data(
     multitable_marginals,
@@ -225,6 +226,7 @@ testthat::test_that("synthesise_data works with correlations and multiple tables
 })
 
 testthat::test_that("synthesise_data works with correlated common variables", { #nolint: line_length_linter
+  testthat::skip_if_not_installed("pharmaversesdtm")
   set.seed(1234)
   sim_dfs <- synthesise_data(
     multitable_marginals,
@@ -359,6 +361,7 @@ testthat::test_that("restore_factors works", {
 })
 
 testthat::test_that("synthesise_data keeps whitespace in categories", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   set.seed(1234)
   sim_dfs <- synthesise_data(multitable_marginals)
   # Expect the categories to match the marginals, including spaces
@@ -382,6 +385,7 @@ testthat::test_that("synthesise_data keeps whitespace in categories", {
 })
 
 testthat::test_that("synthesise_data works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   set.seed(1234)
   sim_dfs <- synthesise_data(multitable_marginals)
   expect_equal(names(sim_dfs), c("dm", "cm", "ae"))

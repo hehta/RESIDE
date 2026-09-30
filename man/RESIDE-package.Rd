@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Developed to assist researchers with planning analysis, prior to obtaining data from Trusted Research Environments (TREs) also known as safe havens. With functionality to export and import marginal distributions as well as synthesise data, both with and without correlations from these marginal distributions. Using a multivariate cumulative distribution (COPULA). Additionally the International Stroke Trial (IST) is included as an example dataset under ODC-By licence Sandercock et al. (2011) \doi{10.7488/ds/104}, Sandercock et al. (2011) \doi{10.1186/1745-6215-12-101}.
+Assists researchers with planning analysis prior to obtaining data from Trusted Research Environments (TREs), also known as safe havens. Marginal distributions of one or more related data frames can be exported from a TRE and imported elsewhere, where data can be synthesised from them, with or without user specified correlations, by sampling from a multivariate cumulative distribution (copula). The International Stroke Trial (IST) is included as an example dataset under the ODC-By licence, Sandercock et al. (2011) \doi{10.7488/ds/104}, Sandercock et al. (2011) \doi{10.1186/1745-6215-12-101}.
 }
 \details{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
@@ -38,7 +38,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Claudia Geue \email{cladia.geue@glasgow.ac.uk} (\href{https://orcid.org/0000-0003-2243-0733}{ORCID}) [contributor]
+  \item Claudia Geue \email{claudia.geue@glasgow.ac.uk} (\href{https://orcid.org/0000-0003-2243-0733}{ORCID}) [contributor]
 }
 
 }

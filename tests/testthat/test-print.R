@@ -57,6 +57,7 @@ testthat::test_that("print works", {
 })
 
 testthat::test_that("print works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
   output <- capture.output(print(multitable_marginals))
   # Expect the overall summary
   expect_true(
