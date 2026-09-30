@@ -10,15 +10,29 @@ continuous_df <- read.csv(
   testthat::test_path("testdata", "continuous_variables.csv")
 )
 
-quantile_df <- read.csv(
-  testthat::test_path("testdata", "continuous_quantiles.csv")
-)
-
 summary_df <- read.csv(
   testthat::test_path("testdata", "summary.csv")
 )
 
 empty_df <- data.frame()
+
+ist_id <- IST
+ist_id$id <- 1:nrow(IST)
+ist_1 <- ist_id[,c(
+  "id",
+  "SEX",
+  "AGE",
+  "ID14",
+  "RSBP",
+  "RATRIAL",
+  "SET14D")]
+ist_2 <- ist_id[,c(
+  "id",
+  "HOSPNUM",
+  "RDELAY",
+  "RCONSC",
+  "DSIDEX"
+)]
 
 marginal_distributions <- get_marginal_distributions(
   IST,
@@ -32,7 +46,24 @@ marginal_distributions <- get_marginal_distributions(
   )
 )
 
-# Quck and dirty random string function
+# pharmaversesdtm is only suggested, tests using the multiple table
+# data should call skip_if_not_installed("pharmaversesdtm")
+if (requireNamespace("pharmaversesdtm", quietly = TRUE)) {
+  dfs <- list(
+    dm = pharmaversesdtm::dm,
+    cm = pharmaversesdtm::cm,
+    ae = pharmaversesdtm::ae
+  )
+
+  multitable_marginals <- suppressWarnings(
+    get_marginal_distributions(
+      dfs,
+      subject_identifier = "USUBJID"
+    )
+  )
+}
+
+# Quick and dirty random string function
 random_string <- function() {
   return(
     runif(1, 1000000000000, 9999999999999) %>% round %>% as.character

@@ -3,6 +3,7 @@
 ^\.Rproj\.user$
 ^\.gitignore$
 ^\.github$
+^\.vscode$
 ^README\.md$
 ^LICENSE.md$
 ^CITATION\.cff$
@@ -12,3 +13,5 @@
 ^doc$
 ^Meta$
 ^cran-comments\.md$
+^CONTRIBUTING\.md$
+^graphify-out$

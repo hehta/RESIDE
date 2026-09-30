@@ -8,7 +8,12 @@ utils::globalVariables(c(
   "n_row",
   "n_col",
   "variables",
-  "max_dp"
+  "max_dp",
+  "is_date",
+  "common_columns",
+  "n_subjects",
+  "df_n_subjects",
+  "data_frame"
 ))
 
 # Global filenames
@@ -18,4 +23,9 @@ utils::globalVariables(c(
   "continuous_variables.csv",
   "continuous_quantiles.csv",
   "summary.csv"
+)
+
+multi_keys <- c(
+  ".df.*",
+  ".nm.date*"
 )

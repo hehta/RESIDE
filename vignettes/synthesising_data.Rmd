@@ -26,48 +26,56 @@ simulated_data <- synthesise_data(marginals)
 ```
 
 # With correlations
-User specified correlations can be added to the synthesised data by supplying a correlation matrix. An empty correlations matrix can be generated using the `export_empty_cor_matrix()` function, supplying the marginals imported using 'import_marginal_distributions' and a folder path respectively:
-```{r export_cor_matrix}
+User specified correlations can be added to the synthesised data by supplying a list of correlations to the `correlations` parameter. Each correlation is created with the `correlation()` function, giving the names of the two variables and the correlation (rho) between them:
+```{r synthesise_data_with_correlations}
 library(RESIDE)
 marginals <- import_marginal_distributions()
-export_empty_cor_matrix(marginals, folder_path = tempdir())
-```
-* By default the file wil be names *correlation_matrix.csv* but can be changed with the 'file_name' parameter *
-
-The exported CSV file will be a symmetric table which looks like:
-```{r print_cor_matrix, eval = TRUE, echo = FALSE}
-.cor_matrix <- utils::read.csv("correlation_matrix.csv")
-.cor_matrix <- tibble::column_to_rownames(.cor_matrix, names(.cor_matrix)[1])
-DT::datatable(
-  .cor_matrix,
-  options = list(
-    pageLength=10, scrollX='400px'
+simulated_data <- synthesise_data(
+  marginals,
+  correlations = list(
+    correlation("AGE", "RSBP", 0.3)
   )
 )
 ```
 
-Correlations should then be added to the CSV file, without modifying the column / row names. Correlations should use rank order correlations. Categorical variables are represented as dummy variables named using the format variable name underscore category name e.g. SEX_F.
-**Note** the correlation matrix should be symmetrical and positive semi definite.
+Correlations should be between -1 and 1 and must be consistent with each other (the resulting correlation matrix must be positive semi definite), otherwise `synthesise_data()` will produce an error.
 
-Once the correlations have been added to the CSV file, the correlations can be imported using the `import_cor_matrix' function:
-```{r import_cor_matrix}
-library(RESIDE)
-correlation_matrix <- import_cor_matrix()
-```
-By default the filename for the correlation matrix is that of the exported filename (`correlation_matrix.csv`) and is imported from the current working directory. This can be changed by specifying a `file_path` using the corresponding parameter of the `import_cor_matrix()` function, this file path should be a relative or absolute file path.
-
-The `import_cor_matrix()` function will produce and error if the matrix is not symmetrical and positive semi definite, or the file does not exist.
-
-With a correlation matrix data can now be synthesised with the user specified correlations using the `synthesise_data()` function, specifying the correlation matrix imported by the `import_cor_matrix()` function:
-```{r synthesise_data_with_correlations}
-library(RESIDE)
-marginals <- import_marginal_distributions()
-export_empty_cor_matrix(marginals)
-correlation_matrix <- import_cor_matrix()
+## Categorical variables
+Categorical variables are correlated using a single category, specified with the `factor_name.x` or `factor_name.y` parameters for the first or second variable respectively. For example to correlate male patients (`SEX` of `M`) with age:
+```{r categorical_correlations}
 simulated_data <- synthesise_data(
   marginals,
-  correlation_matrix
+  correlations = list(
+    correlation("SEX", "AGE", -0.2, factor_name.x = "M"),
+    correlation("RATRIAL", "RSBP", 0.1, factor_name.x = "Y")
+  )
 )
 ```
+A categorical variable without a factor name will produce an error.
 
-**NB** It is not possible to entirely maintain all the marginal distributions when specifying correlations, this is a known limitation and is not likely to change.
+## Multiple tables
+When the marginals were obtained from multiple data frames, variables that are present in more than one data frame (other than the common columns) must specify which data frame they belong to. Use `df_name` when both variables belong to the same data frame, or `df_name.x` and `df_name.y` when they belong to different data frames:
+```{r multi_table_correlations}
+simulated_data <- synthesise_data(
+  marginals,
+  correlations = list(
+    # Both variables in the same data frame
+    correlation("DOMAIN", "AESTDY", 0.2, df_name = "ae", factor_name.x = "AE"),
+    # Variables in different data frames
+    correlation(
+      "SEX",
+      "AESEV",
+      0.3,
+      df_name.x = "dm",
+      df_name.y = "ae",
+      factor_name.x = "M",
+      factor_name.y = "SEVERE"
+    )
+  )
+)
+```
+A data frame name specified for a variable that only appears in a single data frame, but not that data frame, will be ignored with a warning.
+
+Correlated variables are synthesised together, with one row per subject, and joined to each data frame by subject. Correlations between data frames are therefore between subjects, and a correlated variable takes a single value for each subject within a data frame.
+
+**NB** The correlation specified is that of the underlying multivariate normal distribution (Copula), the correlation observed in the synthesised data will be weaker, particularly for binary and categorical variables. It is not possible to entirely maintain all the marginal distributions when specifying correlations, this is a known limitation and is not likely to change.

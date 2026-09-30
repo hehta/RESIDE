@@ -1,10 +1,15 @@
+# @todo: Allow filtering of variables from specific data frames, currently it only filters from all data frames
 #' @title Generate Marginal Distributions for a given data frame
 #' @description Generate Marginal Distributions from a given
 #' data frame with options to specify which variables to use.
-#' @param df Data frame to get the marginal distributions from
+#' @param df Data frame or a \code{"list"} of data frames
+#' to get the marginal distributions from
+#' @param subject_identifier (Optional) Subject identifier required if a
+#' list of data frames is provided, Default: ""
 #' @param variables (Optional) variable (columns) to select, Default: c()
 #' @param print Whether to print the marginal distributions
 #' to the console, Default: FALSE
+#' @param retype Whether to re-type the data frame, Default: TRUE
 #' @return A list of marginal distributions of an S3 RESIDE Class
 #' @details A function to generate marginal distributions from
 #' a given data frame, depending on the variable type the marginals
@@ -16,7 +21,7 @@
 #' @examples
 #' marginal_distributions <- get_marginal_distributions(
 #'   IST,
-#'   variables <- c(
+#'   variables = c(
 #'     "SEX",
 #'     "AGE",
 #'     "ID14",
@@ -32,39 +37,72 @@
 #' @importFrom dplyr mutate_if
 get_marginal_distributions <- function(
   df,
+  subject_identifier = "",
   variables = c(),
-  print = FALSE
+  print = FALSE,
+  retype = TRUE
 ) {
-  # Check if variables is set
-  df <- as.data.frame(df)
-  if (length(variables > 1)) {
-    if (!is.character(variables)) {
-      stop("Variables must be a vector of characters")
-    }
-    # Error is any variables are missing
-    .missing_variables <- get_missing_variables(df, variables)
-    if (length(.missing_variables > 1)) {
-      stop(
-        paste(
-          "all variables must be in df missing:",
-          .missing_variables,
-          sep = " ",
-          collapse = ", "
-        )
-      )
-    }
-    # Subset based on variables
-    df <- df[variables]
+  # Copy the data frame to avoid confusion
+  .df <- df
+  .return <- list() # create empty list to store the return value
+  # Use a list of data frames if a single data frame is provided
+  if (is.data.frame(.df)) {
+    .df <- list(.df)
   }
-
-  # Replace missing values for characters with "missing"
-  df <- df %>% dplyr::mutate_if(
-    is.character,
-    function(x) ifelse(x == "", "missing", x)
+  .dfs <- .prepare_dfs(
+    .df,
+    subject_identifier,
+    variables,
+    retype
   )
+  .dfs <- .check_prepared_dfs(.dfs, subject_identifier)
+  .return <- .get_all_summaries(
+    .dfs,
+    subject_identifier,
+    variables,
+    retype 
+  )
+  # Get the overall summary and store in the return list
+  .return$overall_summary <- .get_overall_summary(.dfs, subject_identifier)
+  # Add s3 class to the return list
+  class(.return) <- "RESIDE"
+  # Return the marginal distributions
+  .return
+}
 
-  # Ensure characters are factors
-  df <- df %>% dplyr::mutate_if(is.character, factor)
+.get_all_summaries <- function(
+  dfs,
+  subject_identifier = "",
+  variables = c(),
+  retype = TRUE
+) {
+  .summaries <- list()
+  df_names <- get_df_names_or_key(dfs)
+  for (df_name in df_names) {
+    # Get the data frame
+    .current_df <- dfs[[df_name]]
+    .summaries[[df_name]] <- .get_summaries(
+      .current_df,
+      subject_identifier
+    )
+  }
+  return(.summaries) #nolint: return
+}
+
+# Internal function to get summaries for a given data frame
+.get_summaries <- function(
+  df,
+  subject_identifier = ""
+) {
+  n_subjects <- ifelse(
+    subject_identifier != "",
+    length(unique(df[[subject_identifier]])),
+    nrow(df)
+  )
+  # Remove subject identifier from df
+  if (subject_identifier %in% names(df)) {
+    df[[subject_identifier]] <- NULL
+  }
 
   # Get variable types
   .variable_types <- get_variable_types(df)
@@ -76,7 +114,7 @@ get_marginal_distributions <- function(
   .binary_summary <- list()
   # Loop through binary variables
   for (.column in .binary_variables) {
-    # add mean of binary varable to binary summary
+    # add mean of binary variable to binary summary
     .binary_summary[[.column]] <- list(
       mean = mean(df[[.column]]),
       missing = get_n_missing(df, .column)
@@ -95,42 +133,35 @@ get_marginal_distributions <- function(
   .continuous_summary <- list()
   # Loop through continuous variables
   for (.column in .continuous_variables) {
+    # Store the continuous variable in a temporary column
+    .tmp_column <- df[.column]
     .continuous_summary[[.column]] <- get_continuous_summary(
-      df[.column]
+      .tmp_column
     )
   }
-
-  .overall_summary <- data.frame(
+  # Create a summary of the data frame
+  .summary <- data.frame(
     n_row = nrow(df),
     n_col = ncol(df),
-    variables = paste(names(df), collapse = ", ")
+    variables = paste(names(df), collapse = ", "),
+    subject_identifier = subject_identifier,
+    n_subjects = n_subjects
   )
 
   # Declare Return as a List
-  .return <- list(
-    categorical_variables = .categorical_summary,
-    binary_variables = .binary_summary,
-    continuous_variables = .continuous_summary,
-    summary = .overall_summary
-  )
-
-  # Add a class to the return to allow for S3 overrides
-  class(.return) <- "RESIDE"
-
-  # If print is TRUE print the marginal distributions
-  if (print) {
-    print(.return)
-  }
-
-  # Return the S3 Class
   return(
-    .return
+    list(
+      categorical_variables = .categorical_summary,
+      binary_variables = .binary_summary,
+      continuous_variables = .continuous_summary,
+      summary = .summary
+    )
   )
-
 }
 
+# Internal function to get variable types for a given data frame
 get_variable_types <- function(df) {
-  # Declare variables
+  # Forward declare variables
   .categorical_variables <- c()
   .continuous_variables <- c()
   .binary_variables <- c()
@@ -173,9 +204,170 @@ get_variable_types <- function(df) {
       )
     }
   }
-  return(list(
+  return(list( #nolint: return
     categorical_variables = .categorical_variables,
     continuous_variables = .continuous_variables,
     binary_variables = .binary_variables
   ))
+}
+
+# Internal function to prepare a data frame
+.prepare_df <- function(
+  df,
+  subject_identifier = "",
+  variables = c(),
+  retype = TRUE
+) {
+
+  # Re-type the data frame
+  # Currently this only converts date columns to numeric,
+  # but in the future it could add more functionality
+  if (retype) {
+    df <- .convert_date_columns(df)
+  }
+
+  # Replace missing values for characters with "missing"
+  df <- df %>% dplyr::mutate_if(
+    is.character,
+    function(x) ifelse(x == "", "missing", x)
+  )
+
+  df <- df %>% dplyr::mutate(
+    dplyr::across(
+      dplyr::where(function(x) all(is.na(x))), ~  "missing"
+    )
+  )
+
+  # Ensure characters are factors
+  df <- df %>% dplyr::mutate_if(is.character, factor)
+
+  return(df)
+}
+
+.prepare_dfs <- function(
+  dfs,
+  subject_identifier,
+  variables,
+  retype
+) {
+  .dfs <- dfs
+
+  # Check if subject identifier is a character
+  if (!is.character(subject_identifier)) {
+    stop("Subject identifier must be a character")
+  }
+
+  if (subject_identifier != "") {
+    # If so check if subject identifier is present in all data frames
+    if (! is_subject_identifier(.dfs, subject_identifier)) {
+      # If not throw an error
+      stop(
+        paste(
+          "Subject identifier",
+          subject_identifier,
+          "must be present in all data frames"
+        )
+      )
+    }
+  }
+
+  # Check if variables are set
+  if (length(variables) > 0) {
+    # Check if variables is a vector of characters
+    if (!is.character(variables)) {
+      stop("Variables must be a vector of characters")
+    }
+    # Get any missing variables from the data frame(s)
+    .missing_variables <- get_missing_variables(.dfs, variables)
+    # If there are any missing variables, throw an error
+    if (length(.missing_variables) > 0) {
+      stop(
+        paste(
+          "all variables must be in data missing:",
+          .missing_variables,
+          sep = " ",
+          collapse = ", "
+        )
+      )
+    }
+    # Check if subject identifier is set
+    if (subject_identifier != "") {
+      # Add subject identifier to variables
+      variables <- c(variables, subject_identifier)
+    }
+    # Ensure variables are unique
+    variables <- unique(variables)
+    # Select only the variables in the data frame
+    .dfs <- filter_variables(.dfs, variables)
+  }
+
+  # Loop through data frames
+  for (i in seq_along(.dfs)) {
+    .dfs[[i]] <- .prepare_df(
+      .dfs[[i]],
+      subject_identifier,
+      variables,
+      retype
+    )
+  }
+  return(.dfs) #nolint: return
+}
+
+is_subject_identifier <- function(
+  dfs,
+  subject_identifier
+) {
+  .present <- lapply(dfs, function(df) {
+    subject_identifier %in% names(df)
+  })
+  all(unlist(.present))
+}
+
+.get_overall_summary <- function(dfs, subject_identifier) {
+  df_names <- get_df_names_or_key(dfs)
+  n_subjects <- 0
+  common_columns <- ""
+  if (subject_identifier == "") {
+    n_subjects <- nrow(dfs[[1]])
+  } else {
+    n_subjects <- get_n_unique_subjects(dfs, subject_identifier)
+    common_columns <- get_common_columns(dfs, subject_identifier)
+  }
+  data.frame(
+    n_data_frames = length(dfs),
+    data_frame_names = paste(df_names, collapse = ", "),
+    subject_identifier = subject_identifier,
+    n_subjects = n_subjects,
+    common_columns = paste(common_columns, collapse = ", ")
+  )
+}
+
+.check_prepared_dfs <- function(dfs, subject_identifier) {
+  df_names <- get_df_names_or_key(dfs)
+  for (df_name in df_names) {
+    current_df <- dfs[[df_name]]
+    if (ncol(current_df) == 0) {
+      stop(
+        paste(
+          "Data frame",
+          df_name,
+          "has no columns after filtering, please check your variables"
+        )
+      )
+    }
+    if (
+      ncol(current_df) == 1 &&
+        subject_identifier != "" &&
+        names(current_df) == subject_identifier
+    ) {
+      stop(
+        paste(
+          "Data frame",
+          df_name,
+          "has no columns after filtering, please check your variables"
+        )
+      )
+    }
+  }
+  dfs
 }

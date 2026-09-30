@@ -1,306 +1,415 @@
-testthat::test_that("synthesise_data works", {
-  marginals <- get_marginal_distributions(IST, c(
-    variables = c(
-      "SEX",
-      "AGE",
-      "ID14",
-      "RSBP",
-      "RATRIAL",
-      "SET14D",
-      "DSIDED"
-    )
-  ))
-  sim_data <- synthesise_data(marginals)
-  testthat::expect_true(is.data.frame(sim_data))
-  testthat::expect_equal(marginals$summary$n_row, nrow(sim_data))
-  testthat::expect_equal(marginals$summary$n_col + 1, ncol(sim_data))
-  variables <- strsplit(marginals$summary$variables, ", ")[[1]]
-  testthat::expect_true(all(
-    variables %in% names(sim_data)
-  ))
-})
-
-testthat::test_that("synthesise_data works", {
+testthat::test_that("export_empty_cor_matrix is defunct", {
   testthat::expect_error(
-    synthesise_data(list()),
-    regexp = "^.*object must be of class RESIDE.*$"
+    export_empty_cor_matrix(),
+    class = "defunctError",
+    regexp = "export_empty_cor_matrix() has been removed",
+    fixed = TRUE
   )
-  marginals <- get_marginal_distributions(IST, c(
-    variables = c(
-      "SEX",
-      "AGE",
-      "ID14",
-      "RSBP",
-      "RATRIAL",
-      "SET14D",
-      "DSIDED"
-    )
-  ))
-  temp_dir <- get_full_file_path(new_temp_dir(), "test")
-  export_empty_cor_matrix(marginals, temp_dir)
-  correlations <- import_cor_matrix(
-    file.path(temp_dir, "correlation_matrix.csv")
-  )
-  sim_data_cor <- synthesise_data(marginals, correlations)
-  testthat::expect_true(is.data.frame(sim_data_cor))
-  testthat::expect_equal(marginals$summary$n_row, nrow(sim_data_cor))
-  testthat::expect_equal(marginals$summary$n_col + 1, ncol(sim_data_cor))
-  variables <- strsplit(marginals$summary$variables, ", ")[[1]]
-  testthat::expect_true(all(
-    variables %in% names(sim_data_cor)
-  ))
-})
-
-test_probs <- c(0.25, 0.65, 0.1)
-
-testthat::test_that("replace_zero_rows works", {
-  test_row <- data.frame(
-    dummy_1 = c(0, 1, 0),
-    dummy_2 = c(0, 1, 1),
-    dummy_3 = c(0, 1, 0)
-  )
-  exp_row <- data.frame(
-    dummy_1 = c(0),
-    dummy_2 = c(1),
-    dummy_3 = c(0)
-  )
-  testthat::expect_equal(
-    replace_zero_rows(test_row, test_probs),
-    exp_row,
-    ignore_attr = TRUE
-  )
-})
-
-testthat::test_that("replace_one_rows works", {
-  test_row <- data.frame(
-    dummy_1 = c(0, 1, 0),
-    dummy_2 = c(1, 1, 1),
-    dummy_3 = c(0, 1, 0)
-  )
-  exp_row <- data.frame(
-    dummy_1 = c(0, 0, 0),
-    dummy_2 = c(1, 1, 1),
-    dummy_3 = c(0, 0, 0)
-  )
-  testthat::expect_equal(
-    replace_one_rows(test_row, test_probs),
-    exp_row,
-    ignore_attr = TRUE
-  )
-})
-
-testthat::test_that("check_probs works", {
-  testthat::expect_equal(check_probs(test_probs), test_probs)
-  test_probs_2 <- c(0, 0, 1)
-  testthat::expect_false(
-    any(duplicated(check_probs(test_probs_2)))
-  )
-  test_probs_3 <- c(0, 1, 1)
-  testthat::expect_false(
-    any(duplicated(check_probs(test_probs_3)))
-  )
-})
-
-testthat::test_that("get_data_def works", {
-  data_def <- get_data_def(
-    marginal_distributions
-  )
-  data_def_cor <- get_data_def(
-    marginal_distributions,
-    TRUE
-  )
-  testthat::expect_true(
-    is.data.frame(data_def)
-  )
-  testthat::expect_true(
-    is.data.frame(data_def_cor)
-  )
-  testthat::expect_equal(
-    data_def[["dist"]],
-    c("categorical", "categorical", "binary", "binary", "normal", "normal")
-  )
-  testthat::expect_equal(
-    data_def_cor[["dist"]],
-    c("binary", "binary", "binary",
-      "binary", "binary", "binary",
-      "binary", "normal", "normal"
-    )
-  )
-  data_var_names <- c(
-    names(marginal_distributions$categorical_variables),
-    names(marginal_distributions$binary_variables),
-    names(marginal_distributions$continuous_variables)
-  )
-  testthat::expect_true(
-    all(data_def[["varname"]] %in% data_var_names)
-  )
-  categorical_summary <- marginal_distributions$categorical_variables
-  cat_names <- c()
-  for (.column in names(categorical_summary)){
-    for (.cat in names(categorical_summary[[.column]])) {
-      # Get the dummy variable name for the category
-      cat_name <- paste(.column, .cat, sep = "_")
-      # Add the dummy variable name to the category names
-      cat_names <- c(cat_names, cat_name)
-    }
-  }
-  data_var_cor_names <- c(
-    cat_names,
-    names(marginal_distributions$binary_variables),
-    names(marginal_distributions$continuous_variables)
-  )
-  testthat::expect_true(
-    all(data_def_cor[["varname"]] %in% data_var_cor_names)
-  )
-})
-
-testthat::test_that("define_categorical works", {
-  categorical_summary <- marginal_distributions$categorical_variables
-  n_row <- marginal_distributions$summary$n_row
-  data_def <- NULL
-  catergorical_def <- define_categorical(
-    categorical_summary,
-    n_row,
-    data_def
-  )
-  testthat::expect_true(
-    all(catergorical_def[["varname"]] %in% names(categorical_summary))
-  )
-  testthat::expect_equal(
-    catergorical_def[["dist"]],
-    c("categorical", "categorical")
-  )
-})
-
-testthat::test_that("define_categorical_binary works", {
-  categorical_summary <- marginal_distributions$categorical_variables
-  n_row <- marginal_distributions$summary$n_row
-  data_def <- NULL
-  categorical_binary_def <- define_categorical_binary(
-    categorical_summary,
-    n_row,
-    data_def
-  )
-  cat_names <- c()
-  for (.column in names(categorical_summary)){
-    for (.cat in names(categorical_summary[[.column]])) {
-      # Get the dummy variable name for the category
-      cat_name <- paste(.column, .cat, sep = "_")
-      # Add the dummy variable name to the category names
-      cat_names <- c(cat_names, cat_name)
-    }
-  }
-  testthat::expect_true(
-    all(categorical_binary_def[["varname"]] %in% cat_names)
-  )
-  testthat::expect_equal(
-    categorical_binary_def[["dist"]],
-    c("binary", "binary", "binary", "binary", "binary")
-  )
-})
-
-testthat::test_that("define_binary works", {
-  binary_summary <- marginal_distributions$binary_variables
-  data_def <- NULL
-  binary_def <- define_binary(
-    binary_summary,
-    data_def
-  )
-  testthat::expect_true(
-    all(binary_def[["varname"]] %in% names(binary_summary))
-  )
-  testthat::expect_equal(
-    binary_def[["dist"]],
-    c("binary", "binary")
-  )
-})
-
-testthat::test_that("define_continuous works", {
-  continuous_summary <- marginal_distributions$continuous_variables
-  data_def <- NULL
-  continuous_def <- define_continuous(
-    continuous_summary,
-    data_def
-  )
-  testthat::expect_true(
-    all(continuous_def[["varname"]] %in% names(continuous_summary))
-  )
-  testthat::expect_equal(
-    continuous_def[["dist"]],
-    c("normal", "normal")
-  )
-})
-
-testthat::test_that("export_empty_cor_matrix works", {
-  # Test empty folder path
-  testthat::expect_error(
-    export_empty_cor_matrix(marginal_distributions),
-    regexp = "A folder path must be provided."
-  )
-  # Test class assumption
+  # Legacy arguments are ignored, the function still errors
   testthat::expect_error(
     export_empty_cor_matrix(list(), tempdir()),
-    regexp = "^.*object must be of class RESIDE.*$"
+    class = "defunctError",
+    regexp = "Use the correlation() function",
+    fixed = TRUE
   )
-  marginals <- marginal_distributions
-  temp_dir <- get_full_file_path(new_temp_dir(), "test")
-  # Test folder doesn't exits
+})
+
+testthat::test_that("import_cor_matrix is defunct", {
   testthat::expect_error(
-    export_empty_cor_matrix(
-      marginals,
-      "./dirdoesnotexist",
-      create_folder = FALSE
+    import_cor_matrix(),
+    class = "defunctError",
+    regexp = "import_cor_matrix() has been removed",
+    fixed = TRUE
+  )
+  # Legacy arguments are ignored, the function still errors
+  testthat::expect_error(
+    import_cor_matrix("correlation_matrix.csv"),
+    class = "defunctError",
+    regexp = "Use the correlation() function",
+    fixed = TRUE
+  )
+})
+
+testthat::test_that("synthesise_data works", {
+  set.seed(1234)
+  sim_df <- synthesise_data(marginal_distributions)
+  sub_marginals <- marginal_distributions[[1]]
+  # Expect a data frame with a row for each row in the marginals
+  expect_true(is.data.frame(sim_df))
+  expect_equal(nrow(sim_df), sub_marginals$summary$n_row)
+  # Expect an id column and a column for each variable
+  expect_equal(
+    names(sim_df),
+    c("id", get_submarginal_variables(sub_marginals))
+  )
+  # Expect error when not class RESIDE
+  expect_error(
+    synthesise_data(list()),
+    regexp = "object must be of class RESIDE",
+    fixed = TRUE
+  )
+})
+
+testthat::test_that("synthesise_data works with correlations", {
+  set.seed(1234)
+  sub_marginals <- marginal_distributions[[1]]
+  sim_df <- synthesise_data(
+    marginal_distributions,
+    correlations = list(
+      correlation("AGE", "RSBP", 0.6),
+      correlation("SEX", "AGE", -0.5, factor_name.x = "M")
+    )
+  )
+  # Expect the same structure as without correlations
+  expect_true(is.data.frame(sim_df))
+  expect_equal(nrow(sim_df), sub_marginals$summary$n_row)
+  expect_equal(
+    names(sim_df),
+    c("id", get_submarginal_variables(sub_marginals))
+  )
+  expect_equal(sim_df$id, seq_len(sub_marginals$summary$n_row))
+  # Expect the categories to be those of the marginals
+  expect_true(
+    all(sim_df$SEX %in% names(sub_marginals$categorical_variables$SEX))
+  )
+  # Expect the categorical marginals to be maintained
+  expect_equal(
+    mean(sim_df$SEX == "M"),
+    unname(
+      sub_marginals$categorical_variables$SEX[["M"]] /
+        sub_marginals$summary$n_row
     ),
-    regexp = "^.*Directory must exist, hint: set create_folder to TRUE.*$"
+    tolerance = 0.05
   )
-  # Test folder creation
-  export_empty_cor_matrix(
-    marginals,
-    temp_dir,
-    "correlations.csv",
-    create_folder = TRUE
+  # Expect continuous variables within the range of the quantiles
+  age_quantiles <- sub_marginals$continuous_variables$AGE$quantiles$orig_q
+  expect_true(
+    all(
+      sim_df$AGE >= min(age_quantiles) & sim_df$AGE <= max(age_quantiles),
+      na.rm = TRUE
+    )
   )
-  testthat::expect_true(
-    file.exists(
-      normalizePath(
-        file.path(temp_dir, "correlations.csv")
+  # Expect the correlations to be in the specified direction
+  expect_gt(
+    cor(sim_df$AGE, sim_df$RSBP, method = "spearman", use = "complete.obs"),
+    0.3
+  )
+  expect_lt(
+    cor(sim_df$SEX == "M", sim_df$AGE, use = "complete.obs"),
+    -0.1
+  )
+  # Expect a single correlation to be accepted
+  expect_no_error(
+    synthesise_data(
+      marginal_distributions,
+      correlations = correlation("AGE", "RSBP", 0.5)
+    )
+  )
+})
+
+testthat::test_that("synthesise_data errors with invalid correlations", {
+  # Expect error when a categorical variable has no factor name
+  expect_error(
+    synthesise_data(
+      marginal_distributions,
+      correlations = list(correlation("SEX", "AGE", 0.3))
+    ),
+    regexp = "Correlation variable SEX is categorical and must have a factor name specified using factor_name.x", #nolint: line_length_linter
+    fixed = TRUE
+  )
+  # Expect error when the correlations are not correlation objects
+  expect_error(
+    synthesise_data(
+      marginal_distributions,
+      correlations = list(list(x = "AGE", y = "RSBP", rho = 0.3))
+    ),
+    regexp = "correlations must be a list of correlations created with the correlation() function.", #nolint: line_length_linter
+    fixed = TRUE
+  )
+  # Expect error when the correlations are inconsistent
+  expect_error(
+    synthesise_data(
+      marginal_distributions,
+      correlations = list(
+        correlation("AGE", "RSBP", 0.9),
+        correlation("AGE", "SET14D", 0.9),
+        correlation("RSBP", "SET14D", -0.9)
+      )
+    ),
+    regexp = "The correlations are not consistent with each other, the correlation matrix is not positive semi definite.", #nolint: line_length_linter
+    fixed = TRUE
+  )
+  # Expect error when a correlation matrix is supplied
+  expect_error(
+    synthesise_data(marginal_distributions, correlation_matrix = diag(2)),
+    regexp = "correlation_matrix is no longer supported",
+    fixed = TRUE
+  )
+  # Expect validation errors
+  expect_error(
+    synthesise_data(
+      marginal_distributions,
+      correlations = list(correlation("NOTAVARIABLE", "AGE", 0.3))
+    ),
+    regexp = "The following variables are not present in the marginals: NOTAVARIABLE", #nolint: line_length_linter
+    fixed = TRUE
+  )
+})
+
+testthat::test_that("synthesise_data works with correlations and multiple tables", { #nolint: line_length_linter
+  testthat::skip_if_not_installed("pharmaversesdtm")
+  set.seed(1234)
+  sim_dfs <- synthesise_data(
+    multitable_marginals,
+    correlations = list(
+      correlation("AGE", "SEX", -0.5, factor_name.y = "M"),
+      correlation(
+        "SEX",
+        "AESEV",
+        0.8,
+        df_name.x = "dm",
+        df_name.y = "ae",
+        factor_name.x = "M",
+        factor_name.y = "MODERATE"
+      ),
+      correlation("DOMAIN", "AESTDY", 0.2, df_name = "ae", factor_name.x = "AE")
+    )
+  )
+  # Expect a data frame for each table with the same structure
+  # as without correlations
+  expect_equal(names(sim_dfs), c("dm", "cm", "ae"))
+  for (df_name in names(sim_dfs)) {
+    sub_marginals <- multitable_marginals[[df_name]]
+    expect_equal(nrow(sim_dfs[[df_name]]), sub_marginals$summary$n_row)
+    expect_equal(
+      names(sim_dfs[[df_name]]),
+      c("USUBJID", get_submarginal_variables(sub_marginals))
+    )
+    # Expect the number of subjects of each table
+    expect_equal(
+      length(unique(sim_dfs[[df_name]]$USUBJID)),
+      sub_marginals$summary$n_subjects,
+      tolerance = 0.1
+    )
+  }
+  # Expect subjects to be shared across tables
+  expect_true(
+    all(sim_dfs$ae$USUBJID %in% seq_len(
+      multitable_marginals$overall_summary$n_subjects
+    ))
+  )
+  # Expect correlated variables to take a single value per subject
+  expect_true(
+    all(tapply(sim_dfs$ae$AESTDY, sim_dfs$ae$USUBJID, function(x) {
+      length(unique(x[!is.na(x)])) <= 1
+    }))
+  )
+  # Expect the correlation within a table
+  expect_lt(
+    cor(sim_dfs$dm$SEX == "M", sim_dfs$dm$AGE, use = "complete.obs"),
+    -0.1
+  )
+  # Expect the correlation across tables, by subject
+  joined <- merge(
+    sim_dfs$dm[, c("USUBJID", "SEX")],
+    sim_dfs$ae[, c("USUBJID", "AESEV")],
+    by = "USUBJID"
+  )
+  expect_gt(
+    cor(joined$SEX == "M", joined$AESEV == "MODERATE"),
+    0.1
+  )
+  # Expect the common variables to be synthesised
+  for (df_name in names(sim_dfs)) {
+    expect_true(all(sim_dfs[[df_name]]$STUDYID == "CDISCPILOT01"))
+  }
+})
+
+testthat::test_that("synthesise_data works with correlated common variables", { #nolint: line_length_linter
+  testthat::skip_if_not_installed("pharmaversesdtm")
+  set.seed(1234)
+  sim_dfs <- synthesise_data(
+    multitable_marginals,
+    correlations = list(
+      correlation("STUDYID", "AGE", 0.1, factor_name.x = "CDISCPILOT01")
+    )
+  )
+  # Expect the common variable in each table
+  for (df_name in names(sim_dfs)) {
+    expect_true(all(sim_dfs[[df_name]]$STUDYID == "CDISCPILOT01"))
+  }
+  # Expect error when a duplicated variable has no df_name
+  expect_error(
+    synthesise_data(
+      multitable_marginals,
+      correlations = list(
+        correlation("DOMAIN", "AGE", 0.3, factor_name.x = "AE")
+      )
+    ),
+    regexp = "Correlation variable DOMAIN is duplicated in the marginals and must have a data frame name specified.", #nolint: line_length_linter
+    fixed = TRUE
+  )
+})
+
+testthat::test_that("generate_correlation_matrix works", {
+  sub_marginals <- marginal_distributions[[1]]
+  cor_matrix <- generate_correlation_matrix(
+    sub_marginals,
+    list(
+      correlation("AGE", "RSBP", 0.5),
+      correlation("SEX", "AGE", -0.3, factor_name.x = "M")
+    )
+  )
+  # Expect a symmetric matrix with a row for each (dummy) variable
+  expect_true(isSymmetric(cor_matrix))
+  expect_equal(
+    rownames(cor_matrix),
+    get_data_def(sub_marginals, TRUE)[["varname"]]
+  )
+  expect_equal(unname(diag(cor_matrix)), rep(1, nrow(cor_matrix)))
+  # Expect the correlations to be set
+  expect_equal(cor_matrix["AGE", "RSBP"], 0.5)
+  expect_equal(cor_matrix["RSBP", "AGE"], 0.5)
+  # Expect the categorical correlation to use the dummy variable
+  expect_equal(cor_matrix["SEX_M", "AGE"], -0.3)
+  expect_equal(cor_matrix["SEX_F", "AGE"], 0)
+  # Expect error when a categorical variable has no factor name
+  expect_error(
+    generate_correlation_matrix(
+      sub_marginals,
+      list(correlation("SEX", "AGE", 0.3))
+    ),
+    regexp = "Correlation variable SEX is categorical and must have a factor name specified using factor_name.x", #nolint: line_length_linter
+    fixed = TRUE
+  )
+})
+
+testthat::test_that("get_correlated_categories works", {
+  expect_equal(
+    get_correlated_categories(
+      list(
+        correlation("SEX", "AGE", 0.3, factor_name.x = "M"),
+        correlation("AGE", "RATRIAL", 0.3, factor_name.y = "Y"),
+        correlation("SEX", "RSBP", 0.3, factor_name.x = "F"),
+        correlation("AGE", "RSBP", 0.3)
+      )
+    ),
+    list(SEX = c("M", "F"), RATRIAL = "Y")
+  )
+  expect_equal(get_correlated_categories(list()), list())
+})
+
+testthat::test_that("replace_zero_rows and replace_one_rows work", {
+  set.seed(1234)
+  rows <- data.frame(a = c(0, 0, 0), b = c(0, 0, 0), c = c(0, 0, 0))
+  # Expect a single category to be selected for each row
+  replaced <- replace_zero_rows(rows, c(0.2, 0.3, 0.5))
+  expect_equal(names(replaced), names(rows))
+  expect_equal(unname(rowSums(replaced)), c(1, 1, 1))
+  # Expect categories with a probability of 0 to not be selected
+  replaced <- replace_zero_rows(rows, c(0, 0, 1))
+  expect_equal(replaced$c, c(1, 1, 1))
+  # Expect one of the selected categories to be chosen
+  rows <- data.frame(a = c(1, 1, 0), b = c(1, 0, 1), c = c(0, 1, 1))
+  replaced <- replace_one_rows(rows, c(0.2, 0.3, 0.5))
+  expect_equal(unname(rowSums(replaced)), c(1, 1, 1))
+  expect_true(all(as.matrix(replaced) <= as.matrix(rows)))
+})
+
+testthat::test_that("fix_factors works", {
+  set.seed(1234)
+  sub_marginals <- list(
+    categorical_variables = list(
+      COLOUR = c(red = 50, green = 30, blue = 20)
+    ),
+    summary = data.frame(n_row = 100)
+  )
+  n <- 10000
+  simulated_data <- data.frame(
+    COLOUR_red = rbinom(n, 1, 0.5),
+    COLOUR_green = rbinom(n, 1, 0.3),
+    COLOUR_blue = rbinom(n, 1, 0.2)
+  )
+  # Expect a single category for each row
+  fixed <- fix_factors(simulated_data, sub_marginals)
+  expect_true(all(rowSums(fixed) == 1))
+  # Expect the correlated category to be kept and the marginals maintained
+  fixed <- fix_factors(
+    simulated_data,
+    sub_marginals,
+    list(COLOUR = "blue")
+  )
+  expect_true(all(rowSums(fixed) == 1))
+  expect_equal(fixed$COLOUR_blue, simulated_data$COLOUR_blue)
+  expect_equal(mean(fixed$COLOUR_red), 0.5, tolerance = 0.05)
+  expect_equal(mean(fixed$COLOUR_green), 0.3, tolerance = 0.05)
+})
+
+testthat::test_that("restore_factors works", {
+  simulated_data <- data.frame(
+    COLOUR_red = c(1, 0, 0),
+    COLOUR_green = c(0, 1, 1),
+    COLOUR_blue = c(0, 0, 0)
+  )
+  # Expect the categories to be restored, including unselected categories
+  restored <- restore_factors(
+    simulated_data,
+    list(COLOUR = c(red = 1, green = 2, blue = 0))
+  )
+  expect_equal(names(restored), "COLOUR")
+  expect_equal(restored$COLOUR, c("red", "green", "green"))
+})
+
+testthat::test_that("synthesise_data keeps whitespace in categories", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
+  set.seed(1234)
+  sim_dfs <- synthesise_data(multitable_marginals)
+  # Expect the categories to match the marginals, including spaces
+  arm_categories <- names(multitable_marginals$dm$categorical_variables$ARM)
+  expect_true(all(sim_dfs$dm$ARM %in% arm_categories))
+  expect_true(any(grepl(" ", sim_dfs$dm$ARM, fixed = TRUE)))
+  # Expect the same for correlated variables
+  sim_dfs <- synthesise_data(
+    multitable_marginals,
+    correlations = list(
+      correlation(
+        "ARM",
+        "AGE",
+        0.3,
+        factor_name.x = "Xanomeline High Dose"
       )
     )
   )
+  expect_true(all(sim_dfs$dm$ARM %in% arm_categories))
+  expect_true(any(sim_dfs$dm$ARM == "Xanomeline High Dose"))
 })
 
-testthat::test_that("import_cor_matrix_works", {
-  # Test file exists
-  expect_error(
-    import_cor_matrix("./doesnotexist.csv"),
-    regexp = "^.*Correlation file must exist.*$"
-  )
-  # Test Asymetric
-  cor_asymetric <-
-    testthat::test_path("testdata", "correlation_matrix_asymetric.csv")
-  testthat::expect_error(
-    import_cor_matrix(cor_asymetric),
-    regexp = "^.*The correlation matrix needs to be symmetrical.*$"
-  )
-  # Test Non Finite
-  cor_non_finite <-
-    testthat::test_path("testdata", "correlation_matrix_non_finite.csv")
-  testthat::expect_error(
-    import_cor_matrix(cor_non_finite),
-    regexp = "^.*The correlation matrix needs to be positive semi definite.*$"
-  )
-  marginals <- marginal_distributions
-  temp_dir <- get_full_file_path(new_temp_dir(), "test")
-  export_empty_cor_matrix(
-    marginals,
-    temp_dir,
-    "correlations.csv",
-    create_folder = TRUE
-  )
-  cor_matrix <- import_cor_matrix(
-    file.path(temp_dir, "correlations.csv")
-  )
-  testthat::expect_true(
-    is.matrix(cor_matrix)
-  )
+testthat::test_that("synthesise_data works with multiple tables", {
+  testthat::skip_if_not_installed("pharmaversesdtm")
+  set.seed(1234)
+  sim_dfs <- synthesise_data(multitable_marginals)
+  expect_equal(names(sim_dfs), c("dm", "cm", "ae"))
+  for (df_name in names(sim_dfs)) {
+    sub_marginals <- multitable_marginals[[df_name]]
+    # Expect the rows and columns of each table
+    expect_equal(nrow(sim_dfs[[df_name]]), sub_marginals$summary$n_row)
+    expect_equal(
+      names(sim_dfs[[df_name]]),
+      c("USUBJID", get_submarginal_variables(sub_marginals))
+    )
+    # Expect the number of subjects of each table
+    expect_equal(
+      length(unique(sim_dfs[[df_name]]$USUBJID)),
+      sub_marginals$summary$n_subjects,
+      tolerance = 0.1
+    )
+    # Expect the subjects to be shared across tables
+    expect_true(
+      all(sim_dfs[[df_name]]$USUBJID %in% seq_len(
+        multitable_marginals$overall_summary$n_subjects
+      ))
+    )
+    # Expect the rows to be ordered by subject
+    expect_false(is.unsorted(sim_dfs[[df_name]]$USUBJID))
+  }
 })
