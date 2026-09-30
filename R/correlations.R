@@ -4,10 +4,20 @@
 #' @param x The name of the first variable
 #' @param y The name of the second variable
 #' @param rho The correlation between the two variables
+#' @param ... Additional arguments to specify data frame names and factor names
+#' See details for more information on the additional arguments.
 #' @return A list containing the correlation information
 #' @details This function is a helper function to create a correlation
 #' object that can be used to specify correlations between variables
 #' when synthesising data using the \code{\link{synthesise_data}} function.
+#' Additional Arguments:
+#' \itemize{
+#' \item df_name: The name of the data frame containing both variables
+#' \item df_name.x: The name of the data frame containing the first variable
+#' \item df_name.y: The name of the data frame containing the second variable
+#' \item factor_name.x: The name of the factor variable for the first variable
+#' \item factor_name.y: The name of the factor variable for the second variable
+#' }
 #' @examples
 #'  correlation("age", "bmi", 0.5)
 #' @rdname correlation
@@ -63,19 +73,4 @@ get_correlation_names <- function(
     correlation_names <- c(correlation_names, cor$x, cor$y)
   }
   return(unique(correlation_names))
-}
-
-get_correlation_factors <- function(
-  correlations
-) {
-  correlation_factors <- c()
-  for (cor in correlations) {
-    if ("factor_name.x" %in% names(cor)) {
-      correlation_factors <- c(correlation_factors, cor$factor_name.x)
-    }
-    if ("factor_name.y" %in% names(cor)) {
-      correlation_factors <- c(correlation_factors, cor$factor_name.y)
-    }
-  }
-  return(unique(correlation_factors))
 }

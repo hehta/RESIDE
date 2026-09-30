@@ -231,7 +231,6 @@ testthat::test_that(".filter_marginals works", {
     multitable_marginals,
     filter_variables
   )
-  print(filtered_marginals)
   testthat::expect_true(
     all(
       "ae" %in% names(filtered_marginals),
@@ -292,32 +291,6 @@ testthat::test_that(".filter_marginals works", {
   )
 })
 
-# testthat::test_that(".filter_common_marginals works", {
-#   filtered_marginals <- .filter_common_marginals(
-#     multitable_marginals
-#   )
-#   testthat::expect_true(
-#     all(
-#       "ae" %in% names(filtered_marginals),
-#       "dm" %in% names(filtered_marginals),
-#       "cm" %in% names(filtered_marginals),
-#       "overall_summary" %in% names(filtered_marginals)
-#     )
-#   )
-#   testthat::expect_true(
-#     all(
-#       length(names(filtered_marginals[["dm"]])) == 2,
-#       length(names(filtered_marginals[["cm"]])) == 2,
-#       length(names(filtered_marginals[["ae"]])) == 2,
-#       length(names(filtered_marginals[["overall_summary"]])) == 5
-#     )
-#   )
-#   testthat::expect_equal(
-#     filtered_marginals$overall_summary$common_columns,
-#     "STUDYID"
-#   )
-# })
-
 testthat::test_that("get_variables works", {
   variables <- get_variables(marginal_distributions)
   testthat::expect_setequal(
@@ -373,17 +346,6 @@ testthat::test_that(".replace_nas works", {
   )
 })
 
-testthat::test_that("get_all_types works", {
-  testthat::expect_setequal(
-    get_all_types(marginal_distributions),
-    c("binary_variables", "categorical_variables", "continuous_variables")
-  )
-  testthat::expect_setequal(
-    get_all_types(multitable_marginals),
-    c("binary_variables", "categorical_variables", "continuous_variables")
-  )
-})
-
 testthat::test_that("get_dates_from_sub_marginals works", {
   ae_dates <- get_dates_from_sub_marginals(multitable_marginals[["ae"]])
   testthat::expect_true(
@@ -402,5 +364,55 @@ testthat::test_that("get_dates_from_sub_marginals works", {
     all(
       c("RFSTDTC", "RFXSTDTC", "RFPENDTC", "DTHDTC", "DMDTC") %in% dm_dates
     )
+  )
+})
+
+testthat::test_that("is_single_table_works", {
+  testthat::expect_true(
+    is_single_table(marginal_distributions)
+  )
+  testthat::expect_false(
+    is_single_table(multitable_marginals)
+  )
+})
+
+testthat::test_that("get_variables_by_df_name works", {
+  variables <- .get_variables_by_df_name(multitable_marginals)
+  testthat::expect_true(
+    all(
+      "ae" %in% names(variables),
+      "dm" %in% names(variables),
+      "cm" %in% names(variables)
+    )
+  )
+  testthat::expect_true(
+    all(
+      names(pharmaversesdtm::ae)[names(pharmaversesdtm::ae) != "USUBJID"] %in%
+        variables$ae
+    )
+  )
+  testthat::expect_true(
+    all(
+      names(pharmaversesdtm::dm)[names(pharmaversesdtm::dm) != "USUBJID"] %in%
+        variables$dm
+    )
+  )
+  testthat::expect_true(
+    all(
+      names(pharmaversesdtm::cm)[names(pharmaversesdtm::cm) != "USUBJID"]
+      %in% variables$cm
+    )
+  )
+  variables <- .get_variables_by_df_name(marginal_distributions)
+  expected_variables <- c(
+    "SEX",
+    "AGE",
+    "ID14",
+    "RSBP",
+    "RATRIAL",
+    "SET14D"
+  )
+  testthat::expect_true(
+    all(expected_variables %in% variables[[1]])
   )
 })

@@ -2,51 +2,29 @@
 % Please edit documentation in R/synthesise_data.R
 \name{export_empty_cor_matrix}
 \alias{export_empty_cor_matrix}
-\title{Export an empty correlation matrix}
+\title{Export an empty correlation matrix (removed)}
 \usage{
-export_empty_cor_matrix(
-  marginals,
-  folder_path,
-  file_name = "correlation_matrix.csv",
-  create_folder = TRUE
-)
+export_empty_cor_matrix(...)
 }
 \arguments{
-\item{marginals}{The marginal distributions}
-
-\item{folder_path}{Folder to export to.}
-
-\item{file_name}{(optional) file name, Default: 'correlation_matrix.csv'}
-
-\item{create_folder}{Whether the folder should be created, Default: TRUE}
+\item{...}{Ignored, retained for backwards compatibility.}
 }
 \value{
-No return value, called for exportation of files.
+No return value, always throws an error.
 }
 \description{
-A function to export a correlation matrix with
-the required variables as a csv file.
+This function has been removed. Correlations should now be
+specified using the \code{\link{correlation}} function.
 }
 \details{
-This function will export an empty correlation matrix
-as a csv file, it will contain all the necessary variables including
-dummy variables for factors. Dummy variables for factors may contain
-a missing category to represent missing data. Correlations should be
-added to the empty CSV and the imported using the
-\code{\link{import_marginal_distributions}} function.
-Correlations should be supplied using rank order correlations.
-The correlation matrix should be symmetric and positive semi definite.
+Previously this function exported an empty correlation matrix
+as a csv file. Correlations are now supplied directly to
+\code{\link{synthesise_data}} as a list of objects created with the
+\code{\link{correlation}} function.
 }
 \examples{
-\dontrun{
- marginals <- import_marginal_distributions()
- export_empty_cor_matrix(
-   marginals,
-   folder_path = tempdir()
-  )
-}
+ try(export_empty_cor_matrix())
 }
 \seealso{
-\code{\link{import_marginal_distributions}}
-\code{\link{import_cor_matrix}}
+\code{\link{correlation}}
 }

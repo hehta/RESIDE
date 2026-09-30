@@ -9,8 +9,6 @@
 #' , Default: '' see details.
 #' @param continuous_variables_file filename for the continuous variables file,
 #' Default: '' see details.
-#' @param continuous_quantiles_file filename for the continuous quantiles file,
-#' Default: '' see details.
 #' @param summary_file filename for the summary file,
 #' Default: 'summary.csv' see details.
 #' @return Returns an object of a RESIDE class
@@ -40,7 +38,7 @@ import_marginal_distributions <- function(
   summary_file = "summary.csv"
 ) {
   # Check the folder exists first
-  if (! dir.exists(normalizePath(folder_path))) {
+  if (! suppressWarnings(dir.exists(normalizePath(folder_path)))) {
     stop(
       "Directory must exist, hint: set create_folder to TRUE"
     )
@@ -84,6 +82,12 @@ import_marginal_distributions <- function(
     ),
     "summary"
   )
+
+  if (! "subject_identifier" %in% names(.summary_variables)) {
+    .summary_variables$subject_identifier <- ""
+  } else if (is.na(.summary_variables$subject_identifier[1])) {
+    .summary_variables$subject_identifier <- ""
+  }
 
   # Validate the variables and throw an error if they
   # are invalid.
@@ -129,6 +133,26 @@ import_marginal_distributions <- function(
       )
     }
 
+    if ("df_n_subjects" %in% names(summary_variables)) {
+      summary_variables <- dplyr::rename(
+        summary_variables,
+        n_subjects = df_n_subjects
+      )
+    }
+
+    if ("data_frame" %in% names(summary_variables)) {
+      summary_variables <- dplyr::select(
+        summary_variables,
+        -data_frame
+      )
+    }
+
+    # If there is only one data frame,
+    # then we don't need to return the data frame name
+    if (length(df_names) == 1) {
+      summary_variables$data_frame <- NULL
+    }
+
     .return[[df_name]] <- list(
       categorical_variables = .gen_categorical_summary(
         categorical_variables
@@ -142,6 +166,10 @@ import_marginal_distributions <- function(
       summary = summary_variables
     )
 
+  }
+
+  if (is.na(.summary_variables$common_columns[1])) {
+    .summary_variables$common_columns <- ""
   }
 
   .return$overall_summary <- data.frame(

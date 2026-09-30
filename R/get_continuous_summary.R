@@ -69,8 +69,6 @@ get_continuous_summary <- function(
         na.rm = TRUE
       )
 
-    #summary_df$sd[is.na(summary_df$sd)] <- 0.01
-
     is_date <- all(get_col_attr(column))
 
     summary_df <- data.frame(

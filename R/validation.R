@@ -172,68 +172,73 @@ check_correlation_dfs <- function(
   )
   # Get the common variables from the marginals
   common_variables <- .get_common_fields(marginals)
-  # remove the common variables
-  variables_test <- setdiff(all_marginal_variables, common_variables)
-  # Get the duplicated variables
-  duplicated_variables <- variables_test[duplicated(variables_test)]
-  # Ingoring common variables, ignore variables that are not duplicated
-  # as these do not need a data frame name.
-  if (length(duplicated_variables) == 0) {
-    return(TRUE)
-  }
-  # Get all the correlation variables
-  correlation_variables <- get_correlation_names(correlations)
-  matching_variables <-
-    correlation_variables[correlation_variables %in% duplicated_variables]
-  # Only continue if there are any correlation variables that
-  # are duplicated in the marginals
-  if (! length(matching_variables) == 0) {
-    return(TRUE)
-  }
+  # Get the duplicated variables, ignoring the common variables
+  duplicated_variables <- setdiff(
+    all_marginal_variables[duplicated(all_marginal_variables)],
+    common_variables
+  )
+  # Get the variables that only appear in one data frame
+  single_variables <- setdiff(
+    all_marginal_variables,
+    c(duplicated_variables, common_variables)
+  )
+  variables_by_df_name <- .get_variables_by_df_name(marginals)
   # loop through the correlations to check the data frame names are present
   # for the duplicated variables
   for (correlation in correlations) {
-    # Forward declare the df_name and correlation_name variables
-    df_name <- ""
-    correlation_name <- ""
-    # Set the df_name based on either the x or y variable
-    # being present in the matching variables and their corresponding df_name
-    # being present in the correlation object. Or if the df_name
-    # is present in the correlation object.
-    if (correlation$x %in% matching_variables) {
-      correlation_name <- correlation$x
+    for (var in c("x", "y")) {
+      variable <- correlation[[var]]
+      # Set the df_name from either the shared df_name
+      # or the variable specific df_name (df_name.x / df_name.y)
+      df_name <- ""
       if ("df_name" %in% names(correlation)) {
         df_name <- correlation$df_name
       }
-      if ("df_name.x" %in% names(correlation)) {
-        df_name <- correlation$df_name.x
+      if (paste0("df_name.", var) %in% names(correlation)) {
+        df_name <- correlation[[paste0("df_name.", var)]]
       }
-    } else if (correlation$y %in% matching_variables) {
-      correlation_name <- correlation$y
-      if ("df_name" %in% names(correlation)) {
-        df_name <- correlation$df_name
+      # Variables that only appear in one data frame do not need a
+      # data frame name, warn if one is specified that doesn't match
+      if (variable %in% single_variables) {
+        variable_df_name <- names(variables_by_df_name)[
+          vapply(
+            variables_by_df_name,
+            function(variables) variable %in% variables,
+            logical(1)
+          )
+        ]
+        if (df_name != "" && !identical(df_name, variable_df_name)) {
+          warning(
+            paste(
+              "Data frame name",
+              df_name,
+              "will be ignored for correlation variable",
+              variable,
+              "as it only appears in one data frame."
+            )
+          )
+        }
+        next
       }
-      if ("df_name.y" %in% names(correlation)) {
-        df_name <- correlation$df_name.y
+      if (! variable %in% duplicated_variables) {
+        next
       }
-    }
-    # if the df_name is not found, then no data frame name was specified
-    #for a variable that is duplicated in the marginals
-    if (df_name == "") {
-      stop(
-        paste(
-          "Correlation variable",
-          correlation_name,
-          "is duplicated in the marginals and 
-          must have a data frame name specified."
+      # if the df_name is not found, then no data frame name was specified
+      # for a variable that is duplicated in the marginals
+      if (df_name == "") {
+        stop(
+          paste(
+            "Correlation variable",
+            variable,
+            "is duplicated in the marginals and",
+            "must have a data frame name specified."
+          )
         )
-      )
+      }
+      validate_df_name(marginals, variable, df_name)
     }
-    validate_df_name(marginals, correlation_name, df_name)
-    return(TRUE)
   }
-
-
+  return(TRUE)
 }
 
 validate_df_name <- function(
@@ -280,7 +285,7 @@ check_factor_exists <- function(
       next
     }
     if (variable %in% names(sub_marginals$categorical_variables)) {
-      if (factor_name %in% sub_marginals$categorical_variables[[variable]]$category) { #nolint: line_length_linter
+      if (factor_name %in% names(sub_marginals$categorical_variables[[variable]])) { #nolint: line_length_linter
         factor_exists <- TRUE
       }
     }
@@ -292,9 +297,8 @@ check_factor_correlations <- function(
   marginals,
   correlations
 ) {
-  correlation_factors <- get_correlation_factors(correlations)
-  # Check the correlation factors are valid
-  check_variables_exist(marginals, correlation_factors)
+  # Check each factor exists for its variable
+  # (the variables themselves are checked by validate_correlations)
   for (correlation in correlations) {
     for (var in c("x", "y")) {
       if (paste0("factor_name.", var) %in% names(correlation)) {
@@ -327,3 +331,87 @@ check_factor_correlations <- function(
   }
 }
 
+
+
+# Get the data frame (name or key) that a correlation variable belongs to,
+# common variables return NA as they belong to every data frame.
+get_correlation_df <- function(
+  marginals,
+  correlation,
+  var,
+  common_fields = .get_common_fields(marginals)
+) {
+  variable <- correlation[[var]]
+  if (variable %in% common_fields) {
+    return(NA)
+  }
+  df_names <- get_df_names_or_key(marginals)
+  # Use the specified df_name if the variable is present in it
+  df_name <- ""
+  if ("df_name" %in% names(correlation)) {
+    df_name <- correlation$df_name
+  }
+  if (paste0("df_name.", var) %in% names(correlation)) {
+    df_name <- correlation[[paste0("df_name.", var)]]
+  }
+  if (
+    df_name %in% df_names &&
+      variable %in% get_submarginal_variables(marginals[[df_name]])
+  ) {
+    return(df_name)
+  }
+  # Otherwise use the data frame the variable is present in
+  return(get_first_df(marginals, variable))
+}
+
+# Get the first data frame (name or key) that contains a variable
+get_first_df <- function(
+  marginals,
+  variable
+) {
+  for (df in get_df_names_or_key(marginals)) {
+    if (variable %in% get_submarginal_variables(marginals[[df]])) {
+      return(df)
+    }
+  }
+  stop(
+    paste(
+      "Correlation variable",
+      variable,
+      "is not present in the marginals."
+    )
+  )
+}
+
+# Check that categorical correlation variables have a factor name,
+# as categorical variables are correlated using a dummy variable
+# for a single category.
+check_categorical_factor_names <- function(
+  marginals,
+  correlations
+) {
+  common_fields <- .get_common_fields(marginals)
+  for (correlation in correlations) {
+    for (var in c("x", "y")) {
+      if (paste0("factor_name.", var) %in% names(correlation)) {
+        next
+      }
+      variable <- correlation[[var]]
+      df <- get_correlation_df(marginals, correlation, var, common_fields)
+      if (is.na(df)) {
+        df <- get_first_df(marginals, variable)
+      }
+      if (variable %in% names(marginals[[df]]$categorical_variables)) {
+        stop(
+          paste(
+            "Correlation variable",
+            variable,
+            "is categorical and must have a factor name specified using",
+            paste0("factor_name.", var)
+          )
+        )
+      }
+    }
+  }
+  return(TRUE)
+}

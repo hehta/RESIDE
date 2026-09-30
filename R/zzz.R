@@ -11,7 +11,9 @@ utils::globalVariables(c(
   "max_dp",
   "is_date",
   "common_columns",
-  "n_subjects"
+  "n_subjects",
+  "df_n_subjects",
+  "data_frame"
 ))
 
 # Global filenames

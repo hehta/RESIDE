@@ -18,7 +18,6 @@ Description: Developed to assist researchers with planning analysis,
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Suggests: 
     testthat (>= 3.0.0),
@@ -32,14 +31,13 @@ Depends:
     R (>= 2.10)
 Imports:
     dplyr,
-    tidyr,
     magrittr,
     bestNormalize,
     RDP,
     methods,
     tibble,
-    simstudy,
-    matrixcalc
+    simstudy
 LazyData: true
 Config/testthat/edition: 3
 URL: https://hehta.github.io/RESIDE/
+Config/roxygen2/version: 8.1.0

@@ -32,6 +32,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Ryan Field \email{ryan.field@glasgow.ac.uk} (\href{https://orcid.org/0000-0002-4424-9890}{ORCID})
   \item David McAllister \email{david.mcallister@glasgow.ac.uk} (\href{https://orcid.org/0000-0003-3550-1764}{ORCID})
 }
 

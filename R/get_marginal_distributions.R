@@ -49,37 +49,44 @@ get_marginal_distributions <- function(
   if (is.data.frame(.df)) {
     .df <- list(.df)
   }
-  if (length(variables) > 0) {
-    # Add the subject identifier to the variables if it is not empty
-    .variables <- variables
-    if (subject_identifier != "") {
-      .variables <- c(.variables, subject_identifier)
-    }
-    # Filter the data frame(s) to only include the specified variables
-    .df <- filter_variables(.df, .variables)
-  }
-  # Get the names of the data frames
-  df_names <- get_df_names_or_key(.df)
-  # Loop through data frames
-  for (df_name in df_names) {
-    # Get the data frame
-    .current_df <- .df[[df_name]]
-    # Prepare the data frame
-    .current_df <- .prepare_df(
-      .current_df,
-      subject_identifier,
-      variables,
-      retype
-    )
-    # Get the summaries for the data frame and store in the return list
-    .return[[df_name]] <- .get_summaries(.current_df, subject_identifier)
-  }
+  .dfs <- .prepare_dfs(
+    .df,
+    subject_identifier,
+    variables,
+    retype
+  )
+  .dfs <- .check_prepared_dfs(.dfs, subject_identifier)
+  .return <- .get_all_summaries(
+    .dfs,
+    subject_identifier,
+    variables,
+    retype 
+  )
   # Get the overall summary and store in the return list
-  .return$overall_summary <- .get_overall_summary(.df, subject_identifier)
+  .return$overall_summary <- .get_overall_summary(.dfs, subject_identifier)
   # Add s3 class to the return list
   class(.return) <- "RESIDE"
   # Return the marginal distributions
   .return
+}
+
+.get_all_summaries <- function(
+  dfs,
+  subject_identifier = "",
+  variables = c(),
+  retype = TRUE
+) {
+  .summaries <- list()
+  df_names <- get_df_names_or_key(dfs)
+  for (df_name in df_names) {
+    # Get the data frame
+    .current_df <- dfs[[df_name]]
+    .summaries[[df_name]] <- .get_summaries(
+      .current_df,
+      subject_identifier
+    )
+  }
+  return(.summaries) #nolint: return
 }
 
 # Internal function to get summaries for a given data frame
@@ -250,6 +257,20 @@ get_variable_types <- function(df) {
     stop("Subject identifier must be a character")
   }
 
+  if (subject_identifier != "") {
+    # If so check if subject identifier is present in all data frames
+    if (! is_subject_identifier(.dfs, subject_identifier)) {
+      # If not throw an error
+      stop(
+        paste(
+          "Subject identifier",
+          subject_identifier,
+          "must be present in all data frames"
+        )
+      )
+    }
+  }
+
   # Check if variables are set
   if (length(variables) > 0) {
     # Check if variables is a vector of characters
@@ -271,17 +292,6 @@ get_variable_types <- function(df) {
     }
     # Check if subject identifier is set
     if (subject_identifier != "") {
-      # If so check if subject identifier is present in all data frames
-      if (! is_subject_identifier(.dfs, subject_identifier)) {
-        # If not throw an error
-        stop(
-          paste(
-            "Subject identifier",
-            subject_identifier,
-            "must be present in all data frames"
-          )
-        )
-      }
       # Add subject identifier to variables
       variables <- c(variables, subject_identifier)
     }
@@ -289,7 +299,6 @@ get_variable_types <- function(df) {
     variables <- unique(variables)
     # Select only the variables in the data frame
     .dfs <- filter_variables(.dfs, variables)
-
   }
 
   # Loop through data frames
@@ -329,6 +338,36 @@ is_subject_identifier <- function(
     data_frame_names = paste(df_names, collapse = ", "),
     subject_identifier = subject_identifier,
     n_subjects = n_subjects,
-    common_columns = common_columns
+    common_columns = paste(common_columns, collapse = ", ")
   )
+}
+
+.check_prepared_dfs <- function(dfs, subject_identifier) {
+  df_names <- get_df_names_or_key(dfs)
+  for (df_name in df_names) {
+    current_df <- dfs[[df_name]]
+    if (ncol(current_df) == 0) {
+      stop(
+        paste(
+          "Data frame",
+          df_name,
+          "has no columns after filtering, please check your variables"
+        )
+      )
+    }
+    if (
+      ncol(current_df) == 1 &&
+        subject_identifier != "" &&
+        names(current_df) == subject_identifier
+    ) {
+      stop(
+        paste(
+          "Data frame",
+          df_name,
+          "has no columns after filtering, please check your variables"
+        )
+      )
+    }
+  }
+  dfs
 }

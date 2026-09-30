@@ -294,10 +294,6 @@ remove_marginal_files <- function(folder_path) {
         ""
       )
     }
-    # Dataframe name moved to 
-    # if ("data_frame" %in% names(marginals$summary)) {
-    #   new_marginals$summary$data_frame <- marginals$summary$data_frame
-    # }
   }
   return(new_marginals) #nolint: return
 }
@@ -351,23 +347,6 @@ remove_marginal_files <- function(folder_path) {
   # Return the filtered marginals
   return(marginals_copy) #nolint: return
 }
-
-# @ todo verify if this function is still needed
-# .filter_common_marginals <- function(
-#   marginals,
-#   keep_subject_identifier = TRUE
-# ) {
-#   # Get the common columns from the marginals
-#   common_columns <- get_common_columns(marginals, "subject_identifier")
-#   # Filter the marginals to only include the common columns
-#   common_marginals <- .filter_marginals(
-#     marginals,
-#     common_columns,
-#     keep_subject_identifier
-#   )
-#   # Return the filtered marginals
-#   return(common_marginals) #nolint: return
-# }
 
 get_default_variable_types <- function() {
   return(c( #nolint: return
@@ -567,7 +546,17 @@ get_common_columns <- function(dfs, subject_identifier) {
         rtn <- rtn[order(rtn[[subject_identifier]]),]
         rtn <- rtn[[col]]
       })
-      eq_cols <- lapply(col_matches, function (x) x == col_matches[[1]])
+      eq_cols <- lapply(
+        col_matches,
+        function(x) {
+          if (is.factor(x)) {
+            return(
+              as.character(x) == as.character(col_matches[[1]])
+            )
+            x == col_matches[[1]]
+          }
+        }
+      )
       eq_cols <- lapply(eq_cols, all)
       if (all(unlist(eq_cols))) {
         matched_cols <- c(matched_cols, col)
@@ -576,14 +565,6 @@ get_common_columns <- function(dfs, subject_identifier) {
   }
   matched_cols <- unique(matched_cols)
   return(matched_cols) #nolint: return
-}
-
-# Subsetter
-get_dates <- function(
-  df,
-  is_date
-) {
-  df[sapply(df, function(x) attr(x, "is_date") == is_date)]
 }
 
 # Gets attributes as vector
@@ -598,21 +579,6 @@ set_col_attr <- function(
     attr(col, "is_date") <- is_date
     col
   }, df, attrs, SIMPLIFY = FALSE))
-}
-
-get_all_types <- function(marginals) {
-  # Forward declare vector for marginal types
-  marginal_types <- c()
-  # Store only the marginal names, not the overall summary, for cleaner code
-  df_names <- get_df_names_or_key(marginals)
-  # Loop through the marginals and get the types of marginals
-  for (i in seq_along(df_names)) {
-    marginal_types <- c(marginal_types, names(marginals[[i]]))
-  }
-  marginal_types <- unique(marginal_types)
-  marginal_types <-
-    marginal_types[marginal_types %in% get_default_variable_types()]
-  return(marginal_types) #nolint: return
 }
 
 is_single_table <- function(marginals) {

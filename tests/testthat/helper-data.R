@@ -10,10 +10,6 @@ continuous_df <- read.csv(
   testthat::test_path("testdata", "continuous_variables.csv")
 )
 
-# quantile_df <- read.csv(
-#   testthat::test_path("testdata", "continuous_quantiles.csv")
-# )
-
 summary_df <- read.csv(
   testthat::test_path("testdata", "summary.csv")
 )

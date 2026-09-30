@@ -134,7 +134,9 @@ export_marginal_distributions <- function(
 
     if ("summary" %in% names(df_marginals)) {
       .summary_df <- df_marginals$summary
-
+      if ("n_subjects" %in% names(.summary_df)) {
+        .summary_df[["df_n_subjects"]] <- .summary_df$n_subjects
+      }
       # Add to vector if there are any rows
       if (nrow(.summary_df) > 0) {
         .summary_df[["data_frame"]] <- i
