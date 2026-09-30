@@ -1,24 +1,25 @@
 Package: RESIDE
 Title: Rapid Easy Synthesis to Inform Data Extraction
-Version: 0.3.3
+Version: 0.4.0
 Authors@R: 
     c(person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4424-9890")),
     person("David", "McAllister", , "david.mcallister@glasgow.ac.uk", role = "aut",
            comment = c(ORCID = "0000-0003-3550-1764")),
-    person("Claudia", "Geue", , "cladia.geue@glasgow.ac.uk", role = "ctb",
+    person("Claudia", "Geue", , "claudia.geue@glasgow.ac.uk", role = "ctb",
            comment = c(ORCID = "0000-0003-2243-0733")))
-Description: Developed to assist researchers with planning analysis,
-    prior to obtaining data from Trusted Research Environments (TREs) also known as safe havens.
-    With functionality to export and import marginal distributions as well as synthesise data, both with
-    and without correlations from these marginal distributions. Using a multivariate cumulative distribution (COPULA).
-    Additionally the International Stroke Trial (IST) is included as an example dataset under ODC-By licence
-    Sandercock et al. (2011) <doi:10.7488/ds/104>,
+Description: Assists researchers with planning analysis prior to obtaining
+    data from Trusted Research Environments (TREs), also known as safe havens.
+    Marginal distributions of one or more related data frames can be exported
+    from a TRE and imported elsewhere, where data can be synthesised from them,
+    with or without user specified correlations, by sampling from a
+    multivariate cumulative distribution (copula).
+    The International Stroke Trial (IST) is included as an example dataset
+    under the ODC-By licence, Sandercock et al. (2011) <doi:10.7488/ds/104>,
     Sandercock et al. (2011) <doi:10.1186/1745-6215-12-101>.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Suggests: 
     testthat (>= 3.0.0),
@@ -26,9 +27,10 @@ Suggests:
     knitr,
     rmarkdown,
     DT,
-    survival
+    survival,
+    pharmaversesdtm
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 Imports:
     dplyr,
     magrittr,
@@ -36,8 +38,8 @@ Imports:
     RDP,
     methods,
     tibble,
-    simstudy,
-    matrixcalc
+    simstudy
 LazyData: true
 Config/testthat/edition: 3
 URL: https://hehta.github.io/RESIDE/
+Config/roxygen2/version: 8.1.0

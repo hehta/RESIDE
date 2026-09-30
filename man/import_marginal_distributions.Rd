@@ -9,7 +9,6 @@ import_marginal_distributions(
   binary_variables_file = "",
   categorical_variables_file = "",
   continuous_variables_file = "",
-  continuous_quantiles_file = "",
   summary_file = "summary.csv"
 )
 }
@@ -24,9 +23,6 @@ Default: '' see details.}
 , Default: '' see details.}
 
 \item{continuous_variables_file}{filename for the continuous variables file,
-Default: '' see details.}
-
-\item{continuous_quantiles_file}{filename for the continuous quantiles file,
 Default: '' see details.}
 
 \item{summary_file}{filename for the summary file,
@@ -50,9 +46,19 @@ The file parameters will provide the default file names
 if no filenames are specified.
 }
 \examples{
-\dontrun{
-  marginals <- import_marginal_distributions()
-}
+# Export marginal distributions to a temporary folder
+folder_path <- file.path(tempdir(), "marginals")
+export_marginal_distributions(
+  get_marginal_distributions(
+    IST,
+    variables = c("SEX", "AGE", "RSBP", "RATRIAL")
+  ),
+  folder_path = folder_path,
+  create_folder = TRUE,
+  force = TRUE
+)
+# Import the marginal distributions
+marginals <- import_marginal_distributions(folder_path = folder_path)
 }
 \seealso{
 \code{\link{synthesise_data}}

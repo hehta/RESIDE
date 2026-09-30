@@ -44,7 +44,7 @@ get_continuous_summary <- function(
       q$epsilon <- mye
       # Update the number of points
       pts <- nrow(q)
-      # Increase the epison value
+      # Increase the epsilon value
       mye <- mye + increment
       # Escape is maximum epsilon has been reached
       if (mye >= maxeps) break
@@ -60,14 +60,20 @@ get_continuous_summary <- function(
       tform_q,
       epsilon
     )
-    # Summarise the transformed quantiles
-    summary_df <- quantile_df[paste0(variable, "_t")] %>%
+    # Summarise the original column for better transparency
+    summary_df <- na.omit(column) %>%
       dplyr::summarise_all(
         .funs = list(
           mean = mean, sd = sd
         ),
         na.rm = TRUE
       )
+
+    is_date <- all(get_col_attr(column))
+
+    summary_df <- data.frame(
+      is_date = ifelse(is.null(is_date), FALSE, is_date)
+    )
 
     # Get the number of rows with missing data
     summary_df$missing <- get_n_missing(column, variable)
@@ -89,6 +95,6 @@ get_continuous_summary <- function(
         "\nskipping"
       )
     )
-    return(NULL)
+    return(NULL) #nolint: return
   })
 }

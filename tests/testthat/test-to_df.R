@@ -12,7 +12,7 @@ test_reside <- get_marginal_distributions(
 
 testthat::test_that("binary_to_df works", {
   binary_df <- binary_to_df(
-    test_reside$binary_variables
+    marginal_distributions[[1]]$binary_variables
   )
   testthat::expect_s3_class(binary_df, "data.frame")
   testthat::expect_true(
@@ -33,12 +33,12 @@ testthat::test_that("binary_to_df works", {
 
 testthat::test_that("quantiles_to_df works", {
   quantiles_df <- quantiles_to_df(
-    test_reside$continuous_variables
+    marginal_distributions[[1]]$continuous_variables
   )
   testthat::expect_s3_class(quantiles_df, "data.frame")
   testthat::expect_true(
     all(
-      c("variable", "orig_q", "tform_q", "epsilon") %in% names(quantiles_df)
+      c("variable", "orig_q", "tform_q") %in% names(quantiles_df)
     )
   )
   testthat::expect_gt(nrow(quantiles_df), 1)
@@ -51,12 +51,12 @@ testthat::test_that("quantiles_to_df works", {
 
 testthat::test_that("continuous_to_df works", {
   continuous_df <- continuous_to_df(
-    test_reside$continuous_variables
+    marginal_distributions[[1]]$continuous_variables
   )
   testthat::expect_s3_class(continuous_df, "data.frame")
   testthat::expect_true(
     all(
-      c("variable", "mean", "sd", "missing", "max_dp") %in% names(continuous_df)
+      c("variable", "is_date", "missing", "max_dp") %in% names(continuous_df)
     )
   )
   testthat::expect_gt(nrow(continuous_df), 1)
@@ -69,7 +69,7 @@ testthat::test_that("continuous_to_df works", {
 
 testthat::test_that("categorical_to_df works", {
   categorical_df <- categorical_to_df(
-    test_reside$categorical_variables
+    marginal_distributions[[1]]$categorical_variables
   )
   testthat::expect_s3_class(categorical_df, "data.frame")
   testthat::expect_true(

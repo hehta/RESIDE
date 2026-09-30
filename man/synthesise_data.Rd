@@ -5,21 +5,24 @@
 \alias{synthesize_data}
 \title{Synthesise data from marginal distributions}
 \usage{
-synthesise_data(marginals, correlation_matrix = NULL, ...)
+synthesise_data(marginals, correlation_matrix = NULL, correlations = NULL, ...)
 
-synthesize_data(marginals, correlation_matrix = NULL, ...)
+synthesize_data(marginals, correlation_matrix = NULL, correlations = NULL, ...)
 }
 \arguments{
 \item{marginals}{an object of class RESIDE}
 
-\item{correlation_matrix}{Correlation Matrix
-see \code{\link{export_empty_cor_matrix}} and
-\code{\link{import_cor_matrix}}, Default: NULL}
+\item{correlation_matrix}{No longer supported, use \code{correlations}.
+Default: NULL}
+
+\item{correlations}{A list of correlations created with the
+\code{\link{correlation}} function, Default: NULL}
 
 \item{...}{Additional parameters currently none are used.}
 }
 \value{
-a data frame of simulated data
+a data frame of simulated data, or a named list of data frames
+for marginals from multiple data frames.
 }
 \description{
 Allows the synthesis of data from marginal
@@ -30,17 +33,29 @@ This function will synthesise a dataset from marginals imported
 using \code{\link{import_marginal_distributions}}.
 By default the dataset will not contain correlations,
 however user specified correlations can be added using
-the \code{correlation_matrix} parameter,
-see \code{\link{export_empty_cor_matrix}} and
-\code{\link{import_cor_matrix}} for more details.
+the \code{correlations} parameter, see \code{\link{correlation}}.
+Categorical variables are correlated using a single category,
+specified with \code{factor_name.x} or \code{factor_name.y}.
+Correlated variables are synthesised together, one row per subject,
+and joined to each data frame by subject. Correlated variables therefore
+take a single value per subject within each data frame.
+It is not possible to entirely maintain the marginal distributions
+when specifying correlations.
 }
 \examples{
-\dontrun{
-   marginals <- import_marginal_distributions()
-   df <- synthesise_data(marginals)
-}
+marginals <- get_marginal_distributions(
+  IST,
+  variables = c("SEX", "AGE", "RSBP", "RATRIAL")
+)
+df <- synthesise_data(marginals)
+df_cor <- synthesise_data(
+  marginals,
+  correlations = list(
+    correlation("AGE", "RSBP", 0.3),
+    correlation("SEX", "AGE", -0.2, factor_name.x = "M")
+  )
+)
 }
 \seealso{
-\code{\link{export_empty_cor_matrix}}
-\code{\link{import_cor_matrix}}
+\code{\link{correlation}}
 }

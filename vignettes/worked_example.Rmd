@@ -2,7 +2,7 @@
 title: "Worked Example Using the IST Dataset"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Worked Example Using IST Dataset}
+  %\VignetteIndexEntry{Worked Example Using the IST Dataset}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  # survival is suggested, only evaluate if it is installed
+  eval = requireNamespace("survival", quietly = TRUE)
 )
 ```
 
@@ -152,21 +154,18 @@ cox.ph.sim
 ```
 
 # Synthesise data with correlations
-Synthesise data from the imported marginals with correlations, by exporting an empty correlation matrix, then reimporting it and using the `correlation_matrix` parameter to specify the correlation matrix. Note the matrix was edited in R for this example but users would be expected to edit the correlation matrix in a program such as excel.
+Synthesise data from the imported marginals with correlations, using the `correlations` parameter to specify a list of assumed correlations created with the `correlation()` function. Categorical variables are correlated using a single category, specified with `factor_name.x` or `factor_name.y`.
 ```{r synthesis-data-cor}
-# Export an empty correlation matrix
-export_empty_cor_matrix(
+# Synthesise data specifying assumed correlations
+sim_df_cor <- synthesise_data(
   imported_marginals,
-  folder_path = folder_path
+  correlations = list(
+    # Patients without atrial fibrillation are less likely to have a stroke
+    correlation("RATRIAL", "STRK14", -0.2, factor_name.x = "N"),
+    # Older patients have a higher systolic blood pressure
+    correlation("AGE", "RSBP", 0.3)
+  )
 )
-# Reimport the matrix
-cor_matrix <- import_cor_matrix(file.path(folder_path, "correlation_matrix.csv"))
-# Add assumed correlations (note the symmetry)
-cor_matrix["RATRIAL_N", "STRK14"] <- -0.02
-cor_matrix["STRK14", "RATRIAL_N"] <- -0.02
-
-# Synthesise data specifying the correlation matrix
-sim_df_cor <- synthesise_data(imported_marginals, correlation_matrix = cor_matrix)
 ```
 
 # Summarise the synthesised data
@@ -177,6 +176,7 @@ sim_df_cor <- sim_df_cor |> dplyr::mutate_if(is.character, factor)
 # Summarise the synthesised dataset
 summary(sim_df_cor)
 ```
+
 # Fit a cox model on the simulated data with correlations
 Using the synthesised data (with correlations) fit a Cox PH model, with the same parameters as earlier.
 ```{r sim-data-model-cor}
@@ -202,4 +202,3 @@ cox.ph.sim.cor <- coxph(Surv(DAY, STRK14) ~ AGE + SEX + RATRIAL + RSBP, data = s
 # Show a summary of the model
 cox.ph.sim.cor
 ```
-

@@ -45,11 +45,6 @@ testthat::test_that("export_marginal_distributions works", {
       ),
       file.exists(
         normalizePath(
-          file.path(temp_dir, "continuous_quantiles.csv")
-        )
-      ),
-      file.exists(
-        normalizePath(
           file.path(temp_dir, "summary.csv")
         )
       )

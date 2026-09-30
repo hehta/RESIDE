@@ -13,7 +13,7 @@ export_marginal_distributions(
 }
 \arguments{
 \item{marginals}{an Object of type RESIDE from
-\code{\link{import_cor_matrix}}}
+\code{\link{get_marginal_distributions}}}
 
 \item{folder_path}{path to folder where to save files.}
 
@@ -34,13 +34,16 @@ Exports each of the marginal distributions to CSV files
 within a given folder, along with the continuous quantiles.
 }
 \examples{
-\donttest{
-  marginal_distributions <- get_marginal_distributions(IST)
-  export_marginal_distributions(
-    marginal_distributions,
-    folder_path = tempdir()
-  )
-}
+marginal_distributions <- get_marginal_distributions(
+  IST,
+  variables = c("SEX", "AGE", "RSBP", "RATRIAL")
+)
+export_marginal_distributions(
+  marginal_distributions,
+  folder_path = file.path(tempdir(), "marginals"),
+  create_folder = TRUE,
+  force = TRUE
+)
 }
 \seealso{
 \code{\link{get_marginal_distributions}}

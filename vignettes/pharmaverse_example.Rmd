@@ -1,0 +1,198 @@
+---
+title: "Worked Example Using Multiple Tables"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Worked Example Using Multiple Tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  # pharmaversesdtm is suggested, only evaluate if it is installed
+  eval = requireNamespace("pharmaversesdtm", quietly = TRUE)
+)
+```
+
+# Introduction
+This R Markdown document illustrates example usage of the RESIDE package with multiple related tables, using the Demographics (DM) and Adverse Events (AE) SDTM domains from the [pharmaversesdtm](https://pharmaverse.github.io/pharmaversesdtm/) package. The tables are linked by a subject identifier (`USUBJID`), DM has one row per subject and AE has one row per adverse event.
+
+# Setup
+Load the RESIDE package and set a seed for reproducibility and store the folder directory for export / import.
+```{r load-library, message = FALSE}
+# Load the Library
+library(RESIDE)
+# Load dplyr for data manipulation
+library(dplyr)
+# Set the seed
+set.seed(1234)
+# Store the folder path used for import / export
+folder_path <- tempdir()
+```
+
+# Summarise original data
+Store the tables in a named list, the names are used to identify the tables in the marginal distributions.
+```{r original-data}
+# Store the tables in a named list
+dfs <- list(
+  dm = pharmaversesdtm::dm,
+  ae = pharmaversesdtm::ae
+)
+
+# Number of rows in each table
+sapply(dfs, nrow)
+
+# Number of subjects in each table
+sapply(dfs, function(df) length(unique(df$USUBJID)))
+
+# Treatment arms of the subjects
+table(dfs$dm$ARM)
+
+# Severity of the adverse events
+table(dfs$ae$AESEV)
+```
+
+# Fit a logistic regression model on the original data
+Join the adverse events to the demographics of the subject and fit a logistic regression model for the odds of an adverse event being moderate or severe, by age, sex and treatment arm. The same function is used for the original and synthesised data.
+```{r original-model}
+# Join the adverse events to the demographics of each subject
+prepare_ae_data <- function(dm, ae) {
+  ae |>
+    select(USUBJID, AESEV) |>
+    inner_join(select(dm, USUBJID, AGE, SEX, ARM), by = "USUBJID") |>
+    # Remove screen failures and adverse events without a severity
+    filter(ARM != "Screen Failure", AESEV != "") |>
+    mutate(
+      MOD_SEV = AESEV %in% c("MODERATE", "SEVERE"),
+      ARM = relevel(factor(ARM), "Placebo")
+    )
+}
+
+ae_original <- prepare_ae_data(dfs$dm, dfs$ae)
+
+# Proportion of moderate or severe adverse events by treatment arm
+prop.table(table(ae_original$ARM, ae_original$MOD_SEV), 1)
+
+# Fit a logistic regression model
+glm.original <- glm(
+  MOD_SEV ~ AGE + SEX + ARM,
+  data = ae_original,
+  family = binomial
+)
+
+# Output the coefficients of the model
+summary(glm.original)$coefficients
+```
+**NB** Adverse events from the same subject are not independent, a mixed effects model would be more appropriate, however a logistic regression model is used here for simplicity.
+
+# Get the marginal distributions
+Use the `get_marginal_distributions()` function to get the marginal distributions of the tables, specifying the column that identifies each subject using the `subject_identifier` parameter.
+```{r get-marginals}
+# Get the Marginal Distributions of both tables
+marginals <- get_marginal_distributions(
+  dfs,
+  subject_identifier = "USUBJID"
+)
+
+# Summarise the Marginal Distributions
+summary(marginals)
+```
+Columns that are present in every table (other than the subject identifier), are identified as common columns, in this case the study identifier `STUDYID`.
+
+# Export the marginal distributions
+Export the marginal distributions using the `export_marginal_distributions()` function, using the `force` parameter to override any existing files.
+```{r export-marginals}
+# Export the Marginal Distributions
+export_marginal_distributions(marginals,
+                              folder_path = folder_path,
+                              force = TRUE)
+```
+
+# Reimport marginal distributions
+Import the exported marginal distributions using the `import_marginal_distributions()` function
+```{r import-marginals}
+# Import the Marginal Distributions
+imported_marginals <- import_marginal_distributions(folder_path = folder_path)
+```
+
+# Synthesise data from marginal distributions (without correlations)
+Synthesise data from the imported marginals using the `synthesise_data` function, for multiple tables a named list of data frames is returned.
+```{r synthesis-data}
+# Synthesise the tables from the imported Marginal Distributions (without correlations)
+sim_dfs <- synthesise_data(imported_marginals)
+
+# Number of rows in each table
+sapply(sim_dfs, nrow)
+
+# Number of subjects in each table
+sapply(sim_dfs, function(df) length(unique(df$USUBJID)))
+```
+The number of rows and subjects of each table are maintained, synthesised subjects are identified by a number, which links the subjects between the tables.
+
+# Fit a logistic regression model on the synthesised data
+Fit the same logistic regression model as earlier except this time on the synthesised data.
+```{r sim-data-model}
+ae_sim <- prepare_ae_data(sim_dfs$dm, sim_dfs$ae)
+
+# Proportion of moderate or severe adverse events by treatment arm
+prop.table(table(ae_sim$ARM, ae_sim$MOD_SEV), 1)
+
+# Fit a logistic regression model on the synthesised data
+glm.sim <- glm(
+  MOD_SEV ~ AGE + SEX + ARM,
+  data = ae_sim,
+  family = binomial
+)
+
+# Output the coefficients of the model
+summary(glm.sim)$coefficients
+```
+Without correlations the variables are synthesised independently, so there is no relationship between the treatment arm and the severity of the adverse events.
+
+# Synthesise data with correlations
+Synthesise data from the imported marginals with assumed correlations, using the `correlations` parameter to specify a list of correlations created with the `correlation()` function. Categorical variables are correlated using a single category, specified with `factor_name.x` or `factor_name.y`, and the tables of the variables can be specified with `df_name.x` and `df_name.y`.
+```{r synthesis-data-cor}
+# Synthesise the tables specifying assumed correlations
+sim_dfs_cor <- synthesise_data(
+  imported_marginals,
+  correlations = list(
+    # Subjects on placebo are more likely to have mild adverse events
+    correlation(
+      "ARM",
+      "AESEV",
+      0.2,
+      df_name.x = "dm",
+      df_name.y = "ae",
+      factor_name.x = "Placebo",
+      factor_name.y = "MILD"
+    ),
+    # Male subjects are younger
+    correlation("AGE", "SEX", -0.2, factor_name.y = "M")
+  )
+)
+```
+Correlated variables are synthesised together, one row per subject, and joined to each table by subject. Therefore correlations between tables are between subjects, and a correlated variable takes a single value for each subject within a table, in this case every adverse event of a subject has the same severity.
+
+# Fit a logistic regression model on the synthesised data with correlations
+Using the synthesised data (with correlations) fit the same logistic regression model as earlier.
+```{r sim-data-model-cor}
+ae_sim_cor <- prepare_ae_data(sim_dfs_cor$dm, sim_dfs_cor$ae)
+
+# Proportion of moderate or severe adverse events by treatment arm
+prop.table(table(ae_sim_cor$ARM, ae_sim_cor$MOD_SEV), 1)
+
+# Fit a logistic regression model on the synthesised data (with correlations)
+glm.sim.cor <- glm(
+  MOD_SEV ~ AGE + SEX + ARM,
+  data = ae_sim_cor,
+  family = binomial
+)
+
+# Output the coefficients of the model
+summary(glm.sim.cor)$coefficients
+```
+With the assumed correlation, adverse events of subjects on placebo are less likely to be moderate or severe, allowing the analysis to be tested before access to the original data is granted.
+
+**NB** The correlation specified is that of the underlying multivariate normal distribution (Copula), the correlation observed in the synthesised data will differ, particularly for categorical variables. It is not possible to entirely maintain all the marginal distributions when specifying correlations.

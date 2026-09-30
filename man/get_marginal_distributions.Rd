@@ -4,15 +4,27 @@
 \alias{get_marginal_distributions}
 \title{Generate Marginal Distributions for a given data frame}
 \usage{
-get_marginal_distributions(df, variables = c(), print = FALSE)
+get_marginal_distributions(
+  df,
+  subject_identifier = "",
+  variables = c(),
+  print = FALSE,
+  retype = TRUE
+)
 }
 \arguments{
-\item{df}{Data frame to get the marginal distributions from}
+\item{df}{Data frame or a \code{"list"} of data frames
+to get the marginal distributions from}
+
+\item{subject_identifier}{(Optional) Subject identifier required if a
+list of data frames is provided, Default: ""}
 
 \item{variables}{(Optional) variable (columns) to select, Default: c()}
 
 \item{print}{Whether to print the marginal distributions
 to the console, Default: FALSE}
+
+\item{retype}{Whether to re-type the data frame, Default: TRUE}
 }
 \value{
 A list of marginal distributions of an S3 RESIDE Class
@@ -33,7 +45,7 @@ stored, missing values are categorise as "missing".
 \examples{
 marginal_distributions <- get_marginal_distributions(
   IST,
-  variables <- c(
+  variables = c(
     "SEX",
     "AGE",
     "ID14",

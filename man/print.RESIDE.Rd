@@ -9,22 +9,27 @@
 \arguments{
 \item{x}{an object of class RESIDE}
 
-\item{...}{Other parameters currently none are used}
+\item{...}{Other parameters, \code{full = TRUE} prints every category
+of the categorical variables, Default: FALSE}
 }
 \value{
-No return value, called to print to the terminal.
+The RESIDE object, invisibly. Called to print to the terminal.
 }
 \description{
 S3 override for print RESIDE
 }
 \details{
-S3 Override for RESIDE Class
+S3 Override for RESIDE Class, prints the overall summary
+followed by the marginal distributions of each data frame.
+By default categorical variables with more than 10 categories only
+print the 10 most common categories, use \code{full = TRUE} to print
+every category.
 }
 \examples{
 print(
   marginal_distributions <- get_marginal_distributions(
     IST,
-    variables <- c(
+    variables = c(
       "SEX",
       "AGE",
       "ID14",
@@ -33,4 +38,5 @@ print(
     )
   )
 )
+print(marginal_distributions, full = TRUE)
 }

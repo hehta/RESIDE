@@ -9,7 +9,13 @@ testthat::test_that("Import Marginal Distributions works", {
     folder_path = temp_dir
   )
   testthat::expect_equal(
-    expected_marginals,
-    imported_marginals
+    imported_marginals,
+    expected_marginals
+  )
+  testthat::expect_error(
+    import_marginal_distributions(
+      folder_path = "/not/a/real/path",
+    ),
+    regexp = "^.*Directory must exist, hint: set create_folder to TRUE*$"
   )
 })
