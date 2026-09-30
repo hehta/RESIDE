@@ -142,10 +142,10 @@ function, using the `force` parameter to override any existing files.
 export_marginal_distributions(marginals,
                               folder_path = folder_path,
                               force = TRUE)
-#> Exporting  Categorical variables to:  /tmp/RtmpWOJDio/categorical_variables.csv
-#> Exporting  Binary variables to:  /tmp/RtmpWOJDio/binary_variables.csv
-#> Exporting  Continuous variables to:  /tmp/RtmpWOJDio/continuous_variables.csv
-#> Exporting  Summary to:  /tmp/RtmpWOJDio/summary.csv
+#> Exporting  Categorical variables to:  /tmp/Rtmptd4RWt/categorical_variables.csv
+#> Exporting  Binary variables to:  /tmp/Rtmptd4RWt/binary_variables.csv
+#> Exporting  Continuous variables to:  /tmp/Rtmptd4RWt/continuous_variables.csv
+#> Exporting  Summary to:  /tmp/Rtmptd4RWt/summary.csv
 ```
 
 ## Reimport marginal distributions

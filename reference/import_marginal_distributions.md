@@ -70,9 +70,9 @@ export_marginal_distributions(
   create_folder = TRUE,
   force = TRUE
 )
-#> Exporting  Categorical variables to:  /tmp/RtmpMyIM1J/marginals/categorical_variables.csv
-#> Exporting  Continuous variables to:  /tmp/RtmpMyIM1J/marginals/continuous_variables.csv
-#> Exporting  Summary to:  /tmp/RtmpMyIM1J/marginals/summary.csv
+#> Exporting  Categorical variables to:  /tmp/RtmpJvn88q/marginals/categorical_variables.csv
+#> Exporting  Continuous variables to:  /tmp/RtmpJvn88q/marginals/continuous_variables.csv
+#> Exporting  Summary to:  /tmp/RtmpJvn88q/marginals/summary.csv
 # Import the marginal distributions
 marginals <- import_marginal_distributions(folder_path = folder_path)
 #> Info: No file for binary variables found
