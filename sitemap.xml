@@ -5,6 +5,7 @@
 <url><loc>https://hehta.github.io/RESIDE/articles/exporting_marginal_distributions.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/articles/importing_marginal_distributions.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/articles/index.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/articles/pharmaverse_example.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/articles/synthesising_data.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/articles/worked_example.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/authors.html</loc></url>
@@ -12,13 +13,18 @@
 <url><loc>https://hehta.github.io/RESIDE/news/index.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/IST.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/RESIDE-package.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/correlation.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/export_empty_cor_matrix.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/export_marginal_distributions.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/filter_variables.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/get_marginal_distributions.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/get_missing_variables.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/import_cor_matrix.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/import_marginal_distributions.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/index.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/print.RESIDE.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/print.summary.RESIDE.html</loc></url>
+<url><loc>https://hehta.github.io/RESIDE/reference/summary.RESIDE.html</loc></url>
 <url><loc>https://hehta.github.io/RESIDE/reference/synthesise_data.html</loc></url>
 </urlset>
 

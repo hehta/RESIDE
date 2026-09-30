@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Worked Example Using the IST Dataset">
 </head>
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">RESIDE</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/exporting_marginal_distributions.html">Exporting Marginal Distributions</a></li>
     <li><a class="dropdown-item" href="../articles/importing_marginal_distributions.html">Importing Marginal Distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/pharmaverse_example.html">Worked Example Using Multiple Tables</a></li>
     <li><a class="dropdown-item" href="../articles/synthesising_data.html">Synthesising Data from Marginal Distributions</a></li>
     <li><a class="dropdown-item" href="../articles/worked_example.html">Worked Example Using the IST Dataset</a></li>
   </ul>
@@ -206,11 +207,10 @@ marginal distributions, additionally selecting which variables using the
 <span><span class="fu"><a href="../reference/export_marginal_distributions.html">export_marginal_distributions</a></span><span class="op">(</span><span class="va">marginals</span>,</span>
 <span>                              folder_path <span class="op">=</span> <span class="va">folder_path</span>,</span>
 <span>                              force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Exporting  categorical to:  /tmp/RtmpcvnCcE/categorical_variables.csv</span></span>
-<span><span class="co">#&gt; Exporting  binary to:  /tmp/RtmpcvnCcE/binary_variables.csv</span></span>
-<span><span class="co">#&gt; Exporting  continuous to:  /tmp/RtmpcvnCcE/continuous_variables.csv</span></span>
-<span><span class="co">#&gt; Exporting  quantiles to:  /tmp/RtmpcvnCcE/continuous_quantiles.csv</span></span>
-<span><span class="co">#&gt; Exporting  summary to:  /tmp/RtmpcvnCcE/summary.csv</span></span></code></pre></div>
+<span><span class="co">#&gt; Exporting  Categorical variables to:  /tmp/RtmpWOJDio/categorical_variables.csv</span></span>
+<span><span class="co">#&gt; Exporting  Binary variables to:  /tmp/RtmpWOJDio/binary_variables.csv</span></span>
+<span><span class="co">#&gt; Exporting  Continuous variables to:  /tmp/RtmpWOJDio/continuous_variables.csv</span></span>
+<span><span class="co">#&gt; Exporting  Summary to:  /tmp/RtmpWOJDio/summary.csv</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reimport-marginal-distributions">Reimport marginal distributions<a class="anchor" aria-label="anchor" href="#reimport-marginal-distributions"></a>
@@ -290,37 +290,33 @@ data.</p>
 <span><span class="co">#&gt;     data = sim_df)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;               coef exp(coef)  se(coef)      z      p</span></span>
-<span><span class="co">#&gt; AGE       0.006539  1.006561  0.003154  2.073 0.0381</span></span>
-<span><span class="co">#&gt; SEXM     -0.128197  0.879680  0.072031 -1.780 0.0751</span></span>
-<span><span class="co">#&gt; RATRIALY -0.001382  0.998619  0.095327 -0.014 0.9884</span></span>
-<span><span class="co">#&gt; RSBP     -0.002892  0.997113  0.001323 -2.186 0.0288</span></span>
+<span><span class="co">#&gt; AGE       0.006556  1.006578  0.003153  2.079 0.0376</span></span>
+<span><span class="co">#&gt; SEXM     -0.128158  0.879714  0.072031 -1.779 0.0752</span></span>
+<span><span class="co">#&gt; RATRIALY -0.001377  0.998624  0.095327 -0.014 0.9885</span></span>
+<span><span class="co">#&gt; RSBP     -0.002878  0.997126  0.001318 -2.183 0.0290</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Likelihood ratio test=12.41  on 4 df, p=0.01452</span></span>
+<span><span class="co">#&gt; Likelihood ratio test=12.43  on 4 df, p=0.01443</span></span>
 <span><span class="co">#&gt; n= 18453, number of events= 771</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="synthesise-data-with-correlations">Synthesise data with correlations<a class="anchor" aria-label="anchor" href="#synthesise-data-with-correlations"></a>
 </h2>
-<p>Synthesise data from the imported marginals with correlations, by
-exporting an empty correlation matrix, then reimporting it and using the
-<code>correlation_matrix</code> parameter to specify the correlation
-matrix. Note the matrix was edited in R for this example but users would
-be expected to edit the correlation matrix in a program such as
-excel.</p>
+<p>Synthesise data from the imported marginals with correlations, using
+the <code>correlations</code> parameter to specify a list of assumed
+correlations created with the <code><a href="../reference/correlation.html">correlation()</a></code> function.
+Categorical variables are correlated using a single category, specified
+with <code>factor_name.x</code> or <code>factor_name.y</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Export an empty correlation matrix</span></span>
-<span><span class="fu"><a href="../reference/export_empty_cor_matrix.html">export_empty_cor_matrix</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># Synthesise data specifying assumed correlations</span></span>
+<span><span class="va">sim_df_cor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthesise_data.html">synthesise_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">imported_marginals</span>,</span>
-<span>  folder_path <span class="op">=</span> <span class="va">folder_path</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co"># Reimport the matrix</span></span>
-<span><span class="va">cor_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/import_cor_matrix.html">import_cor_matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">folder_path</span>, <span class="st">"correlation_matrix.csv"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># Add assumed correlations (note the symmetry)</span></span>
-<span><span class="va">cor_matrix</span><span class="op">[</span><span class="st">"RATRIAL_N"</span>, <span class="st">"STRK14"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">0.02</span></span>
-<span><span class="va">cor_matrix</span><span class="op">[</span><span class="st">"STRK14"</span>, <span class="st">"RATRIAL_N"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">0.02</span></span>
-<span></span>
-<span><span class="co"># Synthesise data specifying the correlation matrix</span></span>
-<span><span class="va">sim_df_cor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthesise_data.html">synthesise_data</a></span><span class="op">(</span><span class="va">imported_marginals</span>, correlation_matrix <span class="op">=</span> <span class="va">cor_matrix</span><span class="op">)</span></span></code></pre></div>
+<span>  correlations <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="co"># Patients without atrial fibrillation are less likely to have a stroke</span></span>
+<span>    <span class="fu"><a href="../reference/correlation.html">correlation</a></span><span class="op">(</span><span class="st">"RATRIAL"</span>, <span class="st">"STRK14"</span>, <span class="op">-</span><span class="fl">0.2</span>, factor_name.x <span class="op">=</span> <span class="st">"N"</span><span class="op">)</span>,</span>
+<span>    <span class="co"># Older patients have a higher systolic blood pressure</span></span>
+<span>    <span class="fu"><a href="../reference/correlation.html">correlation</a></span><span class="op">(</span><span class="st">"AGE"</span>, <span class="st">"RSBP"</span>, <span class="fl">0.3</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summarise-the-synthesised-data-1">Summarise the synthesised data<a class="anchor" aria-label="anchor" href="#summarise-the-synthesised-data-1"></a>
@@ -331,20 +327,20 @@ excel.</p>
 <span><span class="va">sim_df_cor</span> <span class="op">&lt;-</span> <span class="va">sim_df_cor</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html" class="external-link">mutate_if</a></span><span class="op">(</span><span class="va">is.character</span>, <span class="va">factor</span><span class="op">)</span></span>
 <span><span class="co"># Summarise the synthesised dataset</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim_df_cor</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        id        SEX       RATRIAL       STRK14             AGE      </span></span>
-<span><span class="co">#&gt;  Min.   :    1   F: 4130    :  151   Min.   :0.00000   Min.   :16.0  </span></span>
-<span><span class="co">#&gt;  1st Qu.: 4860   M:15305   N:18620   1st Qu.:0.00000   1st Qu.:65.0  </span></span>
-<span><span class="co">#&gt;  Median : 9718             Y:  664   Median :0.00000   Median :73.0  </span></span>
-<span><span class="co">#&gt;  Mean   : 9718                       Mean   :0.03828   Mean   :71.6  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:14576                       3rd Qu.:0.00000   3rd Qu.:80.0  </span></span>
-<span><span class="co">#&gt;  Max.   :19435                       Max.   :1.00000   Max.   :99.0  </span></span>
-<span><span class="co">#&gt;       RSBP    </span></span>
-<span><span class="co">#&gt;  Min.   : 77  </span></span>
-<span><span class="co">#&gt;  1st Qu.:141  </span></span>
-<span><span class="co">#&gt;  Median :160  </span></span>
-<span><span class="co">#&gt;  Mean   :160  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:176  </span></span>
-<span><span class="co">#&gt;  Max.   :291</span></span></code></pre></div>
+<span><span class="co">#&gt;        id        SEX       RATRIAL       STRK14             AGE       </span></span>
+<span><span class="co">#&gt;  Min.   :    1   F: 8946    : 1003   Min.   :0.00000   Min.   :18.00  </span></span>
+<span><span class="co">#&gt;  1st Qu.: 4860   M:10489   N:15336   1st Qu.:0.00000   1st Qu.:65.00  </span></span>
+<span><span class="co">#&gt;  Median : 9718             Y: 3096   Median :0.00000   Median :73.00  </span></span>
+<span><span class="co">#&gt;  Mean   : 9718                       Mean   :0.03998   Mean   :71.64  </span></span>
+<span><span class="co">#&gt;  3rd Qu.:14576                       3rd Qu.:0.00000   3rd Qu.:80.00  </span></span>
+<span><span class="co">#&gt;  Max.   :19435                       Max.   :1.00000   Max.   :99.00  </span></span>
+<span><span class="co">#&gt;       RSBP      </span></span>
+<span><span class="co">#&gt;  Min.   : 78.0  </span></span>
+<span><span class="co">#&gt;  1st Qu.:141.0  </span></span>
+<span><span class="co">#&gt;  Median :160.0  </span></span>
+<span><span class="co">#&gt;  Mean   :160.2  </span></span>
+<span><span class="co">#&gt;  3rd Qu.:177.0  </span></span>
+<span><span class="co">#&gt;  Max.   :293.0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="fit-a-cox-model-on-the-simulated-data-with-correlations">Fit a cox model on the simulated data with correlations<a class="anchor" aria-label="anchor" href="#fit-a-cox-model-on-the-simulated-data-with-correlations"></a>
@@ -358,7 +354,7 @@ with the same parameters as earlier.</p>
 <span></span>
 <span><span class="co"># Again check that the missing values where added</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim_df_cor</span><span class="op">$</span><span class="va">RATRIAL</span> <span class="op">==</span> <span class="st">""</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 151</span></span>
+<span><span class="co">#&gt; [1] 1003</span></span>
 <span></span>
 <span><span class="co"># Again remove the missing values</span></span>
 <span><span class="va">sim_df_cor</span> <span class="op">&lt;-</span> <span class="va">sim_df_cor</span><span class="op">[</span><span class="op">!</span><span class="va">sim_df_cor</span><span class="op">$</span><span class="va">RATRIAL</span> <span class="op">==</span> <span class="st">""</span>,<span class="op">]</span></span>
@@ -369,7 +365,7 @@ with the same parameters as earlier.</p>
 <span><span class="co"># Show there are no missing values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sim_df_cor</span><span class="op">$</span><span class="va">RATRIAL</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     N     Y </span></span>
-<span><span class="co">#&gt; 18620   664</span></span>
+<span><span class="co">#&gt; 15336  3096</span></span>
 <span></span>
 <span><span class="co"># Fit the model on the synthesised data (with correlations)</span></span>
 <span><span class="va">cox.ph.sim.cor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">DAY</span>, <span class="va">STRK14</span><span class="op">)</span> <span class="op">~</span> <span class="va">AGE</span> <span class="op">+</span> <span class="va">SEX</span> <span class="op">+</span> <span class="va">RATRIAL</span> <span class="op">+</span> <span class="va">RSBP</span>, data <span class="op">=</span> <span class="va">sim_df_cor</span><span class="op">)</span></span>
@@ -380,14 +376,14 @@ with the same parameters as earlier.</p>
 <span><span class="co">#&gt; coxph(formula = Surv(DAY, STRK14) ~ AGE + SEX + RATRIAL + RSBP, </span></span>
 <span><span class="co">#&gt;     data = sim_df_cor)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;              coef exp(coef) se(coef)     z     p</span></span>
-<span><span class="co">#&gt; AGE      0.003287  1.003292 0.003197 1.028 0.304</span></span>
-<span><span class="co">#&gt; SEXM     0.026197  1.026543 0.090866 0.288 0.773</span></span>
-<span><span class="co">#&gt; RATRIALY 0.182798  1.200571 0.186449 0.980 0.327</span></span>
-<span><span class="co">#&gt; RSBP     0.000207  1.000207 0.001336 0.155 0.877</span></span>
+<span><span class="co">#&gt;               coef exp(coef)  se(coef)     z      p</span></span>
+<span><span class="co">#&gt; AGE      0.0004601 1.0004602 0.0033498 0.137  0.891</span></span>
+<span><span class="co">#&gt; SEXM     0.0211164 1.0213409 0.0755433 0.280  0.780</span></span>
+<span><span class="co">#&gt; RATRIALY 0.7220032 2.0585528 0.0828990 8.709 &lt;2e-16</span></span>
+<span><span class="co">#&gt; RSBP     0.0001810 1.0001810 0.0013996 0.129  0.897</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Likelihood ratio test=2.06  on 4 df, p=0.7241</span></span>
-<span><span class="co">#&gt; n= 19284, number of events= 735</span></span></code></pre></div>
+<span><span class="co">#&gt; Likelihood ratio test=67.8  on 4 df, p=6.61e-14</span></span>
+<span><span class="co">#&gt; n= 18432, number of events= 707</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -400,7 +396,7 @@ with the same parameters as earlier.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
