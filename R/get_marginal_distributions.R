@@ -23,6 +23,10 @@
 #' stored, missing values are categorise as "missing". Categories with fewer
 #' than \code{min_category_n} rows are merged into an "(Other)" category,
 #' which will appear as a value in synthesised data.
+#' An info message is shown for large data (10 million values or more,
+#' i.e. rows x columns), which may take several minutes to process. The
+#' threshold can be changed using \code{options(RESIDE.large_data_cells = n)},
+#' \code{synthesise_data()} shows the message at five times the threshold.
 #' @examples
 #' marginal_distributions <- get_marginal_distributions(
 #'   IST,
@@ -356,6 +360,13 @@ get_variable_types <- function(df) {
     # Select only the variables in the data frame
     .dfs <- filter_variables(.dfs, variables)
   }
+
+  # Let the user know if this is likely to take a while
+  .message_if_large(
+    sum(vapply(.dfs, nrow, integer(1))),
+    sum(vapply(.dfs, function(.df) nrow(.df) * ncol(.df), numeric(1))),
+    "get_marginal_distributions() is processing"
+  )
 
   # Loop through data frames
   for (i in seq_along(.dfs)) {

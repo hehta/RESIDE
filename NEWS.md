@@ -8,6 +8,13 @@
   data. Set `min_category_n = 0` to keep every category. Marginals of small
   data sets may differ from previous versions.
 
+## New features
+
+* `get_marginal_distributions()` and `synthesise_data()` show an info message
+  for large data that may take several minutes, during which R may appear
+  unresponsive. The threshold (10 million values, rows x columns) can be
+  changed using `options(RESIDE.large_data_cells = n)`.
+
 ## Bug fixes
 
 * `synthesise_data()` no longer copies whole rows over other rows when adding

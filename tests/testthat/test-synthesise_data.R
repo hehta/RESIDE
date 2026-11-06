@@ -535,3 +535,24 @@ testthat::test_that("replace_one_rows chooses categories by probability", {
     data.frame(a = c(0, 1), b = c(1, 0), c = c(0, 0))
   )
 })
+
+testthat::test_that("synthesising large data shows an info message", {
+  # marginal_distributions has 19435 rows and 6 columns (116,610 values)
+  testthat::expect_no_message(
+    synthesise_data(marginal_distributions),
+    message = "unresponsive"
+  )
+  old_options <- options(RESIDE.large_data_cells = 20000)
+  on.exit(options(old_options))
+  # Synthesising uses five times the threshold, 116,610 >= 100,000
+  testthat::expect_message(
+    synthesise_data(marginal_distributions),
+    regexp = "may appear unresponsive"
+  )
+  # 116,610 < 150,000
+  options(RESIDE.large_data_cells = 30000)
+  testthat::expect_no_message(
+    synthesise_data(marginal_distributions),
+    message = "unresponsive"
+  )
+})

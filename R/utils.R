@@ -638,3 +638,28 @@ is_single_table <- function(marginals) {
   }
   return(variables_by_df_name) #nolint: return
 }
+# Shows an info message when the data is large enough that R is likely to
+# appear unresponsive while it is processed. The threshold is the number of
+# values (rows x columns), set using options(RESIDE.large_data_cells = n),
+# 10 million values takes in the order of 10 seconds to get the marginal
+# distributions, synthesising is faster so uses a multiple of the threshold.
+.message_if_large <- function(
+  n_rows,
+  n_cells,
+  task,
+  threshold_multiplier = 1
+) {
+  threshold <- getOption("RESIDE.large_data_cells", 1e7) * threshold_multiplier
+  if (n_cells >= threshold) {
+    message(
+      paste0(
+        "Info: ", task, " ",
+        format(n_rows, big.mark = ",", scientific = FALSE), " rows (",
+        format(n_cells, big.mark = ",", scientific = FALSE), " values), ",
+        "this may take several minutes and R may appear unresponsive ",
+        "until it finishes."
+      )
+    )
+  }
+  invisible(NULL)
+}

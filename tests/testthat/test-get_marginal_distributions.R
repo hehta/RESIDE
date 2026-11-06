@@ -221,3 +221,35 @@ testthat::test_that("more than 100 categories are kept", {
   testthat::expect_length(counts, 150)
   testthat::expect_false("(Other)" %in% names(counts))
 })
+
+testthat::test_that("large data shows an info message", {
+  df <- IST[1:100, c("SEX", "AGE", "RSBP")]
+  # Small data, no message
+  testthat::expect_no_message(
+    get_marginal_distributions(df),
+    message = "unresponsive"
+  )
+  old_options <- options(RESIDE.large_data_cells = 300)
+  on.exit(options(old_options))
+  # 100 rows x 3 columns reaches the threshold
+  testthat::expect_message(
+    get_marginal_distributions(df),
+    regexp = "100 rows.*may appear unresponsive"
+  )
+  # Only the selected variables are counted
+  testthat::expect_no_message(
+    get_marginal_distributions(df, variables = c("SEX", "AGE")),
+    message = "unresponsive"
+  )
+  # The rows of every data frame are counted
+  testthat::expect_message(
+    get_marginal_distributions(
+      list(
+        a = ist_id[1:100, c("id", "SEX")],
+        b = ist_id[1:100, c("id", "AGE")]
+      ),
+      subject_identifier = "id"
+    ),
+    regexp = "200 rows"
+  )
+})

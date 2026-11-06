@@ -48,6 +48,10 @@ transformation. For categorical variables, the number of each category is
 stored, missing values are categorise as "missing". Categories with fewer
 than \code{min_category_n} rows are merged into an "(Other)" category,
 which will appear as a value in synthesised data.
+An info message is shown for large data (10 million values or more,
+i.e. rows x columns), which may take several minutes to process. The
+threshold can be changed using \code{options(RESIDE.large_data_cells = n)},
+\code{synthesise_data()} shows the message at five times the threshold.
 }
 \examples{
 marginal_distributions <- get_marginal_distributions(

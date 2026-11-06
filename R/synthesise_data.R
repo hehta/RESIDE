@@ -59,6 +59,25 @@ synthesise_data <- function(
       )
     )
   }
+  # Let the user know if this is likely to take a while
+  .sizes <- vapply(
+    get_df_names_or_key(marginals),
+    function(.df_name) {
+      .summary <- marginals[[.df_name]]$summary
+      .n_row <- as.numeric(.summary$n_row[1])
+      .n_col <- as.numeric(.summary$n_col[1])
+      if (length(.n_row) == 0 || is.na(.n_row)) .n_row <- 0
+      if (length(.n_col) == 0 || is.na(.n_col)) .n_col <- 0
+      c(.n_row, .n_row * .n_col)
+    },
+    numeric(2)
+  )
+  .message_if_large(
+    sum(.sizes[1, ]),
+    sum(.sizes[2, ]),
+    "synthesise_data() is generating",
+    threshold_multiplier = 5
+  )
   # If there are no correlations
   # then synthesise the data without correlations
   if (is.null(correlations)) {
