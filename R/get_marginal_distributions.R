@@ -10,6 +10,9 @@
 #' @param print Whether to print the marginal distributions
 #' to the console, Default: FALSE
 #' @param retype Whether to re-type the data frame, Default: TRUE
+#' @param min_category_n Categories of categorical variables with fewer
+#' rows than this are merged into a single "(Other)" category, to avoid
+#' disclosing rare values, set to 0 to keep every category, Default: 10
 #' @return A list of marginal distributions of an S3 RESIDE Class
 #' @details A function to generate marginal distributions from
 #' a given data frame, depending on the variable type the marginals
@@ -17,7 +20,9 @@
 #' for continuous variables, they are first transformed and both mean and sd of
 #' the transformed variables are stored along with the quantile mapping for back
 #' transformation. For categorical variables, the number of each category is
-#' stored, missing values are categorise as "missing".
+#' stored, missing values are categorise as "missing". Categories with fewer
+#' than \code{min_category_n} rows are merged into an "(Other)" category,
+#' which will appear as a value in synthesised data.
 #' @examples
 #' marginal_distributions <- get_marginal_distributions(
 #'   IST,
@@ -40,8 +45,17 @@ get_marginal_distributions <- function(
   subject_identifier = "",
   variables = c(),
   print = FALSE,
-  retype = TRUE
+  retype = TRUE,
+  min_category_n = 10
 ) {
+  if (
+    !is.numeric(min_category_n) ||
+      length(min_category_n) != 1 ||
+      is.na(min_category_n) ||
+      min_category_n < 0
+  ) {
+    stop("min_category_n must be a single number of 0 or more")
+  }
   # Copy the data frame to avoid confusion
   .df <- df
   .return <- list() # create empty list to store the return value
@@ -60,7 +74,8 @@ get_marginal_distributions <- function(
     .dfs,
     subject_identifier,
     variables,
-    retype 
+    retype,
+    min_category_n
   )
   # Get the overall summary and store in the return list
   .return$overall_summary <- .get_overall_summary(.dfs, subject_identifier)
@@ -74,7 +89,8 @@ get_marginal_distributions <- function(
   dfs,
   subject_identifier = "",
   variables = c(),
-  retype = TRUE
+  retype = TRUE,
+  min_category_n = 10
 ) {
   .summaries <- list()
   df_names <- get_df_names_or_key(dfs)
@@ -83,7 +99,8 @@ get_marginal_distributions <- function(
     .current_df <- dfs[[df_name]]
     .summaries[[df_name]] <- .get_summaries(
       .current_df,
-      subject_identifier
+      subject_identifier,
+      min_category_n
     )
   }
   return(.summaries) #nolint: return
@@ -92,7 +109,8 @@ get_marginal_distributions <- function(
 # Internal function to get summaries for a given data frame
 .get_summaries <- function(
   df,
-  subject_identifier = ""
+  subject_identifier = "",
+  min_category_n = 10
 ) {
   n_subjects <- ifelse(
     subject_identifier != "",
@@ -125,8 +143,11 @@ get_marginal_distributions <- function(
   .categorical_summary <- list()
   # Loop through categorical variables
   for (.column in .categorical_variables) {
-    # add (factor) summary to categorical summary
-    .categorical_summary[[.column]] <- summary(df[[.column]])
+    # add the category counts to categorical summary
+    .categorical_summary[[.column]] <- summarise_categories(
+      df[[.column]],
+      min_category_n
+    )
   }
 
   # Forward declare continuous summary as empty list
@@ -157,6 +178,41 @@ get_marginal_distributions <- function(
       summary = .summary
     )
   )
+}
+
+# Internal function to count the categories of a factor, as summary()
+# but without its limit of 100 categories (which lumps the remaining
+# categories into "(Other)"). Categories with fewer than min_category_n rows
+# are merged into "(Other)", except "missing" and "NA's" which are needed
+# to add missing values when synthesising.
+summarise_categories <- function(
+  x,
+  min_category_n = 10,
+  other_label = "(Other)"
+) {
+  counts <- summary(x, maxsum = Inf)
+  protected <- names(counts) %in% c("missing", "NA's")
+  rare <- counts < min_category_n & !protected
+  if (!any(rare)) {
+    return(counts) #nolint: return
+  }
+  other_n <- sum(counts[rare])
+  counts <- counts[!rare]
+  # Categories with no rows are dropped, rather than adding an empty "(Other)"
+  if (other_n > 0) {
+    if (other_label %in% names(counts)) {
+      counts[[other_label]] <- counts[[other_label]] + other_n
+    } else {
+      # Keep "NA's" as the last category, as summary()
+      is_na <- names(counts) == "NA's"
+      counts <- c(
+        counts[!is_na],
+        stats::setNames(other_n, other_label),
+        counts[is_na]
+      )
+    }
+  }
+  counts
 }
 
 # Internal function to get variable types for a given data frame

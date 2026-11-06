@@ -9,7 +9,8 @@ get_marginal_distributions(
   subject_identifier = "",
   variables = c(),
   print = FALSE,
-  retype = TRUE
+  retype = TRUE,
+  min_category_n = 10
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ list of data frames is provided, Default: ""}
 to the console, Default: FALSE}
 
 \item{retype}{Whether to re-type the data frame, Default: TRUE}
+
+\item{min_category_n}{Categories of categorical variables with fewer
+rows than this are merged into a single "(Other)" category, to avoid
+disclosing rare values, set to 0 to keep every category, Default: 10}
 }
 \value{
 A list of marginal distributions of an S3 RESIDE Class
@@ -40,7 +45,9 @@ will differ, for binary variables a mean and number of missing is generated
 for continuous variables, they are first transformed and both mean and sd of
 the transformed variables are stored along with the quantile mapping for back
 transformation. For categorical variables, the number of each category is
-stored, missing values are categorise as "missing".
+stored, missing values are categorise as "missing". Categories with fewer
+than \code{min_category_n} rows are merged into an "(Other)" category,
+which will appear as a value in synthesised data.
 }
 \examples{
 marginal_distributions <- get_marginal_distributions(

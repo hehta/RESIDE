@@ -1,3 +1,48 @@
+# RESIDE 0.5.0
+
+## Breaking changes
+
+* `get_marginal_distributions()` merges categories with fewer than
+  `min_category_n` rows (default 10) into a single `"(Other)"` category, to
+  avoid disclosing rare values. `"(Other)"` appears as a value in synthesised
+  data. Set `min_category_n = 0` to keep every category. Marginals of small
+  data sets may differ from previous versions.
+
+## Bug fixes
+
+* `synthesise_data()` no longer copies whole rows over other rows when adding
+  missing values to binary and continuous variables. Previously, rows were
+  duplicated or lost and missing values were added to the wrong rows,
+  including the subject identifier when synthesising with correlations.
+  Synthetic data generated with earlier versions from marginals with missing
+  values should be regenerated.
+* `synthesise_data()` only removes the `"missing"` and `"NA's"` placeholder
+  categories when they are the whole value, previously `"missing"` was
+  removed from within values, e.g. `"missing dose"` became `" dose"`.
+* `get_marginal_distributions()` keeps more than 100 categories, previously
+  the remaining categories were merged into `"(Other)"`.
+* `get_marginal_distributions()` only reports columns as common to multiple
+  data frames when their values match for the shared subjects, previously
+  any numeric column with the same name was reported as common, as were
+  columns of data frames without shared subjects.
+* `synthesise_data()` keeps the types of columns common to multiple data
+  frames, previously every common column was converted to character when any
+  of them was character, e.g. a numeric `age` became `"34"`.
+
+## Performance
+
+* `get_marginal_distributions()` and `synthesise_data()` are considerably
+  faster and use less memory for large data, e.g. 500,000 rows reduced from
+  21 to 10 seconds and from 19 to 2.5 seconds respectively:
+  * Dates are converted using vectorised parsing of each distinct value.
+  * The maximum number of decimal places of continuous variables is
+    calculated once per distinct value, skipping whole numbers.
+  * Categorical variables are sampled directly, rather than using a
+    probability matrix of every row and category, which could run out of
+    memory for large data with many categories.
+  * When synthesising with correlations, rows with more than one correlated
+    category selected are resolved without a loop over each row.
+
 # RESIDE 0.4.0
 
 ## Breaking changes

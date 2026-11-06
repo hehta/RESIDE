@@ -182,3 +182,42 @@ testthat::test_that(".prepare_dfs works", {
     )
   )
 })
+
+testthat::test_that("rare categories are merged into (Other)", {
+  df <- data.frame(
+    colour = c(
+      rep("red", 50), rep("blue", 20), rep("green", 3), rep("pink", 2),
+      rep("", 4), rep(NA, 1)
+    ),
+    n = seq_len(80)
+  )
+  marginals <- get_marginal_distributions(df)
+  colour <- marginals[[1]]$categorical_variables$colour
+  # Rare categories merged, "missing" and NA's are never merged
+  testthat::expect_equal(
+    colour,
+    c(blue = 20L, missing = 4L, red = 50L, "(Other)" = 5L, "NA's" = 1L)
+  )
+  testthat::expect_equal(sum(colour), nrow(df))
+  # The threshold can be changed, 0 keeps every category
+  all_categories <- get_marginal_distributions(df, min_category_n = 0)
+  testthat::expect_setequal(
+    names(all_categories[[1]]$categorical_variables$colour),
+    c("blue", "green", "missing", "pink", "red", "NA's")
+  )
+  testthat::expect_error(
+    get_marginal_distributions(df, min_category_n = -1),
+    regexp = "min_category_n"
+  )
+})
+
+testthat::test_that("more than 100 categories are kept", {
+  df <- data.frame(
+    category = rep(sprintf("level %03d", seq_len(150)), each = 10),
+    n = seq_len(1500)
+  )
+  marginals <- get_marginal_distributions(df)
+  counts <- marginals[[1]]$categorical_variables$category
+  testthat::expect_length(counts, 150)
+  testthat::expect_false("(Other)" %in% names(counts))
+})

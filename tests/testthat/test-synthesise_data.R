@@ -413,3 +413,125 @@ testthat::test_that("synthesise_data works with multiple tables", {
     expect_false(is.unsorted(sim_dfs[[df_name]]$USUBJID))
   }
 })
+
+testthat::test_that("sample_categories follows the marginal probabilities", {
+  set.seed(1234)
+  counts <- c(a = 600, b = 300, c = 100)
+  sampled <- sample_categories(counts, 1000, 100000)
+  testthat::expect_setequal(unique(sampled), c("c1", "c2", "c3"))
+  testthat::expect_equal(
+    as.numeric(table(sampled)[c("c1", "c2", "c3")]) / 100000,
+    c(0.6, 0.3, 0.1),
+    tolerance = 0.02
+  )
+  # A single category is always selected
+  testthat::expect_true(all(sample_categories(c(a = 5), 5, 10) == "c1"))
+  # Probabilities summing to less than one leave the remainder missing
+  testthat::expect_warning(
+    short <- sample_categories(c(a = 50), 100, 10000),
+    regexp = "do not sum to 1"
+  )
+  testthat::expect_equal(mean(is.na(short)), 0.5, tolerance = 0.03)
+})
+
+testthat::test_that("synthesise_data_no_cor handles many categories", {
+  set.seed(1234)
+  n_row <- 50000
+  counts <- rep(n_row / 500, 500)
+  names(counts) <- paste0("category ", seq_len(500))
+  sub_marginals <- list(
+    categorical_variables = list(cat = counts),
+    binary_variables = list(bin = list(mean = 0.3, missing = 0)),
+    continuous_variables = list(),
+    summary = data.frame(
+      n_row = n_row, n_col = 2, variables = "cat, bin",
+      subject_identifier = ""
+    )
+  )
+  sim_df <- synthesise_data_no_cor(sub_marginals)
+  testthat::expect_s3_class(sim_df, "data.table")
+  testthat::expect_equal(names(sim_df), c("id", "cat", "bin"))
+  testthat::expect_equal(nrow(sim_df), n_row)
+  testthat::expect_true(all(sim_df$cat %in% names(counts)))
+  testthat::expect_gt(length(unique(sim_df$cat)), 450)
+  testthat::expect_equal(mean(sim_df$bin), 0.3, tolerance = 0.02)
+})
+
+testthat::test_that("add_missingness only replaces whole placeholder values", {
+  set.seed(1234)
+  sim_df <- data.frame(
+    reason = c("missing", "Dismissing patient", "NA's", "ok", "missing dose"),
+    num = c(1, 2, 3, 4, 5),
+    stringsAsFactors = FALSE
+  )
+  sub_marginals <- list(
+    continuous_variables = list(
+      num = list(summary = data.frame(missing = 2))
+    )
+  )
+  result <- add_missingness(sim_df, sub_marginals)
+  testthat::expect_equal(
+    result$reason,
+    c("", "Dismissing patient", "", "ok", "missing dose")
+  )
+  testthat::expect_equal(sum(is.na(result$num)), 2)
+  testthat::expect_equal(nrow(result), 5)
+})
+
+testthat::test_that("common fields keep their column types", {
+  set.seed(1234)
+  a <- data.frame(
+    id = 1:200,
+    age = rep(20:69, 4),
+    sex = rep(c("M", "F"), 100),
+    x = rnorm(200)
+  )
+  b <- data.frame(
+    id = rep(1:200, each = 2),
+    age = rep(rep(20:69, 4), each = 2),
+    sex = rep(rep(c("M", "F"), 100), each = 2),
+    y = rnorm(400)
+  )
+  marginals <- suppressWarnings(
+    get_marginal_distributions(list(a = a, b = b), subject_identifier = "id")
+  )
+  testthat::expect_setequal(
+    .split_variables(marginals$overall_summary$common_columns),
+    c("age", "sex")
+  )
+  sim_dfs <- suppressWarnings(synthesise_data(marginals))
+  for (df_name in c("a", "b")) {
+    testthat::expect_type(sim_dfs[[df_name]]$age, "double")
+    testthat::expect_type(sim_dfs[[df_name]]$sex, "character")
+  }
+  # A shared subject has the same common values in each data frame
+  shared <- intersect(sim_dfs$a$id, sim_dfs$b$id)
+  a_age <- sim_dfs$a$age[match(shared, sim_dfs$a$id)]
+  b_age <- sim_dfs$b$age[match(shared, sim_dfs$b$id)]
+  testthat::expect_equal(a_age, b_age)
+})
+
+testthat::test_that("replace_one_rows chooses categories by probability", {
+  set.seed(1234)
+  n <- 100000
+  probs <- c(0.5, 0.3, 0.2)
+  patterns <- list(c(1, 1, 1), c(1, 1, 0), c(0, 1, 1))
+  expected <- list(c(0.5, 0.3, 0.2), c(0.625, 0.375, 0), c(0, 0.6, 0.4))
+  for (i in seq_along(patterns)) {
+    rows <- as.data.frame(matrix(patterns[[i]], n, 3, byrow = TRUE))
+    replaced <- replace_one_rows(rows, probs)
+    testthat::expect_true(all(rowSums(replaced) == 1))
+    testthat::expect_equal(
+      unname(colMeans(replaced)),
+      expected[[i]],
+      tolerance = 0.01
+    )
+  }
+  # A single selected category is always kept,
+  # even with a probability of zero
+  rows <- data.frame(a = c(0, 1), b = c(1, 0), c = c(0, 0))
+  testthat::expect_equal(
+    replace_one_rows(rows, c(0.5, 0, 0.5)),
+    data.frame(a = c(0, 1), b = c(1, 0), c = c(0, 0))
+  )
+})

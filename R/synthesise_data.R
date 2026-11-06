@@ -106,14 +106,36 @@ synthesise_data_no_cor <- function(
   sub_marginals,
   date_transform = TRUE
 ) {
-  # Predefine dataDefinition
-  data_def <- get_data_def(sub_marginals, FALSE)
+  n_row <- sub_marginals$summary$n_row
+  categorical_summary <- sub_marginals$categorical_variables
+
+  # Categorical variables are sampled directly (see sample_categories),
+  # so only the binary and continuous variables are defined for simstudy
+  non_categorical_marginals <- sub_marginals
+  non_categorical_marginals$categorical_variables <- NULL
+  data_def <- get_data_def(non_categorical_marginals, FALSE)
 
   # Synthesise the data
-  sim_df <- simstudy::genData(
-    sub_marginals$summary$n_row,
-    data_def
-  )
+  if (is.null(data_def)) {
+    sim_df <- simstudy::genData(n_row)
+  } else {
+    sim_df <- simstudy::genData(n_row, data_def)
+  }
+  generated_columns <- setdiff(names(sim_df), "id")
+
+  for (.column in names(categorical_summary)) {
+    sim_df[[.column]] <- sample_categories(
+      categorical_summary[[.column]],
+      n_row,
+      n_row
+    )
+  }
+  # Order the columns as the definitions: categorical, binary, continuous
+  sim_df <- sim_df[
+    ,
+    c("id", names(categorical_summary), generated_columns),
+    drop = FALSE
+  ]
 
   # Convert the internal category names back to the original categories
   sim_df <- decode_categories(
@@ -531,6 +553,34 @@ get_id_name <- function(
   return("id")
 }
 
+# Sample n values of a categorical variable from its counts, returning the
+# internal category names (c1, c2, ...) as used by decode_categories.
+# Equivalent to a simstudy "categorical" definition, but simstudy builds an
+# n x categories matrix of probabilities, which runs out of memory for
+# large data, whereas sampling only needs the probabilities once.
+sample_categories <- function(
+  counts,
+  n_row,
+  n
+) {
+  probs <- unname(as.numeric(counts)) / n_row
+  labels <- paste0("c", seq_along(probs))
+  total <- sum(probs)
+  # As simstudy, add a missing category for any remaining probability,
+  # probabilities summing to more than one are normalised by sample()
+  if (!isTRUE(all.equal(total, 1)) && total < 1) {
+    warning(
+      paste0(
+        "Probabilities do not sum to 1. ",
+        "Adding missing category with p = ", 1 - total
+      )
+    )
+    probs <- c(probs, 1 - total)
+    labels <- c(labels, NA)
+  }
+  labels[sample.int(length(probs), n, replace = TRUE, prob = probs)]
+}
+
 # Convert the internal category names (c1, c2, ...) back to the original
 # categories, internal names are used as simstudy removes whitespace
 decode_categories <- function(
@@ -621,7 +671,9 @@ synthesise_filtered_fields <- function(
   for (col in names(cols)) {
     cols[[col]] <- sample(cols[[col]], n_subjects, replace = TRUE)
   }
-  df <- as.data.frame(do.call(cbind, cols))
+  # Build the data frame directly, cbind() would create a matrix,
+  # converting every column to character if any column is character
+  df <- as.data.frame(cols, stringsAsFactors = FALSE, check.names = FALSE)
   df[[filtered_marginals$overall_summary$subject_identifier]] <-
     seq_len(nrow(df))
   df
@@ -841,39 +893,39 @@ add_missingness <- function(
   simulated_data,
   sub_marginals
 ) {
-  # Remove purposely added 'missing' factors
-  .df <- simulated_data %>%
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::where(is.character), ~gsub("missing", "", .x)
-      )
+  .df <- simulated_data
+  # Replace the purposely added "missing" and "NA's" categories with
+  # empty strings, matching whole values only
+  for (.column in names(.df)) {
+    if (is.character(.df[[.column]])) {
+      .values <- .df[[.column]]
+      .values[.values %in% c("missing", "NA's")] <- ""
+      .df[[.column]] <- .values
+    }
+  }
+  # The number of missing values of each binary and continuous variable
+  .missingness <- c(
+    vapply(
+      sub_marginals$binary_variables,
+      function(.variable) .variable[["missing"]],
+      numeric(1)
+    ),
+    vapply(
+      sub_marginals$continuous_variables,
+      function(.variable) .variable[["summary"]][["missing"]],
+      numeric(1)
     )
-  # Loop through the binary variables
-  for (binary_variable in names(sub_marginals$binary_variables)) {
-    # Get the number of NAs
-    .variable_missingness <-
-      sub_marginals$binary_variables[[binary_variable]][["missing"]]
-    # Only add NAs if there are any to add
-    if (.variable_missingness > 0) {
-      # Select a random set of rows given the number of NAs and replace
-      # the variable of those rows with NAs
-      .df[sample(nrow(.df), .variable_missingness), ][[binary_variable]] <- NA
-    }
-  }
-  # Loop through the continuous variables
-  for (continuous_variable in names(sub_marginals$continuous_variables)) {
-    # Only add NAs if there are any to add
-    .variable_missingness <-
-      sub_marginals$continuous_variables[[continuous_variable]][["summary"]][["missing"]] # nolint line_length
-    if (.variable_missingness > 0) {
-      # Select a random set of rows given the number of NAs and replace
-      # the variable of those rows with NAs
-      .df[sample(nrow(.df), .variable_missingness), ][[continuous_variable]] <- NA # nolint line_length
-    }
-  }
-  .df <- .replace_nas(
-    .df
   )
+  for (.column in names(.missingness)) {
+    # Only add NAs if there are any to add
+    if (.missingness[[.column]] > 0) {
+      # Select the rows once, then replace only this variable with NAs
+      # (sampling inside df[rows, ][[column]] <- NA would sample twice,
+      # copying whole rows over other rows)
+      .rows <- sample(nrow(.df), .missingness[[.column]])
+      .df[[.column]][.rows] <- NA
+    }
+  }
   # Return the new data frame
   return(.df)
 }
@@ -1071,13 +1123,20 @@ replace_zero_rows <- function(rows, probs) {
 # in which case one of the categories selected is sampled
 # using the probabilities.
 replace_one_rows <- function(rows, probs) {
-  selected <- apply(as.matrix(rows), 1, function(row) {
-    options <- which(row == 1)
-    if (length(options) == 1) {
-      return(options)
-    }
-    sample(options, 1, prob = probs[options])
-  })
+  selected_matrix <- as.matrix(rows)
+  # Weight each category by its probability divided by a random
+  # exponential draw, the largest weight of each row is then a random
+  # choice weighted by the probabilities (an "exponential race"),
+  # equivalent to sampling each row separately but without a loop
+  scores <- matrix(
+    probs,
+    nrow = nrow(selected_matrix),
+    ncol = ncol(selected_matrix),
+    byrow = TRUE
+  ) / stats::rexp(length(selected_matrix))
+  # Only the selected categories (1) can be chosen
+  scores[selected_matrix != 1] <- -1
+  selected <- max.col(scores, ties.method = "first")
   return(one_hot_rows(rows, selected))
 }
 

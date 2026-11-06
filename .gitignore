@@ -11,3 +11,4 @@ inst/doc
 /RESIDE.Rcheck
 *.tar.gz
 graphify-out
+scratch/

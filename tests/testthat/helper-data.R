@@ -58,7 +58,9 @@ if (requireNamespace("pharmaversesdtm", quietly = TRUE)) {
   multitable_marginals <- suppressWarnings(
     get_marginal_distributions(
       dfs,
-      subject_identifier = "USUBJID"
+      subject_identifier = "USUBJID",
+      # Keep every category, tests rely on rare categories (e.g. AESER "Y")
+      min_category_n = 0
     )
   )
 }

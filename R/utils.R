@@ -155,12 +155,21 @@ load_variables_file <- function(
 max_decimal_places <- function(x) {
   # Filter NAS
   .x <- x[!is.na(x)]
+  # Fast path: whole numbers (e.g. integers, IDs, numeric dates)
+  # always have zero decimal places
+  if (length(.x) > 0 && all(is.finite(.x)) && all(.x == round(.x))) {
+    return(0L) #nolint: return
+  }
+  # Duplicate values have the same number of decimal places,
+  # so only format each distinct value once
+  .x <- unique(.x)
   # Get a vector of decimal places using regex
   # and ignoring scientific notation e.g., 3.5e-13
-  dps <- sapply(
+  dps <- vapply(
     .x, function(y) {
       nchar(sub("^-?\\d*\\.?", "", format(y, scientific = FALSE)))
-    }
+    },
+    integer(1)
   )
   # Return the maximum number of decimal places
   return(max(dps)) #nolint: return
@@ -414,21 +423,42 @@ get_variables <- function(marginals, unique = TRUE) {
   if (!is.character(col)) {
     return(FALSE) #nolint: return
   }
-  dates <- as.Date(col, optional = TRUE)
+  # Only parse each distinct value once (dates repeat a lot in large data),
+  # unique() keeps the first value first, so as.Date() still chooses the
+  # format from the first value of the column
+  .unique <- unique(col)
+  .is_parsed <- !is.na(as.Date(.unique, optional = TRUE))
+  # Count the rows, not the distinct values
+  n_dates <- sum(.is_parsed[match(col, .unique)])
   if (
-    !all(is.na(dates)) &&
-      length(na.omit(dates)) > length(na.omit(col)) * threshold
+    n_dates > 0 &&
+      n_dates > sum(!is.na(col)) * threshold
   ) {
     return(TRUE)
   }
   return(FALSE) #nolint: return
 }
 
-.as_numeric_date <- Vectorize(function(x) {
-  epoch <- as.Date("1970-01-01")
-  difftime(as.Date(x, optional = TRUE), epoch, units = "days")
-}, USE.NAMES = FALSE
-)
+# Converts a character vector of dates to numeric days since 1970-01-01.
+# Equivalent to calling as.Date(x, optional = TRUE) on each element
+# individually (each element may match a different format), but vectorised:
+# each format is tried across the whole vector, only filling values
+# that previous formats could not parse.
+.as_numeric_date <- function(
+  x,
+  try_formats = c("%Y-%m-%d", "%Y/%m/%d")
+) {
+  x <- as.character(x)
+  # Only parse each distinct value once (dates repeat a lot in large data)
+  .unique <- unique(x)
+  dates <- rep(as.Date(NA), length(.unique))
+  for (.format in try_formats) {
+    .unparsed <- is.na(dates) & !is.na(.unique)
+    if (!any(.unparsed)) break
+    dates[.unparsed] <- as.Date(.unique[.unparsed], format = .format)
+  }
+  as.numeric(dates)[match(x, .unique)]
+}
 
 get_dates_from_sub_marginals <- function(sub_marginals) {
   dates <- c()
@@ -539,6 +569,8 @@ get_common_columns <- function(dfs, subject_identifier) {
       col_matches[sapply(col_matches, is.null)] <- NULL
       # Get the common subjects
       common_subjects <- get_common_subjects(col_matches, subject_identifier)
+      # Without shared subjects the values can't be compared, so no match
+      if (length(common_subjects) == 0) next
       # Use an lapply to get
       col_matches <- lapply(col_matches, function(x) {
         rtn <- x[x[[subject_identifier]] %in% common_subjects,]
@@ -546,25 +578,34 @@ get_common_columns <- function(dfs, subject_identifier) {
         rtn <- rtn[order(rtn[[subject_identifier]]),]
         rtn <- rtn[[col]]
       })
-      eq_cols <- lapply(
+      # Compare every data frame's values against the first
+      eq_cols <- vapply(
         col_matches,
-        function(x) {
-          if (is.factor(x)) {
-            return(
-              as.character(x) == as.character(col_matches[[1]])
-            )
-            x == col_matches[[1]]
-          }
-        }
+        .values_equal,
+        logical(1),
+        y = col_matches[[1]]
       )
-      eq_cols <- lapply(eq_cols, all)
-      if (all(unlist(eq_cols))) {
+      if (all(eq_cols)) {
         matched_cols <- c(matched_cols, col)
       }
     }
   }
   matched_cols <- unique(matched_cols)
   return(matched_cols) #nolint: return
+}
+
+# Returns TRUE if two vectors hold the same values in the same order.
+# Factors are compared by their labels, and missing values are equal
+# only when both vectors are missing at the same positions.
+.values_equal <- function(x, y) {
+  if (is.factor(x)) x <- as.character(x)
+  if (is.factor(y)) y <- as.character(y)
+  if (length(x) != length(y)) {
+    return(FALSE) #nolint: return
+  }
+  na_x <- is.na(x)
+  na_y <- is.na(y)
+  identical(na_x, na_y) && all(x[!na_x] == y[!na_y])
 }
 
 # Gets attributes as vector

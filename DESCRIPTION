@@ -1,6 +1,6 @@
 Package: RESIDE
 Title: Rapid Easy Synthesis to Inform Data Extraction
-Version: 0.4.0
+Version: 0.5.0
 Authors@R: 
     c(person("Ryan", "Field", , "ryan.field@glasgow.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4424-9890")),
@@ -42,4 +42,4 @@ Imports:
 LazyData: true
 Config/testthat/edition: 3
 URL: https://hehta.github.io/RESIDE/
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

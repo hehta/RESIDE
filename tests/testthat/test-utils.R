@@ -424,3 +424,112 @@ testthat::test_that("get_variables_by_df_name works", {
     all(expected_variables %in% variables[[1]])
   )
 })
+
+testthat::test_that(".as_numeric_date matches per-element as.Date", {
+  x <- c(
+    "", "2020-01-01", NA, "2020/02/03", "junk",
+    "2020-01-01 10:11:12", "1969-12-31"
+  )
+  # Reference: parse each element individually
+  expected <- vapply(
+    x,
+    function(y) as.numeric(as.Date(y, optional = TRUE)),
+    numeric(1),
+    USE.NAMES = FALSE
+  )
+  testthat::expect_identical(.as_numeric_date(x), expected)
+  testthat::expect_identical(
+    .as_numeric_date(c("1970-01-01", "1970/01/02")),
+    c(0, 1)
+  )
+  testthat::expect_true(all(is.na(.as_numeric_date(c(NA, "", "junk")))))
+})
+
+testthat::test_that(".convert_date_columns converts and flags dates", {
+  df <- data.frame(
+    d = c("2020-01-01", "", "2020/01/03"),
+    x = c("a", "b", "c"),
+    n = c(1, 2, 3)
+  )
+  converted <- .convert_date_columns(df)
+  testthat::expect_equal(
+    as.numeric(converted$d),
+    c(18262, NA, 18264)
+  )
+  testthat::expect_identical(
+    unname(get_col_attr(converted)),
+    c(TRUE, FALSE, FALSE)
+  )
+})
+
+testthat::test_that("max_decimal_places works", {
+  testthat::expect_equal(max_decimal_places(c(1, 2, 3, NA)), 0)
+  testthat::expect_equal(max_decimal_places(c(1L, 5L)), 0)
+  testthat::expect_equal(max_decimal_places(c(1e15, 2)), 0)
+  testthat::expect_equal(max_decimal_places(c(1.5, 2, NA, -3.25)), 2)
+  testthat::expect_equal(max_decimal_places(rep(2.125, 50)), 3)
+  testthat::expect_equal(max_decimal_places(c(3.5e-13, 1)), 14)
+  # Non-finite values skip the whole-number fast path
+  testthat::expect_equal(max_decimal_places(c(Inf, 1.5)), 3)
+})
+
+testthat::test_that("get_common_columns compares values for all column types", {
+  dfs <- list(
+    a = data.frame(
+      id = c(1, 2, 3),
+      num_same = c(10, 20, 30),
+      num_diff = c(10, 20, 30),
+      fct_same = factor(c("x", "y", "z")),
+      fct_diff = factor(c("x", "y", "z")),
+      na_same = c(1, NA, 3),
+      a_only = c(1, 2, 3)
+    ),
+    b = data.frame(
+      # Different row order and an extra subject not in a
+      id = c(3, 2, 1, 4),
+      num_same = c(30, 20, 10, 99),
+      num_diff = c(30, 21, 10, 99),
+      fct_same = factor(c("z", "y", "x", "w")),
+      fct_diff = factor(c("z", "q", "x", "w")),
+      na_same = c(3, NA, 1, 5)
+    )
+  )
+  testthat::expect_setequal(
+    get_common_columns(dfs, "id"),
+    c("num_same", "fct_same", "na_same")
+  )
+  # A missing value in only one table is a difference
+  dfs$b$na_same[2] <- 2
+  testthat::expect_false("na_same" %in% get_common_columns(dfs, "id"))
+})
+
+testthat::test_that("get_common_columns needs shared subjects to match", {
+  dfs <- list(
+    a = data.frame(id = c(1, 2), x = c(5, 6), f = factor(c("p", "q"))),
+    b = data.frame(id = c(3, 4), x = c(5, 6), f = factor(c("p", "q")))
+  )
+  testthat::expect_length(get_common_columns(dfs, "id"), 0)
+  # One overlapping subject with equal values is enough to match
+  dfs$b$id[1] <- 1
+  testthat::expect_setequal(get_common_columns(dfs, "id"), c("x", "f"))
+})
+
+testthat::test_that(".is_date counts rows, not distinct values", {
+  # 1 of 11 rows is a date (below the 20% threshold),
+  # but 1 of 2 distinct values is
+  testthat::expect_false(.is_date(c("2020-01-01", rep("x", 10))))
+  # 10 of 11 rows are dates, but only 1 of 2 distinct values
+  testthat::expect_true(.is_date(c(rep("2020-01-01", 10), "x")))
+  # The format is taken from the first value, as as.Date()
+  testthat::expect_false(
+    .is_date(c("2020/01/01", rep("2020-01-02", 3)), threshold = 0.5)
+  )
+})
+
+testthat::test_that(".as_numeric_date handles repeated values", {
+  x <- rep(c("2020-01-01", NA, "2020/01/03", "", "2020-01-01"), 1000)
+  testthat::expect_identical(
+    .as_numeric_date(x),
+    rep(c(18262, NA, 18264, NA, 18262), 1000)
+  )
+})
